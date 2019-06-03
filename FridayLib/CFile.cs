@@ -22,7 +22,30 @@ namespace FridayLib
         }
 
 
-        private string name;
+        private int id =0;
+        public int ID
+        {
+            get { return id; }
+            set
+            {
+                id = value;
+                OnPropertyChanged("ID");
+            }
+        }
+
+
+        private string projectName = "";
+        public string ProjectName
+        {
+            get { return projectName; }
+            set
+            {
+                projectName = value;
+                OnPropertyChanged("ProjectName");
+            }
+        }
+
+        private string name = "";
         /// <summary>
         /// Относительное имя файла
         /// </summary>
@@ -37,7 +60,7 @@ namespace FridayLib
         }
 
 
-        private string sourcePath;
+        private string sourcePath = "";
         /// <summary>
         /// Путь к источнику разрабатываемого проекта
         /// </summary>
@@ -52,7 +75,7 @@ namespace FridayLib
         }
 
 
-        private string releasePath;
+        private string releasePath = "";
         /// <summary>
         /// Путь к релизу проекта
         /// </summary>
@@ -67,7 +90,7 @@ namespace FridayLib
         }
 
 
-        private string lastHash;
+        private string lastHash = "";
         /// <summary>
         /// Результат предыдущей проверки
         /// </summary>
@@ -82,7 +105,7 @@ namespace FridayLib
         }
 
 
-        private string currentHash;
+        private string currentHash = "";
         /// <summary>
         /// Результат текущей проверки
         /// </summary>
@@ -93,6 +116,30 @@ namespace FridayLib
             {
                 currentHash = value;
                 OnPropertyChanged("CurrentHash");
+            }
+        }
+
+
+        private DateTime date;
+        public DateTime Date
+        {
+            get { return date; }
+            set
+            {
+                date = value;
+                OnPropertyChanged("Date");
+            }
+        }
+
+
+        private string version="";
+        public string Version
+        {
+            get { return version; }
+            set
+            {
+                version = value;
+                OnPropertyChanged("Version");
             }
         }
 
