@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Security.Cryptography;
+using System.Diagnostics;
 
 namespace FridayLib
 {
@@ -94,7 +95,7 @@ namespace FridayLib
         /// <summary>
         /// Результат предыдущей проверки
         /// </summary>
-        public string LastHash
+        public string ReleaseHash
         {
             get { return lastHash; }
             set
@@ -109,7 +110,7 @@ namespace FridayLib
         /// <summary>
         /// Результат текущей проверки
         /// </summary>
-        public string CurrentHash
+        public string SourceHash
         {
             get { return currentHash; }
             set
@@ -121,7 +122,7 @@ namespace FridayLib
 
 
         private DateTime date;
-        public DateTime Date
+        public DateTime SourceDate
         {
             get { return date; }
             set
@@ -131,9 +132,31 @@ namespace FridayLib
             }
         }
 
+        private DateTime rDate;
+        public DateTime ReleaseDate
+        {
+            get { return rDate; }
+            set
+            {
+                rDate = value;
+                OnPropertyChanged("ReleaseDate");
+            }
+        }
+
+
+        private string rVersion;
+        public string ReleaseVersion
+        {
+            get { return rVersion; }
+            set
+            {
+                rVersion = value;
+                OnPropertyChanged("ReleaseVersion");
+            }
+        }
 
         private string version="";
-        public string Version
+        public string SourceVersion
         {
             get { return version; }
             set
@@ -146,6 +169,10 @@ namespace FridayLib
         public string FullPath
         {
             get { return Path.Combine(SourcePath, Name); }
+        }
+        public string FullReleasePath
+        {
+            get { return Path.Combine(ReleasePath, Name); }
         }
 
         public void RefreshProject()
@@ -172,32 +199,55 @@ namespace FridayLib
             return result;
         }
 
-        public void ComputeMD5Checksum()
+        string ComputeMD5Checksum(string adress)
         {
             try
             {
-                if (File.Exists(FullPath))
+                if (File.Exists(adress))
                 {
-                    using (FileStream fs = System.IO.File.OpenRead(FullPath))
+                    using (FileStream fs = System.IO.File.OpenRead(adress))
                     {
                         MD5 md5 = new MD5CryptoServiceProvider();
                         byte[] fileData = new byte[fs.Length];
                         fs.Read(fileData, 0, (int)fs.Length);
                         byte[] checkSum = md5.ComputeHash(fileData);
                         string result = BitConverter.ToString(checkSum).Replace("-", String.Empty);
-                        CurrentHash = result;
+                        return result;
                     }
                 }
                 else
                 {
-                    CurrentHash = "";
+                    return "";
                 }
             }
             catch (Exception ex)
             {
-               
+                return "";
             }
 
         }
+
+        public void GetFileInfo()
+        {
+            try
+            {
+                FileInfo fileInfo = new FileInfo(FullPath);
+                FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(FullPath);
+                SourceVersion = myFileVersionInfo.FileVersion;
+                SourceDate = fileInfo.LastWriteTime;
+                SourceHash = ComputeMD5Checksum(FullPath);
+                fileInfo = new FileInfo(FullReleasePath);
+                myFileVersionInfo = FileVersionInfo.GetVersionInfo(FullReleasePath);
+                ReleaseVersion = myFileVersionInfo.FileVersion;
+                ReleaseHash = ComputeMD5Checksum(FullReleasePath);
+                ReleaseDate = fileInfo.LastWriteTime;
+            }
+            catch
+            {
+
+            }
+                        
+        }
+
     }
 }

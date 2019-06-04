@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FridayLib", "FridayLib\Frid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FridayConsole", "FridayConsole\FridayConsole.csproj", "{FFD9797E-F031-4062-BACF-01C0E700800E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Friday", "Friday\Friday.csproj", "{88EE26BD-2990-46F7-BB75-94E1E47064B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{FFD9797E-F031-4062-BACF-01C0E700800E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFD9797E-F031-4062-BACF-01C0E700800E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFD9797E-F031-4062-BACF-01C0E700800E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88EE26BD-2990-46F7-BB75-94E1E47064B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88EE26BD-2990-46F7-BB75-94E1E47064B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88EE26BD-2990-46F7-BB75-94E1E47064B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88EE26BD-2990-46F7-BB75-94E1E47064B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

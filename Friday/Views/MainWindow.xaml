@@ -1,0 +1,59 @@
+﻿<dx:ThemedWindow
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+        xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+        xmlns:local="clr-namespace:Friday"
+        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" x:Class="Friday.MainWindow"
+        Title="Пятница" Height="350" Width="1200" WindowStartupLocation="CenterScreen" Icon="{dx:DXImageOffice2013 Image=CheckBox_32x32.png}">
+    <!--<dx:ThemedWindow.DataContext>
+        <local:MainWindowViewModel/>
+    </dx:ThemedWindow.DataContext>-->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <dxg:GridControl AutoGenerateColumns="None" EnableSmartColumnsGeneration="True"  Margin="5,5,5,5" ItemsSource="{Binding AllFiles}">
+            <dxg:GridControl.View >
+                <dxg:TableView ShowFixedTotalSummary="False" ShowGroupPanel="False" ShowTotalSummary="False" AllowEditing="False"/>
+            </dxg:GridControl.View>
+            <dxg:GridControl.Columns>
+                <dxg:GridColumn x:Name="editColumn" IsSmart="True" Width="43">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dx:SimpleButton Glyph="{dx:DXImageOffice2013 Image=Edit_16x16.png}"  Width="40" Height="20" Margin="1,1,1,1" CommandParameter="{Binding RowData.Row}" Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn Header="ID" FieldName="ID" IsSmart="True" Width="40" AllowEditing="False"/>
+                <dxg:GridColumn Header="Исполняемый файл" FieldName="Name" IsSmart="True"/>
+                <dxg:GridColumn Header="Проект" FieldName="ProjectName" IsSmart="True"/>
+                <dxg:GridColumn Header="Путь к источнику" FieldName="SourcePath" IsSmart="True" Width="*"/>
+                <dxg:GridColumn Header="Путь к релизу" FieldName="ReleasePath" IsSmart="True" Width="*"/>
+                <dxg:GridColumn Header="Версия источника" FieldName="SourceVersion" IsSmart="True"/>
+                <dxg:GridColumn Header="Дата изменения источника" FieldName="SourceDate" IsSmart="True"/>
+                <dxg:GridColumn Header="Хеш источника" FieldName="SourceHash" IsSmart="True"/>
+                <dxg:GridColumn Header="Версия релиза" FieldName="ReleaseVersion" IsSmart="True"/>
+                <dxg:GridColumn Header="Дата изменения релиза" FieldName="ReleaseDate" IsSmart="True"/>                
+                <dxg:GridColumn Header="Хеш релиза" FieldName="ReleaseHash" IsSmart="True"/>
+                <dxg:GridColumn x:Name="checkColumn" IsSmart="True" Width="100" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dx:SimpleButton Content="Проверить" Command="{Binding DataContext.CheckSingleCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding RowData.Row}"/>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn x:Name="refreshColumn" IsSmart="True" Width="100" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dx:SimpleButton Content="Обновить" Command="{Binding DataContext.UpdateSingleCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding RowData.Row}"/>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </dxg:GridControl.Columns>
+        </dxg:GridControl>
+        <dx:SimpleButton Grid.Row="1" HorizontalAlignment="Right" Width="120" Content="Проверить все" Margin="5,5,135,5" Command="{Binding CheckAllCommand}"/>
+        <dx:SimpleButton Grid.Row="1" HorizontalAlignment="Right" Width="120" Content="Обновить все" Margin="5,5,5,5" Command="{Binding UpdateAllCommand}"/>
+    </Grid>
+</dx:ThemedWindow>

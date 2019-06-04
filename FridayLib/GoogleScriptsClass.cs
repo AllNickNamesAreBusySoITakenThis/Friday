@@ -34,35 +34,42 @@ namespace FridayLib
             IList<IList<Object>> exValues = response.Values;
 
             List<Request> requests = new List<Request>();
-            int counter = 0;
+            
             foreach(var file in files)
             {
-
-                List<CellData> values = new List<CellData>()
+                foreach ( var val in exValues)
                 {
-                    new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = file.ID }},
-                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.ProjectName }},
-                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.Name }},
-                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.Version }},
-                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = exValues[counter][4].ToString() }},
-                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.Date.Date.ToString() }},
-                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.CurrentHash }},
-                };
-                
-                requests.Add(new Request()
-                {
-                    UpdateCells = new UpdateCellsRequest()
+                    if(file.ProjectName==val[1].ToString() & !string.IsNullOrEmpty(file.SourcePath))
                     {
-                        Start = new GridCoordinate()
+                        List<CellData> values = new List<CellData>()
                         {
-                            SheetId = sheetId,
-                            ColumnIndex = 0,
-                            RowIndex = 1
-                        },
-                        Rows = new List<RowData>() { new RowData() { Values=values} },
-                        Fields = "userEnteredValue"
+                            new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = file.ID }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.ProjectName }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.Name }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceVersion }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = val[4].ToString() }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceDate.Date.ToString() }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceHash }},
+                        };
+
+                        requests.Add(new Request()
+                        {
+                            UpdateCells = new UpdateCellsRequest()
+                            {
+                                Start = new GridCoordinate()
+                                {
+                                    SheetId = sheetId,
+                                    ColumnIndex = 0,
+                                    RowIndex = 1
+                                },
+                                Rows = new List<RowData>() { new RowData() { Values = values } },
+                                Fields = "userEnteredValue"
+                            }
+                        });
+                        break;
                     }
-                });
+                }
+                
             }
             BatchUpdateSpreadsheetRequest request = new BatchUpdateSpreadsheetRequest()
             {
@@ -94,9 +101,9 @@ namespace FridayLib
                         Name = row[2].ToString(),
                         ReleasePath="",
                         SourcePath ="",
-                        CurrentHash=row[6].ToString(),
-                        Version = row[3].ToString(),
-                        Date = Convert.ToDateTime(row[5])
+                        SourceHash=row[6].ToString(),
+                        SourceVersion = row[3].ToString(),
+                        SourceDate = Convert.ToDateTime(row[5])
                     });
                 }
             }
@@ -131,6 +138,44 @@ namespace FridayLib
                 ApplicationName = AppName,
             });
             return service;
+        }
+
+        public static void AddDataToSheet(CFile file)
+        {
+            var credeintial = GetCredintials();
+            var service = GetService(credeintial);
+            String spreadsheetId = "10dymgee_7SNKLRwf9nS533pJpTMk1tLbndR9BmdO8As";
+            int sheetId = 1539764994;
+            List<Request> requests = new List<Request>();
+            List<CellData> values = new List<CellData>()
+            {
+                new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = file.ID }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.ProjectName }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.Name }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceVersion }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = "" }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceDate.Date.ToString() }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceHash }},
+            };
+            requests.Add(new Request()
+            {
+                UpdateCells = new UpdateCellsRequest()
+                {
+                    Start = new GridCoordinate()
+                    {
+                        SheetId = sheetId,
+                        ColumnIndex = 0,
+                        RowIndex = file.ID+1
+                    },
+                    Rows = new List<RowData>() { new RowData() { Values = values } },
+                    Fields = "userEnteredValue"
+                }
+            });
+            BatchUpdateSpreadsheetRequest request = new BatchUpdateSpreadsheetRequest()
+            {
+                Requests = requests
+            };
+            service.Spreadsheets.BatchUpdate(request, spreadsheetId).Execute();
         }
     }
 }

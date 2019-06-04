@@ -60,11 +60,8 @@ namespace FridayLib
                             Name = reader["RelatievePath"].ToString(),
                             SourcePath = reader["SourceDir"].ToString(),
                             ReleasePath = reader["ReleaseDir"].ToString(),
-                            LastHash = reader["LastHash"].ToString(),
                             ID = Convert.ToInt32(reader["ID"]),
-                            ProjectName = reader["ProjectName"].ToString(),
-                            Date = Convert.ToDateTime(reader["Date"]),
-                            Version = reader["Version"].ToString()
+                            ProjectName = reader["ProjectName"].ToString()
                         };
                         cFiles.Add(cFile);
                     }
@@ -84,8 +81,8 @@ namespace FridayLib
                 var connection = Connect();
                 if (connection != null)
                 {
-                    string query = string.Format("UPDATE dbo.Friday SET ProjectName = N'{5}', SourceDir=N'{0}', ReleaseDir = N'{1}', RelatievePath = N'{2}', LastHash = N'{3}', Date = N'{6}', Version = N'{7}' WHERE ID = {4}", 
-                        file.SourcePath, file.ReleasePath, file.Name, file.CurrentHash, file.ID, file.ProjectName, file.Date.Date.ToString(), file.Version);
+                    string query = string.Format("UPDATE dbo.Friday SET ProjectName = N'{5}', SourceDir=N'{0}', ReleaseDir = N'{1}', RelatievePath = N'{2}' WHERE ID = {4}", 
+                        file.SourcePath, file.ReleasePath, file.Name, file.SourceHash, file.ID, file.ProjectName);
                     SqlCommand command = connection.CreateCommand();
                     command.CommandText = query;
                     command.ExecuteNonQuery();
@@ -104,8 +101,8 @@ namespace FridayLib
                 var connection = Connect();
                 if (connection != null)
                 {
-                    string query = string.Format("INSERT INTO dbo.Friday (ID, SourceDir, ReleaseDir, RelatievePath, LastHash, ProjectName, Date,Version) VALUES ({0},N'{1}',N'{2}',N'{3}',N'{4}',N'{5}',N'{6}',N'{7}')",
-                        file.ID,file.SourcePath, file.ReleasePath, file.Name, file.CurrentHash, file.ProjectName,file.Date.Date.ToString(), file.Version);
+                    string query = string.Format("INSERT INTO dbo.Friday (ID, SourceDir, ReleaseDir, RelatievePath, ProjectName) VALUES ({0},N'{1}',N'{2}',N'{3}',N'{4}')",
+                        file.ID,file.SourcePath, file.ReleasePath, file.Name, file.ProjectName);
                     SqlCommand command = connection.CreateCommand();
                     command.CommandText = query;
                     command.ExecuteNonQuery();
