@@ -107,5 +107,15 @@ namespace Friday
         {
             MainModel.EditFile(arg);
         }
+
+        public ICommand AddCommand
+        {
+            get { return new RelayCommand(ExecuteAdd); }
+        }
+
+        private void ExecuteAdd()
+        {
+            MainModel.AddFile();
+        }
     }
 }

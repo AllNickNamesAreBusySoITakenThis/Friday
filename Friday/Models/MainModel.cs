@@ -36,12 +36,12 @@ namespace Friday
 
         internal static void UpdateAll()
         {
-            MainClass.UpdateFiles();
+            MainClass.Refresh();
         }
 
         internal static void UpdateSingle(CFile file)
         {
-            MainClass.UpdateFile(file);
+            MainClass.Refresh(file);
         }
 
         internal static void AddFile()

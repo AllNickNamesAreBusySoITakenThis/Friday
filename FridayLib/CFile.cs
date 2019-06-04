@@ -175,13 +175,29 @@ namespace FridayLib
             get { return Path.Combine(ReleasePath, Name); }
         }
 
-        public void RefreshProject()
+        public async void RefreshProject()
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo(SourcePath);
-            foreach(var file in GetFiles(directoryInfo))
+            await Task.Factory.StartNew(() =>
             {
-                File.Copy(file.FullName, Path.Combine(ReleasePath, GetRelativePath(file)));
-            }            
+                if (!string.IsNullOrEmpty(SourcePath) & !string.IsNullOrEmpty(ReleasePath))
+                {
+                    DirectoryInfo directoryInfo = new DirectoryInfo(SourcePath);
+                    foreach (var dir in GetDirectories(new DirectoryInfo(SourcePath)))
+                    {
+                        var tempDir = new DirectoryInfo(dir.FullName.Replace(SourcePath, ReleasePath));
+                        if (!tempDir.Exists)
+                        {
+                            tempDir.Create();
+                        }
+                    }
+                    foreach (var file in GetFiles(directoryInfo))
+                    {
+                        File.Copy(file.FullName, ReleasePath + GetRelativePath(file), true);
+                    }
+                    GetFileInfo();
+                }
+            });
+           
         }
 
         private string GetRelativePath(FileInfo file)
@@ -195,6 +211,17 @@ namespace FridayLib
             foreach(var dir in root.GetDirectories())
             {
                 result.AddRange(GetFiles(dir));
+            }
+            return result;
+        }
+
+        private List<DirectoryInfo> GetDirectories(DirectoryInfo root)
+        {
+            List<DirectoryInfo> result = new List<DirectoryInfo>();
+            foreach(var dir in root.GetDirectories())
+            {
+                result.Add(dir);
+                result.AddRange(GetDirectories(dir));
             }
             return result;
         }

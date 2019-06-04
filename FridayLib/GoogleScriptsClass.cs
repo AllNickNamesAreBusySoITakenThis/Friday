@@ -27,7 +27,8 @@ namespace FridayLib
             var service = GetService(credential);
             String spreadsheetId = "10dymgee_7SNKLRwf9nS533pJpTMk1tLbndR9BmdO8As";
             String range = "Актуальные версии!A2:N100";
-            int sheetId = 1539764994;
+            //int sheetId = 1539764994;
+            int sheetId = 1515691245;
             SpreadsheetsResource.ValuesResource.GetRequest dataRequest =
                     service.Spreadsheets.Values.Get(spreadsheetId, range);
             ValueRange response = dataRequest.Execute();
@@ -39,6 +40,7 @@ namespace FridayLib
             {
                 foreach ( var val in exValues)
                 {
+
                     if(file.ProjectName==val[1].ToString() & !string.IsNullOrEmpty(file.SourcePath))
                     {
                         List<CellData> values = new List<CellData>()
@@ -48,7 +50,7 @@ namespace FridayLib
                             new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.Name }},
                             new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceVersion }},
                             new CellData(){UserEnteredValue = new ExtendedValue { StringValue = val[4].ToString() }},
-                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceDate.Date.ToString() }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceDate.Date.ToString("dd.MM.yyyy") }},
                             new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceHash }},
                         };
 
@@ -60,7 +62,7 @@ namespace FridayLib
                                 {
                                     SheetId = sheetId,
                                     ColumnIndex = 0,
-                                    RowIndex = 1
+                                    RowIndex = file.ID
                                 },
                                 Rows = new List<RowData>() { new RowData() { Values = values } },
                                 Fields = "userEnteredValue"
