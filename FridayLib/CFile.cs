@@ -16,6 +16,8 @@ namespace FridayLib
 
     public class CFile : INotifyPropertyChanged
     {
+        public const string ForbEXT = ".pdb;.xml;.vshost;";
+
         public event PropertyChangedEventHandler PropertyChanged;
         void OnPropertyChanged(string name)
         {
@@ -192,7 +194,8 @@ namespace FridayLib
                     }
                     foreach (var file in GetFiles(directoryInfo))
                     {
-                        File.Copy(file.FullName, ReleasePath + GetRelativePath(file), true);
+                        if(!ForbEXT.Contains(file.Extension))
+                            File.Copy(file.FullName, ReleasePath + GetRelativePath(file), true);
                     }
                     GetFileInfo();
                 }
