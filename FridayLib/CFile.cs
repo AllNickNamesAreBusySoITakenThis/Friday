@@ -23,9 +23,21 @@ namespace FridayLib
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+        private int id = 0;
+        private string projectName = "";
+        private string name = "";
+        private string sourcePath = "";
+        private string releasePath = "";
+        private string currentHash = "";
+        private string lastHash = "";
+        private DateTime date;
+        private DateTime rDate;
+        private string rVersion="";
+        private string version = "";
 
-
-        private int id =0;
+        /// <summary>
+        /// Идентификатор приложения в БД
+        /// </summary>
         public int ID
         {
             get { return id; }
@@ -35,9 +47,9 @@ namespace FridayLib
                 OnPropertyChanged("ID");
             }
         }
-
-
-        private string projectName = "";
+        /// <summary>
+        /// Имя проекта
+        /// </summary>
         public string ProjectName
         {
             get { return projectName; }
@@ -47,8 +59,6 @@ namespace FridayLib
                 OnPropertyChanged("ProjectName");
             }
         }
-
-        private string name = "";
         /// <summary>
         /// Относительное имя файла
         /// </summary>
@@ -61,9 +71,6 @@ namespace FridayLib
                 OnPropertyChanged("Name");
             }
         }
-
-
-        private string sourcePath = "";
         /// <summary>
         /// Путь к источнику разрабатываемого проекта
         /// </summary>
@@ -76,9 +83,6 @@ namespace FridayLib
                 OnPropertyChanged("SourcePath");
             }
         }
-
-
-        private string releasePath = "";
         /// <summary>
         /// Путь к релизу проекта
         /// </summary>
@@ -91,9 +95,6 @@ namespace FridayLib
                 OnPropertyChanged("ReleasePath");
             }
         }
-
-
-        private string lastHash = "";
         /// <summary>
         /// Результат предыдущей проверки
         /// </summary>
@@ -106,9 +107,6 @@ namespace FridayLib
                 OnPropertyChanged("LastHash");
             }
         }
-
-
-        private string currentHash = "";
         /// <summary>
         /// Результат текущей проверки
         /// </summary>
@@ -121,9 +119,6 @@ namespace FridayLib
                 OnPropertyChanged("CurrentHash");
             }
         }
-
-
-        private DateTime date;
         public DateTime SourceDate
         {
             get { return date; }
@@ -133,8 +128,6 @@ namespace FridayLib
                 OnPropertyChanged("Date");
             }
         }
-
-        private DateTime rDate;
         public DateTime ReleaseDate
         {
             get { return rDate; }
@@ -144,9 +137,6 @@ namespace FridayLib
                 OnPropertyChanged("ReleaseDate");
             }
         }
-
-
-        private string rVersion;
         public string ReleaseVersion
         {
             get { return rVersion; }
@@ -156,8 +146,6 @@ namespace FridayLib
                 OnPropertyChanged("ReleaseVersion");
             }
         }
-
-        private string version="";
         public string SourceVersion
         {
             get { return version; }
