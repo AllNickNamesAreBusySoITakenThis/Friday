@@ -68,6 +68,10 @@
       <HintPath>..\packages\NLog.4.6.8\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ServiceLib, Version=1.0.2.10, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libs\ServiceLib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -88,7 +92,10 @@
   <ItemGroup>
     <Compile Include="CFile.cs" />
     <Compile Include="CFileData.cs" />
+    <Compile Include="ControlledApp.cs" />
+    <Compile Include="ControlledProject.cs" />
     <Compile Include="DatabaseClass.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="GScripts Module\GoogleScriptsClass.cs" />
     <Compile Include="MainClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -100,6 +107,7 @@
     <None Include="credentials.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Content Include="Libs\ServiceLib.dll" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

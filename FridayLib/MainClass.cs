@@ -16,6 +16,12 @@ namespace FridayLib
         {
             StaticPropertyChanged?.Invoke(null, new PropertyChangedEventArgs(name));
         }
+        public delegate void ErrorInLibraryDelegate(string message);
+        public static event ErrorInLibraryDelegate ErrorInLibrary;
+        internal static void OnErrorInLibrary(string message)
+        {
+            ErrorInLibrary?.Invoke(message);
+        }
 
 
         static ObservableCollection<CFile> files;
