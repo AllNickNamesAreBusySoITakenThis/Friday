@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,6 +45,9 @@ namespace FridayLib
         private ControlledProject parent;
         private bool isInReestr = false;
         private int id;
+        private string mainFileReleaseVersion;
+        private string mainFileReleaseHash;
+        private string mainFileReleaseDate;
 
 
         /// <summary>
@@ -410,5 +414,130 @@ namespace FridayLib
             }
         }
 
+        /// <summary>
+        /// Версия основного исполняемого файла в релизе
+        /// </summary>
+        public string MainFileReleaseVersion
+        {
+            get { return mainFileReleaseVersion; }
+            set
+            {
+                mainFileReleaseVersion = value;
+                OnPropertyChanged("MainFileReleaseVersion");
+            }
+        }
+
+        /// <summary>
+        /// Контрольная сумма (SHA1) основного исполняемого файла в релизе
+        /// </summary>
+        public string MainFileReleaseHash
+        {
+            get { return mainFileReleaseHash; }
+            set
+            {
+                mainFileReleaseHash = value;
+                OnPropertyChanged("MainFileReleaseHash");
+            }
+        }
+
+        /// <summary>
+        /// Дата изменения основного исполняемого файла в релизе
+        /// </summary>
+        public string MainFileReleaseDate
+        {
+            get { return mainFileReleaseDate; }
+            set
+            {
+                mainFileReleaseDate = value;
+                OnPropertyChanged("MainFileReleaseDate");
+            }
+        }
+
+        public string MainFilePath
+        {
+            get { return Path.Combine(SourceDirectory, MainFileName); }
+        }
+        public string MainFileReleasePath
+        {
+            get { return Path.Combine(ReleaseDirectory, MainFileName); }
+        }
+
+        /// <summary>
+        /// Обновить данные по основному исполняемому файлу в рабочей директории и в релизе
+        /// </summary>
+        /// <returns></returns>
+        public async Task UpdateMainFileInfoAsync()
+        {
+            await Task.Run(() =>
+            {
+                MainFileDate = FileOperations.GetChangeDate(MainFilePath);
+                MainFileHash =  FileOperations.GetCheckSumm(MainFilePath);
+                MainFileVersion = FileOperations.GetVersion(MainFilePath);
+                MainFileReleaseDate = FileOperations.GetChangeDate(MainFileReleasePath);
+                MainFileReleaseHash = FileOperations.GetCheckSumm(MainFileReleasePath);
+                MainFileReleaseVersion = FileOperations.GetVersion(MainFileReleasePath);
+            });           
+            UpToDate = (MainFileVersion.Equals(MainFileReleaseVersion) && MainFileHash.Equals(MainFileReleaseHash));
+        }
+
+        /// <summary>
+        /// Обновить данные по основному исполняемому файлу в рабочей директории и в релизе
+        /// </summary>
+        /// <returns></returns>
+        public void UpdateMainFileInfo()
+        {
+            MainFileDate = FileOperations.GetChangeDate(MainFilePath);
+            MainFileHash = FileOperations.GetCheckSumm(MainFilePath);
+            MainFileVersion = FileOperations.GetVersion(MainFilePath);
+            MainFileReleaseDate = FileOperations.GetChangeDate(MainFileReleasePath);
+            MainFileReleaseHash = FileOperations.GetCheckSumm(MainFileReleasePath);
+            MainFileReleaseVersion = FileOperations.GetVersion(MainFileReleasePath);
+            UpToDate = (MainFileVersion.Equals(MainFileReleaseVersion) && MainFileHash.Equals(MainFileReleaseHash));
+        }
+
+        /// <summary>
+        /// Скопировать все требуемые файлы из каталога в каталог
+        /// </summary>
+        /// <param name="source">Каталог-источник</param>
+        /// <param name="dest">Католог-цель</param>
+        /// <returns></returns>
+        public async Task CopyToFolderAsync(string source, string dest)
+        {
+            try
+            {
+                foreach(var dir in Directory.GetDirectories(source))
+                {
+                    await CopyToFolderAsync(dir, Path.Combine(dest, new DirectoryInfo(dir).Name));
+                }
+                foreach(var file in Directory.GetFiles(source))
+                {
+                    if(Service.AllowedFileExtentions.Contains(new FileInfo(file).Extension))
+                        File.Copy(file, Path.Combine(dest, new FileInfo(file).Name), true);
+                }
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
+            }
+        }
+        public void CopyToFolder(string source, string dest)
+        {
+            try
+            {
+                foreach (var dir in Directory.GetDirectories(source))
+                {
+                    CopyToFolder(dir, Path.Combine(dest, new DirectoryInfo(dir).Name));
+                }
+                foreach (var file in Directory.GetFiles(source))
+                {
+                    if (Service.AllowedFileExtentions.Contains(new FileInfo(file).Extension))
+                        File.Copy(file, Path.Combine(dest, new FileInfo(file).Name), true);
+                }
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
+            }
+        }
     }
 }

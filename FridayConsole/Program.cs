@@ -11,12 +11,80 @@ namespace FridayConsole
     {
         static void Main(string[] args)
         {
-            var a = GoogleScriptsClass.GetSheetsData();
-            foreach(var file in a)
+            MainClass.ErrorInLibrary += MainClass_ErrorInLibrary;
+            //ControlledProject project = new ControlledProject()
+            //{
+            //    Id = 0,
+            //    Category = PPOCategories.Sevice,
+            //    DocumentDirectory = @"\\192.168.77.228\ппо\РЕЛИЗ\C#\Создание списка исходных текстов",
+            //    ReleaseDirectory = @"\\192.168.77.228\ппо\РЕЛИЗ\C#\Создание списка исходных текстов",
+            //    WorkingDirectory = @"C:\Users\Иван Козлов\Desktop\SourceTextListing",
+            //    Name = "Создание списка исходных текстов",
+            //    Task = PPOTasks.OS_Addons,
+            //    AllAppsAreInReestr = false,
+            //    AllApрsAreUpToDate = false,
+            //    Apps = new System.Collections.ObjectModel.ObservableCollection<ControlledApp>()
+            //};
+
+            //ControlledApp app = new ControlledApp()
+            //{
+            //    Id = 0,
+            //    Name = "SourceTextListing",
+            //    AuthorizationType = "Нет",
+            //    Description = "Создание списка исходных текстов приложений",
+            //    MainFileName = "SourceTextListing.exe",
+            //    SourceDirectory = @"C:\Users\Иван Козлов\Desktop\SourceTextListing\SourceTextListing\bin\Release",
+            //    ReleaseDirectory = @"\\192.168.77.228\ппо\РЕЛИЗ\C#\Создание списка исходных текстов\Приложение",
+            //    DocumentDirectory = @"\\192.168.77.228\ппо\РЕЛИЗ\C#\Создание списка исходных текстов\Документация",
+            //    BuildingComponents = ".Net Framework 4.5.2 – реализация возможности использования C#",
+            //    CompatibleOSs = "Windows 7, 10",
+            //    CompatibleScadas = "iFix 5.8, 5.9, 6.0",
+            //    CompatibleSZI = "Kaspersky Endpoint Security 11",
+            //    DataStoringMechanism = "Текстовый файл в общедоступном каталоге",
+            //    FunctionalComponents = ".Net Framework 4.5.2 – реализация возможности использования C#",
+            //    IdentificationType = "Нет",
+            //    Installer = "Нет",
+            //    IsInReestr = false,
+            //    LocalData = "Нет",
+            //    OtherSoft = "Нет",
+            //    Platform = ".Net Framework 4.5.2",
+            //    SUBD = "отсутствует",
+            //    Report = "отсутствует",
+            //    Status = PPOReestrStatus.NotTested
+            //};
+            //app.UpdateMainFileInfo();
+            //project.Apps.Add(app);
+            //app.Parent = project;
+
+            //DatabaseClass.AddProject(project);
+            //DatabaseClass.AddApp(app);
+
+            var projects = DatabaseClass.GetProjects().Result;
+            for (int i = 0; i < projects.Count; i++)
             {
-                DatabaseClass.AddCFile(file);
+                projects[i] = DatabaseClass.GetAppsForProject(projects[i]).Result;
             }
+            foreach (var prj in projects)
+            {
+                foreach (var app in prj.Apps)
+                {
+                    app.UpdateMainFileInfo();
+                    //app.CopyToFolderAsync(app.SourceDirectory, app.ReleaseDirectory);
+                    Console.WriteLine("Begin preparing formular");
+                    FridayLib.Word_Module.DocumentCreation.CreateFormular(app);
+                    Console.WriteLine("{0} - {1}", prj.Name, app.Name);
+                    //app.UpdateMainFileInfo();
+                    //DatabaseClass.UpdateApp(app);
+                }
+            }
+
+            //
             Console.Read();
+        }
+
+        private static void MainClass_ErrorInLibrary(string message)
+        {
+            Console.WriteLine(message);
         }
     }
 }

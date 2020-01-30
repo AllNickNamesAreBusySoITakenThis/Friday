@@ -96,12 +96,15 @@
     <Compile Include="ControlledProject.cs" />
     <Compile Include="DatabaseClass.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="FileOperations.cs" />
     <Compile Include="GScripts Module\GoogleScriptsClass.cs" />
     <Compile Include="MainClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Source Texts Module\SourceTextCreation.cs" />
     <Compile Include="Source Texts Module\SourceTextFile.cs" />
+    <Compile Include="Word Module\Common.cs" />
+    <Compile Include="Word Module\DocumentCreation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="credentials.json">
@@ -115,7 +118,15 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
-    <None Include="Res\SampleTable.xlsx" />
+    <None Include="Res\SampleTable.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Res\Sample request.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Res\Sample formular.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="Microsoft.Office.Core">
@@ -136,19 +147,27 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+    <COMReference Include="Microsoft.Office.Interop.Word">
+      <Guid>{00020905-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>6</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
     <COMReference Include="VBIDE">
       <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
       <VersionMajor>5</VersionMajor>
       <VersionMinor>3</VersionMinor>
       <Lcid>0</Lcid>
-      <WrapperTool>primary</WrapperTool>
+      <WrapperTool>tlbimp</WrapperTool>
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Text Module\" />
-    <Folder Include="Word Module\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
