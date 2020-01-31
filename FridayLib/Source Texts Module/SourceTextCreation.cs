@@ -12,7 +12,6 @@ namespace FridayLib
 {
     public class SourceTextCreation
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
         /// <summary>
         /// Список запрещенных к просмотру папок
         /// </summary>
@@ -22,7 +21,7 @@ namespace FridayLib
         /// </summary>
         /// <param name="rootAddress">Директория проекта</param>
         /// <returns></returns>
-        public static ObservableCollection<SourceTextFile> ScanFolder(string rootAddress, string addName = "", string savedPath = "")
+        internal static ObservableCollection<SourceTextFile> ScanFolder(string rootAddress, string addName = "", string savedPath = "")
         {
             try
             {
@@ -63,7 +62,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                logger.Error("Ошибка при сканировании папки: {0}", ex.Message);
+                MainClass.OnErrorInLibrary(string.Format("Ошибка при сканировании папки: {0}", ex.Message));
                 return new ObservableCollection<SourceTextFile>();
             }
         }
@@ -85,7 +84,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                logger.Error("Ошибка при сохранении файла данных об исходных кодах: {0}", ex.Message);
+                MainClass.OnErrorInLibrary(string.Format("Ошибка при сохранении файла данных об исходных кодах: {0}", ex.Message));
             }
         }
         /// <summary>
@@ -93,7 +92,7 @@ namespace FridayLib
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static ObservableCollection<SourceTextFile> GetFromTextFile(string path)
+        internal static ObservableCollection<SourceTextFile> GetFromTextFile(string path)
         {
             try
             {
@@ -107,15 +106,15 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                logger.Error("Ошибка при чтении файла данных об исходных кодах: {0}", ex.Message);
+                MainClass.OnErrorInLibrary(string.Format("Ошибка при чтении файла данных об исходных кодах: {0}", ex.Message));
                 return new ObservableCollection<SourceTextFile>();
             }
         }
-        public static void SaveAsExcel(ObservableCollection<SourceTextFile> collection, string path, string projectName)
+        internal static void SaveAsExcel(ObservableCollection<SourceTextFile> collection, string path)
         {
             try
             {
-                string samplePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"SampleTable.xlsx");
+                string samplePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"Res", @"SampleTable.xlsx");
                 Excel.Application excelapp = null;
                 Excel.Sheets excelsheets; // переменная-список всх листов текущей книги
                 Excel.Worksheet excelworksheet;// переменная определяет рабочий лист текущей книги
@@ -133,23 +132,64 @@ namespace FridayLib
                 excelappworkbook = excelappworkbooks[1];
                 excelsheets = excelappworkbook.Worksheets;
                 excelworksheet = (Excel.Worksheet)excelsheets.get_Item(1);
-                excelworksheet.Name = projectName;
+                excelworksheet.Name = "Ведомость";
                 for (int i = 0; i < collection.Count; i++)
                 {
                     excelworksheet.Cells[i + 2, 1] = collection[i].Name;
                     excelworksheet.Cells[i + 2, 2] = collection[i].Description;
                     excelworksheet.Cells[i + 2, 3] = collection[i].FullName;
                     excelworksheet.Cells[i + 2, 4] = collection[i].Size;
-                    excelworksheet.Cells[i + 2, 5] = collection[i].FileData.Version;
-                    excelworksheet.Cells[i + 2, 6] = collection[i].FileData.Hash;
+                    excelworksheet.Cells[i + 2, 5] = collection[i].Version;
+                    excelworksheet.Cells[i + 2, 6] = collection[i].Hash;
                     excelworksheet.Cells[i + 2, 7] = collection[i].Owner;
                 }
-                excelappworkbook.SaveAs(Path.Combine(path, projectName + ".xlsx"));
+                excelappworkbook.SaveAs(path);
                 excelapp.Quit();
             }
             catch (Exception ex)
             {
-                logger.Error("Ошибка при создании таблицы исходных кодов: {0}", ex.Message);
+                MainClass.OnErrorInLibrary(string.Format("Ошибка при создании таблицы исходных кодов: {0}", ex.Message));
+            }
+        }
+
+        public static void CreateSourceTextList(ControlledProject project)
+        {
+            try
+            {
+                project.SourceTextFiles = UpdateSourceTextList(project);
+                SaveAsExcel(project.SourceTextFiles, Path.Combine(project.DocumentDirectory, "Ведомость исходных текстов.xlsx"));
+                SaveAsTextFile(project.SourceTextFiles, Path.Combine(project.DocumentDirectory, "SourceTexts.csv"));
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка при сохранении исходных текстов: {0}", ex.Message));
+            }
+        }
+
+        public static ObservableCollection<SourceTextFile> UpdateSourceTextList(ControlledProject project)
+        {
+            try
+            {
+                ObservableCollection<SourceTextFile> originalCollection = ScanFolder(project.WorkingDirectory);
+                ObservableCollection<SourceTextFile> savedCollection = GetFromTextFile(Path.Combine(project.DocumentDirectory, "SourceTexts.csv"));
+                foreach(var item in originalCollection)
+                {
+                    foreach(var sItem in savedCollection)
+                    {
+                        if(sItem.FullName.Equals(item.FullName))
+                        {
+                            item.Description = sItem.Description;
+                            item.Owner = sItem.Owner;
+                            break;
+                        }
+                    }
+                }
+                return originalCollection;
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка при создании исходных текстов: {0}", ex.Message));
+                return new ObservableCollection<SourceTextFile>();
             }
         }
     }

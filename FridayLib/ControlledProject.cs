@@ -27,6 +27,7 @@ namespace FridayLib
         private string docDirectory;
         private bool allAppsAreInReestr;
         private ObservableCollection<ControlledApp> apps = new ObservableCollection<ControlledApp>();
+        private ObservableCollection<SourceTextFile> sourceTextFiles = new ObservableCollection<SourceTextFile>();
 
 
         /// <summary>
@@ -155,6 +156,19 @@ namespace FridayLib
             {
                 apps = value;
                 OnPropertyChanged("Apps");
+            }
+        }
+
+        /// <summary>
+        /// Коллекция для списка исходных текстов
+        /// </summary>
+        public ObservableCollection<SourceTextFile> SourceTextFiles
+        {
+            get { return sourceTextFiles; }
+            set
+            {
+                sourceTextFiles = value;
+                OnPropertyChanged("SourceTextFiles");
             }
         }
     }

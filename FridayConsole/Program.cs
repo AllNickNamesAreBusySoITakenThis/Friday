@@ -75,11 +75,16 @@ namespace FridayConsole
                     //Console.WriteLine("{0} - {1}", prj.Name, app.Name);
                     //app.UpdateMainFileInfo();
                     //DatabaseClass.UpdateApp(app);
+                    GoogleScriptsClass.AddDataToSheet(app);
                     
                 }
-                Console.WriteLine("Запуск формирования листинга для проекта {0}",prj.Name);
-                FridayLib.Text_Module.Listing.CreateListing(prj);
-                Console.WriteLine("Окончено формирования листинга для проекта {0}", prj.Name);
+                //GoogleScriptsClass.UpdateSheetsData(prj.Apps);
+                //Console.WriteLine("Запуск формирования листинга для проекта {0}",prj.Name);
+                //FridayLib.Text_Module.Listing.CreateListing(prj);
+                //Console.WriteLine("Окончено формирования листинга для проекта {0}", prj.Name);
+                //Console.WriteLine("Запуск формирования ведомости исходных текстов для проекта {0}", prj.Name);
+                //SourceTextCreation.CreateSourceTextList(prj);
+                //Console.WriteLine("Окончено формирования ведомости исходных текстов для проекта {0}", prj.Name);
             }
 
             //

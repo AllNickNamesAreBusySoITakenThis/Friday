@@ -21,16 +21,16 @@ namespace FridayLib
         static string[] Scopes = { SheetsService.Scope.Spreadsheets };
         static string AppName = "Friday";
 
-        public static void UpdateSheetsData(IEnumerable<CFile> files)
+        public static void UpdateSheetsData(IEnumerable<ControlledApp> applications)
         {
             try
             {
                 var credential = GetCredintials();
                 var service = GetService(credential);
                 String spreadsheetId = "10dymgee_7SNKLRwf9nS533pJpTMk1tLbndR9BmdO8As";
-                String range = "Актуальные версии!A2:N100";
-                int sheetId = 1539764994;
-                //int sheetId = 1515691245;
+                String range = "Test!A2:N100";
+                //int sheetId = 1539764994;
+                int sheetId = 1515691245;
                 SpreadsheetsResource.ValuesResource.GetRequest dataRequest =
                         service.Spreadsheets.Values.Get(spreadsheetId, range);
                 ValueRange response = dataRequest.Execute();
@@ -38,22 +38,22 @@ namespace FridayLib
 
                 List<Request> requests = new List<Request>();
 
-                foreach (var file in files)
+                foreach (var app in applications)
                 {
                     foreach (var val in exValues)
                     {
 
-                        if (file.ProjectName == val[1].ToString() & !string.IsNullOrEmpty(file.SourcePath))
+                        if (app.Name == val[1].ToString() & !string.IsNullOrEmpty(app.SourceDirectory))
                         {
                             List<CellData> values = new List<CellData>()
                         {
-                            new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = file.ID }},
-                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.ProjectName }},
-                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.Name }},
-                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceVersion }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = app.Id }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Name }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileName }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseVersion }},
                             new CellData(){UserEnteredValue = new ExtendedValue { StringValue = val[4].ToString() }},
-                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceDate.Date.ToString("dd.MM.yyyy") }},
-                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceHash }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseDate.Remove(app.MainFileReleaseDate.IndexOf(" "))}},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseHash }},
                         };
 
                             requests.Add(new Request()
@@ -64,7 +64,7 @@ namespace FridayLib
                                     {
                                         SheetId = sheetId,
                                         ColumnIndex = 0,
-                                        RowIndex = file.ID
+                                        RowIndex = app.Id
                                     },
                                     Rows = new List<RowData>() { new RowData() { Values = values } },
                                     Fields = "userEnteredValue"
@@ -82,56 +82,13 @@ namespace FridayLib
 
                 service.Spreadsheets.BatchUpdate(request, spreadsheetId).Execute();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                
+                MainClass.OnErrorInLibrary(string.Format("Ошибка при обновлении таблицы Google: {0}", ex.Message));
             }
-            
+
         }
 
-        public static List<CFile> GetSheetsData()
-        {
-            List<CFile> result = new List<CFile>();
-            try
-            {
-                var credential = GetCredintials();
-                var service = GetService(credential);
-                String spreadsheetId = "10dymgee_7SNKLRwf9nS533pJpTMk1tLbndR9BmdO8As";
-                String range = "Актуальные версии!A2:N100";
-                SpreadsheetsResource.ValuesResource.GetRequest request =
-                        service.Spreadsheets.Values.Get(spreadsheetId, range);
-                ValueRange response = request.Execute();
-                IList<IList<Object>> values = response.Values;
-
-                if (values != null && values.Count > 0)
-                {
-                    foreach (var row in values)
-                    {
-                        result.Add(new CFile()
-                        {
-                            ID = Convert.ToInt32(row[0]),
-                            ProjectName = row[1].ToString(),
-                            Name = row[2].ToString(),
-                            ReleasePath = "",
-                            SourcePath = "",
-                            SourceHash = row[6].ToString(),
-                            SourceVersion = row[3].ToString(),
-                            SourceDate = Convert.ToDateTime(row[5])
-                        });
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("No data found.");
-                }
-            }
-            catch
-            {
-
-            }
-           
-            return result;
-        }
 
         public static UserCredential GetCredintials()
         {
@@ -158,25 +115,32 @@ namespace FridayLib
             });
             return service;
         }
-
-        public static void AddDataToSheet(CFile file)
+        public static void AddDataToSheet(ControlledApp app)
         {
             try
             {
                 var credeintial = GetCredintials();
                 var service = GetService(credeintial);
                 String spreadsheetId = "10dymgee_7SNKLRwf9nS533pJpTMk1tLbndR9BmdO8As";
-                int sheetId = 1539764994;
+                //int sheetId = 1539764994;
+                int sheetId = 1515691245;
+                String range = "Test!A2:N100";
+                SpreadsheetsResource.ValuesResource.GetRequest dataRequest =
+                        service.Spreadsheets.Values.Get(spreadsheetId, range);
+                ValueRange response = dataRequest.Execute();
+                IList<IList<Object>> exValues = response.Values;
                 List<Request> requests = new List<Request>();
                 List<CellData> values = new List<CellData>()
             {
-                new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = file.ID }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.ProjectName }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.Name }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceVersion }},
+                new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = exValues.Count+1 }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Name }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileName }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseVersion }},
                 new CellData(){UserEnteredValue = new ExtendedValue { StringValue = "" }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceDate.Date.ToString("dd.MM.yyyy") }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = file.SourceHash }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseDate.Remove(app.MainFileReleaseDate.IndexOf(" "))}},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseHash }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Description }},
+                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Parent.Category.ToString() }}                
             };
                 requests.Add(new Request()
                 {
@@ -186,7 +150,7 @@ namespace FridayLib
                         {
                             SheetId = sheetId,
                             ColumnIndex = 0,
-                            RowIndex = file.ID + 1
+                            RowIndex = exValues.Count+1
                         },
                         Rows = new List<RowData>() { new RowData() { Values = values } },
                         Fields = "userEnteredValue"
@@ -198,11 +162,11 @@ namespace FridayLib
                 };
                 service.Spreadsheets.BatchUpdate(request, spreadsheetId).Execute();
             }
-            catch
+            catch(Exception ex)
             {
-
+                MainClass.OnErrorInLibrary(string.Format("Ошибка при добавлениии данных в таблицу Google: {0}", ex.Message));
             }
-            
+
         }
     }
 }

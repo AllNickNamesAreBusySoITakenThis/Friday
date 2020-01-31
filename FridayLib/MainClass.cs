@@ -57,13 +57,13 @@ namespace FridayLib
             {
                 DatabaseClass.UpdateCFile(file);
             }
-            GoogleScriptsClass.UpdateSheetsData(Files);
+            //GoogleScriptsClass.UpdateSheetsData(Files);
         }
 
         public static void UpdateFile(CFile file)
         {
             DatabaseClass.UpdateCFile(file);
-            GoogleScriptsClass.UpdateSheetsData(new CFile[] { file });
+            //GoogleScriptsClass.UpdateSheetsData(new CFile[] { file });
         }
 
         public static void AddFile(string name, string sourcePath, string releasePath, string projName)
@@ -78,7 +78,7 @@ namespace FridayLib
             };
             temp.GetFileInfo();
             DatabaseClass.AddCFile(temp);
-            GoogleScriptsClass.AddDataToSheet(temp);
+            //GoogleScriptsClass.AddDataToSheet(temp);
             Files.Add(temp);
         }
 

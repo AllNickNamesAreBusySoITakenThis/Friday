@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
 using System.Security.Cryptography;
-using NLog;
 
 namespace FridayLib
 {
@@ -24,9 +23,7 @@ namespace FridayLib
         private string name="";
         private string owner;
         private string size;
-        private CFileData fileData;
-        private Logger logger = LogManager.GetCurrentClassLogger();
-        static private Logger sLogger = LogManager.GetCurrentClassLogger();
+        //private CFileData fileData;
 
         /// <summary>
         /// Полное имя файла
@@ -80,18 +77,53 @@ namespace FridayLib
                 OnPropertyChanged("Size");
             }
         }
-        /// <summary>
-        /// Общие данные по файлу
-        /// </summary>
-        public CFileData FileData
+        ///// <summary>
+        ///// Общие данные по файлу
+        ///// </summary>
+        //public CFileData FileData
+        //{
+        //    get { return fileData; }
+        //    set
+        //    {
+        //        fileData = value;
+        //        OnPropertyChanged("FileData");
+        //    }
+        //}
+
+        private string hash;
+        public string Hash
         {
-            get { return fileData; }
+            get { return hash; }
             set
             {
-                fileData = value;
-                OnPropertyChanged("FileData");
+                hash = value;
+                OnPropertyChanged("Hash");
             }
         }
+
+        private string version;
+        public string Version
+        {
+            get { return version; }
+            set
+            {
+                version = value;
+                OnPropertyChanged("Version");
+            }
+        }
+
+        private string creationDate;
+        public string CreationDate
+        {
+            get { return creationDate; }
+            set
+            {
+                creationDate = value;
+                OnPropertyChanged("CreationDate");
+            }
+        }
+
+
 
         public SourceTextFile()
         {
@@ -104,7 +136,10 @@ namespace FridayLib
             Description = "";            
             Size = fileInfo.Length / 1024 < 1 ? string.Format("{0} B", fileInfo.Length) : string.Format("{0} kB", fileInfo.Length / 1024);
             Owner = "АО \"НПО \"Спецэлектромеханика\"";
-            FileData = new CFileData(fileInfo.FullName);
+            Hash = FileOperations.GetCheckSumm(fileInfo.FullName);
+            CreationDate = FileOperations.GetChangeDate(fileInfo.FullName);
+            Version = FileOperations.GetVersion(fileInfo.FullName);
+            //FileData = new CFileData(fileInfo.FullName);
         }
         /// <summary>
         /// Перевести данные в строку
@@ -112,7 +147,7 @@ namespace FridayLib
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0}||{1}||{2}||{3}||{4}||{5}||{6}||{7}", FullName, Description, FileData.Date.ToString("dd.MM.yyyy HH:mm:ss"), FileData.Version, FileData.Hash, Size, Name, Owner);
+            return string.Format("{0}||{1}||{2}||{3}||{4}||{5}||{6}||{7}", FullName, Description, CreationDate, Version, Hash, Size, Name, Owner);
         }
         /// <summary>
         /// Прочитать данные из строки
@@ -128,7 +163,9 @@ namespace FridayLib
                 {
                     FullName = sSource[0],
                     Description = sSource[1],
-                    FileData = new CFileData() { Date = Convert.ToDateTime(sSource[2]), Version = sSource[3], Hash = sSource[4] },  
+                    CreationDate = sSource[2], 
+                    Version = sSource[3], 
+                    Hash = sSource[4],  
                     Size = sSource[5],
                     Name = sSource[6],
                     Owner = sSource[7]
