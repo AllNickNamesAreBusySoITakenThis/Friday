@@ -103,6 +103,7 @@
     <Compile Include="Service.cs" />
     <Compile Include="Source Texts Module\SourceTextCreation.cs" />
     <Compile Include="Source Texts Module\SourceTextFile.cs" />
+    <Compile Include="Text Module\Listing.cs" />
     <Compile Include="Word Module\Common.cs" />
     <Compile Include="Word Module\DocumentCreation.cs" />
   </ItemGroup>
@@ -166,8 +167,6 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Text Module\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

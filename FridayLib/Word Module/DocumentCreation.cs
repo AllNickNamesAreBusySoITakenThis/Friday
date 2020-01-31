@@ -10,6 +10,10 @@ namespace FridayLib.Word_Module
 {
     public class DocumentCreation
     {
+        /// <summary>
+        /// Переместить курсор на верх документа
+        /// </summary>
+        /// <param name="application">Приложение</param>
         static void MoveToStart(Word.Application application)
         {
             object unit;
@@ -18,6 +22,14 @@ namespace FridayLib.Word_Module
             extend = Word.WdMovementType.wdMove;
             application.Selection.HomeKey(ref unit, ref extend);
         }
+        /// <summary>
+        /// Переместить курсор с возможностью выделения
+        /// </summary>
+        /// <param name="application">Приложение</param>
+        /// <param name="_units">Тип элементов смещения</param>
+        /// <param name="_count">Количество элементов смещения</param>
+        /// <param name="direction">Направление смещения</param>
+        /// <param name="select">Требуется ли выделять</param>
         static void MoveSelect(Word.Application application, Word.WdUnits _units,int _count, MoveDirection direction, bool select)
         {
             object unit = _units; 
@@ -39,6 +51,13 @@ namespace FridayLib.Word_Module
                     break;
             }
         }       
+        /// <summary>
+        /// Записать строку в описании принятых решений
+        /// </summary>
+        /// <param name="application">Приложение</param>
+        /// <param name="document">Документ</param>
+        /// <param name="paragraph">Номер строки</param>
+        /// <param name="data">Ланные для записи</param>
         static void WriteLineInFormular(Word.Application application, Word.Document document,int paragraph, string data)
         {
             try
@@ -57,7 +76,10 @@ namespace FridayLib.Word_Module
                 MainClass.OnErrorInLibrary(string.Format("Ошибка в формировании строки {0} описания принятых решений: {1}", paragraph, ex.Message));
             }
         }
-
+        /// <summary>
+        /// Создать заявку на анализ защищенности приложения
+        /// </summary>
+        /// <param name="app">Приложение</param>
         public static void CreateRequest(ControlledApp app)
         {
             try
@@ -157,7 +179,10 @@ namespace FridayLib.Word_Module
                 MainClass.OnErrorInLibrary(string.Format("Ошибка создания заявки для приложения {0}: {1}", app.Name, ex.Message));
             }
         }
-
+        /// <summary>
+        /// Создать описание принятых решений приложения
+        /// </summary>
+        /// <param name="app">Приложение</param>
         public static void CreateFormular(ControlledApp app)
         {
             try
@@ -166,10 +191,6 @@ namespace FridayLib.Word_Module
                 var document = Common.OpenDoc(wordApp, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Res", "Sample formular.docx"));
                 
                 #region Редактирование документа
-                //перемещаем курсор в начало документа
-                //unit = Word.WdUnits.wdStory;
-                //extend = Word.WdMovementType.wdMove;
-                //wordApp.Selection.HomeKey(ref unit, ref extend);
                 MoveToStart(wordApp);
 
                 //Заголовок программы

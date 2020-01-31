@@ -68,14 +68,18 @@ namespace FridayConsole
             {
                 foreach (var app in prj.Apps)
                 {
-                    app.UpdateMainFileInfo();
+                    //app.UpdateMainFileInfo();
                     //app.CopyToFolderAsync(app.SourceDirectory, app.ReleaseDirectory);
-                    Console.WriteLine("Begin preparing formular");
-                    FridayLib.Word_Module.DocumentCreation.CreateFormular(app);
-                    Console.WriteLine("{0} - {1}", prj.Name, app.Name);
+                    //Console.WriteLine("Begin preparing formular");
+                    //FridayLib.Word_Module.DocumentCreation.CreateFormular(app);
+                    //Console.WriteLine("{0} - {1}", prj.Name, app.Name);
                     //app.UpdateMainFileInfo();
                     //DatabaseClass.UpdateApp(app);
+                    
                 }
+                Console.WriteLine("Запуск формирования листинга для проекта {0}",prj.Name);
+                FridayLib.Text_Module.Listing.CreateListing(prj);
+                Console.WriteLine("Окончено формирования листинга для проекта {0}", prj.Name);
             }
 
             //
