@@ -191,7 +191,7 @@ namespace FridayLib
                         var command = Connection.CreateCommand();
                         command.CommandText = string.Format("SELECT AppId, ProjectId, Name, ReleaseDirectory, SourceDirectory, DocumentDirectory,Description,MainFileName" +
                             ",MainFileReleaseHash,MainFileReleaseVersion,MainFileReleaseDate,Status,CompatibleOSs,CompatibleScadas,CompatibleSZI,IdentificationType,Installer,Report" +
-                            ",BuildingComponents,FunctionalComponents,DataStoringMechanism,SUBD,LocalData,AuthorizationType,Platform,OtherSoft,IsInReestr  FROM dbo.Applications WHERE ProjectId={0}", prj.Id);
+                            ",BuildingComponents,FunctionalComponents,DataStoringMechanism,SUBD,LocalData,AuthorizationType,Platform,OtherSoft,IsInReestr, UserCategories  FROM dbo.Applications WHERE ProjectId={0}", prj.Id);
                         var reader = await command.ExecuteReaderAsync();
                         while (await reader.ReadAsync())
                         {
@@ -223,6 +223,7 @@ namespace FridayLib
                                 Platform = reader["Platform"].ToString(),
                                 OtherSoft = reader["OtherSoft"].ToString(),
                                 IsInReestr = Convert.ToBoolean(reader["IsInReestr"]),
+                                UserCategories = reader["UserCategories"].ToString(),
                                 Parent = prj
                             });                             
                         }
@@ -274,10 +275,10 @@ namespace FridayLib
                         command.CommandText = string.Format("INSERT INTO dbo.Applications (AppId, ProjectId, Name, ReleaseDirectory, SourceDirectory, DocumentDirectory,Description,MainFileName" +
                                 ",MainFileReleaseHash,MainFileReleaseVersion,MainFileReleaseDate,Status,CompatibleOSs,CompatibleScadas,CompatibleSZI,IdentificationType,Installer,Report" +
                                 ",BuildingComponents,FunctionalComponents,DataStoringMechanism,SUBD,LocalData,AuthorizationType,Platform,OtherSoft,IsInReestr) VALUES (" +
-                                "{0},{1},'{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}',{11},'{12}','{13}','{14}','{15}','{16}','{17}','{18}','{19}','{20}','{21}','{22}','{23}','{24}','{25}',{26})",
+                                "{0},{1},'{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}',{11},'{12}','{13}','{14}','{15}','{16}','{17}','{18}','{19}','{20}','{21}','{22}','{23}','{24}','{25}',{26},'{27}')",
                                 app.Id, app.Parent.Id, app.Name, app.ReleaseDirectory, app.SourceDirectory, app.DocumentDirectory, app.Description, app.MainFileName, app.MainFileReleaseHash, app.MainFileReleaseVersion
                                 , app.MainFileReleaseDate, (int)app.Status, app.CompatibleOSs, app.CompatibleScadas, app.CompatibleSZI, app.IdentificationType, app.Installer, app.Report
-                                , app.BuildingComponents, app.FunctionalComponents, app.DataStoringMechanism, app.SUBD, app.LocalData, app.AuthorizationType, app.Platform, app.OtherSoft, app.IsInReestr?1:0);
+                                , app.BuildingComponents, app.FunctionalComponents, app.DataStoringMechanism, app.SUBD, app.LocalData, app.AuthorizationType, app.Platform, app.OtherSoft, app.IsInReestr?1:0,app.UserCategories);
                         await command.ExecuteNonQueryAsync();
                         Disconnect(Connection); 
                     }
@@ -305,10 +306,10 @@ namespace FridayLib
                         var command = Connection.CreateCommand();
                         command.CommandText = string.Format("UPDATE dbo.Applications SET Name = '{2}', ReleaseDirectory = '{3}', SourceDirectory = '{4}', DocumentDirectory = '{5}',Description = '{6}',MainFileName = '{7}'" +
                                 ",MainFileReleaseHash = '{8}',MainFileReleaseVersion = '{9}',MainFileReleaseDate = '{10}',Status = {11},CompatibleOSs = '{12}',CompatibleScadas = '{13}',CompatibleSZI = '{14}',IdentificationType = '{15}',Installer = '{16}',Report = '{17}'" +
-                                ",BuildingComponents = '{18}',FunctionalComponents = '{19}',DataStoringMechanism = '{20}',SUBD = '{21}',LocalData = '{22}',AuthorizationType = '{23}',Platform = '{24}',OtherSoft = '{25}',IsInReestr = '{26}' WHERE AppId={0} AND ProjectId={1} ",
+                                ",BuildingComponents = '{18}',FunctionalComponents = '{19}',DataStoringMechanism = '{20}',SUBD = '{21}',LocalData = '{22}',AuthorizationType = '{23}',Platform = '{24}',OtherSoft = '{25}',IsInReestr = '{26}', UserCategories='{27}' WHERE AppId={0} AND ProjectId={1} ",
                                 app.Id, app.Parent.Id, app.Name, app.ReleaseDirectory, app.SourceDirectory, app.DocumentDirectory, app.Description, app.MainFileName, app.MainFileReleaseHash, app.MainFileReleaseVersion
                                 , app.MainFileReleaseDate, (int)app.Status, app.CompatibleOSs, app.CompatibleScadas, app.CompatibleSZI, app.IdentificationType, app.Installer, app.Report
-                                , app.BuildingComponents, app.FunctionalComponents, app.DataStoringMechanism, app.SUBD, app.LocalData, app.AuthorizationType, app.Platform, app.OtherSoft, app.IsInReestr);
+                                , app.BuildingComponents, app.FunctionalComponents, app.DataStoringMechanism, app.SUBD, app.LocalData, app.AuthorizationType, app.Platform, app.OtherSoft, app.IsInReestr, app.UserCategories);
                         await command.ExecuteNonQueryAsync();
                         Disconnect(Connection); 
                     }

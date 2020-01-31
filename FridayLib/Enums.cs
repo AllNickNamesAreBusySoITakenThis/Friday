@@ -54,4 +54,11 @@ namespace FridayLib
         [Description("Не прошла проверку")]
         FailTests
     }
+    public enum MoveDirection
+    {
+        Up,
+        Down,
+        Left,
+        Right
+    }
 }

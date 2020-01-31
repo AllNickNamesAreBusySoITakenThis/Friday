@@ -42,6 +42,7 @@ namespace FridayLib
         private string localData = "Настройки приложения";
         private string authorizationType = "Нет";
         private string platform = ".NetFramework v.4.5.2";
+        private string userCategories = "нет";
         private ControlledProject parent;
         private bool isInReestr = false;
         private int id;
@@ -452,6 +453,19 @@ namespace FridayLib
                 OnPropertyChanged("MainFileReleaseDate");
             }
         }
+        
+        /// <summary>
+        /// Предполагаемые категори пользователей
+        /// </summary>
+        public string UserCategories
+        {
+            get { return userCategories; }
+            set
+            {
+                userCategories = value;
+                OnPropertyChanged("UserCategories");
+            }
+        }
 
         public string MainFilePath
         {
@@ -461,6 +475,7 @@ namespace FridayLib
         {
             get { return Path.Combine(ReleaseDirectory, MainFileName); }
         }
+
 
         /// <summary>
         /// Обновить данные по основному исполняемому файлу в рабочей директории и в релизе
