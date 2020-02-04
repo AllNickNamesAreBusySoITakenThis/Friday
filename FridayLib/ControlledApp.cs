@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 
 namespace FridayLib
 {
-
-    public class ControlledApp : INotifyPropertyChanged
+    public class ControlledApp : INotifyPropertyChanged, ICloneable
     {
         public event PropertyChangedEventHandler PropertyChanged;
         void OnPropertyChanged(string name)
@@ -43,6 +42,7 @@ namespace FridayLib
         private string authorizationType = "Нет";
         private string platform = ".NetFramework v.4.5.2";
         private string userCategories = "нет";
+        [NonSerialized]
         private ControlledProject parent;
         private bool isInReestr = false;
         private int id;
@@ -375,10 +375,10 @@ namespace FridayLib
                 OnPropertyChanged("Installer");
             }
         }
-        
+
         /// <summary>
         /// Проект, к которому приналдежит приложение
-        /// </summary>
+        /// </summary>        
         public ControlledProject Parent
         {
             get { return parent; }
@@ -553,6 +553,55 @@ namespace FridayLib
             {
                 MainClass.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
             }
+        }
+
+
+        public static ControlledApp GetById(int id, ControlledProject prj)
+        {
+            foreach (var app in prj.Apps)
+            {
+                if (app.Id == id)
+                    return app;
+            }
+            return new ControlledApp();
+        }
+        public object Clone()
+        {
+            return new ControlledApp
+            {
+                AuthorizationType = this.AuthorizationType,
+                BuildingComponents = this.BuildingComponents,
+                CompatibleOSs = this.CompatibleOSs,
+                CompatibleScadas = this.CompatibleScadas,
+                CompatibleSZI = this.CompatibleSZI,
+                DataStoringMechanism = this.DataStoringMechanism,
+                Description = this.Description,
+                DocumentDirectory = this.DocumentDirectory,
+                FunctionalComponents = this.FunctionalComponents,
+                Id = this.Id,
+                IdentificationType = this.IdentificationType,
+                Installer = this.Installer,
+                IsInReestr = this.IsInReestr,
+                LocalData = this.LocalData,
+                MainFileDate = this.MainFileDate,
+                MainFileHash = this.MainFileHash,
+                MainFileName = this.MainFileName,
+                MainFileReleaseDate = this.MainFileReleaseDate,
+                MainFileReleaseHash = this.MainFileReleaseHash,
+                MainFileReleaseVersion = this.MainFileReleaseVersion,
+                MainFileVersion = this.MainFileVersion,
+                Name = this.Name,
+                OtherSoft = this.OtherSoft,
+                Parent = this.Parent,
+                Platform=this.Platform,
+                ReleaseDirectory = this.ReleaseDirectory,
+                Report = this.Report,
+                SourceDirectory=this.SourceDirectory,
+                Status = this.Status,
+                SUBD = this.SUBD,
+                UpToDate = this.UpToDate,
+                UserCategories=this.UserCategories                
+            };
         }
     }
 }

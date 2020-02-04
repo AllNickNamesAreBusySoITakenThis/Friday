@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 
 namespace FridayLib
 {
-
+    [Serializable]
     public class SourceTextFile : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

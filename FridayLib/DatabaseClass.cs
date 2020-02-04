@@ -160,7 +160,7 @@ namespace FridayLib
                     if (Connection != null)
                     {
                         var command = Connection.CreateCommand();
-                        command.CommandText = string.Format("UPDATE dbo.Projects SET (Name='{1}', ReleaseDirectory='{2}', WorkingDirectory='{3}', DocumentDirectory='{4}', Category={5}, Task={6}) WHERE " +
+                        command.CommandText = string.Format("UPDATE dbo.Projects SET Name='{1}', ReleaseDirectory='{2}', WorkingDirectory='{3}', DocumentDirectory='{4}', Category={5}, Task={6} WHERE " +
                             "ProjectId={0}", project.Id, project.Name, project.ReleaseDirectory, project.WorkingDirectory, project.DocumentDirectory, (int)project.Category, (int)project.Task);
                         await command.ExecuteNonQueryAsync();
                         Disconnect(Connection);

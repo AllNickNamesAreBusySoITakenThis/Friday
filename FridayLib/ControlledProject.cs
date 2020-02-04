@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace FridayLib
 {
-
-    public class ControlledProject : INotifyPropertyChanged
+    public class ControlledProject : INotifyPropertyChanged, ICloneable
     {
+        //[NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
         void OnPropertyChanged(string name)
         {
@@ -170,6 +170,35 @@ namespace FridayLib
                 sourceTextFiles = value;
                 OnPropertyChanged("SourceTextFiles");
             }
+        }
+
+
+        public static ControlledProject GetById(int id, IEnumerable<ControlledProject> collection)
+        {
+            foreach(var prj in collection)
+            {
+                if (prj.Id == id)
+                    return prj;
+            }
+            return new ControlledProject();
+        }
+
+        public object Clone()
+        {
+            return new ControlledProject
+            {
+                AllAppsAreInReestr= this.AllAppsAreInReestr,
+                AllApрsAreUpToDate = this.AllApрsAreUpToDate,
+                Apps=this.Apps,
+                Category=this.Category,
+                DocumentDirectory=this.DocumentDirectory,
+                Id=this.Id,
+                Name=this.Name,
+                ReleaseDirectory=this.ReleaseDirectory,
+                SourceTextFiles = this.SourceTextFiles,
+                Task=this.Task,
+                WorkingDirectory=this.WorkingDirectory
+            };
         }
     }
 }
