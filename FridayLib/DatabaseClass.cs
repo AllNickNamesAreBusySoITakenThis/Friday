@@ -70,6 +70,8 @@ namespace FridayLib
             }
         }
 
+        #region Project
+
         /// <summary>
         /// Получить перечень проектов, сохраненных в БД
         /// </summary>
@@ -86,7 +88,7 @@ namespace FridayLib
                         var command = Connection.CreateCommand();
                         command.CommandText = "SELECT ProjectId, Name, ReleaseDirectory, WorkingDirectory, DocumentDirectory, Category, Task FROM dbo.Projects";
                         var reader = await command.ExecuteReaderAsync();
-                        while(await reader.ReadAsync())
+                        while (await reader.ReadAsync())
                         {
                             result.Add(new ControlledProject
                             {
@@ -132,13 +134,14 @@ namespace FridayLib
                     {
                         var command = Connection.CreateCommand();
                         command.CommandText = string.Format("INSERT INTO dbo.Projects (ProjectId, Name, ReleaseDirectory, WorkingDirectory, DocumentDirectory, Category, Task) VALUES (" +
-                            "{0},'{1}','{2}','{3}','{4}',{5},{6})",project.Id,project.Name,project.ReleaseDirectory,project.WorkingDirectory,project.DocumentDirectory, (int)project.Category, (int)project.Task);
-                        await command.ExecuteNonQueryAsync();                        
+                            "{0},'{1}','{2}','{3}','{4}',{5},{6})", project.Id, project.Name, project.ReleaseDirectory, project.WorkingDirectory, project.DocumentDirectory, (int)project.Category, (int)project.Task);
+                        await command.ExecuteNonQueryAsync();
                         Disconnect(Connection);
                     }
                     else
                         throw new Exception("Ошибка подключения!");
-                }         }
+                }
+            }
             catch (Exception ex)
             {
                 MainClass.OnErrorInLibrary(string.Format("Не удалось сохранить проект в БД: {0}", ex.Message));
@@ -174,6 +177,62 @@ namespace FridayLib
                 MainClass.OnErrorInLibrary(string.Format("Не удалось обновитб проект в БД: {0}", ex.Message));
             }
         }
+        /// <summary>
+        /// Удалить проект
+        /// </summary>
+        /// <param name="prj"></param>
+        /// <returns></returns>
+        public async static Task DeleteProject(ControlledProject prj)
+        {
+            try
+            {
+                foreach (var app in prj.Apps)
+                {
+                    await DeleteApp(app);
+                }
+                using (var Connection = await ConnectAsync())
+                {
+                    var command = Connection.CreateCommand();
+                    command.CommandText = string.Format("DELETE FROM dbo.Projects WHERE ProjectId={0}", prj.Id);
+                    await command.ExecuteNonQueryAsync();
+                    Disconnect(Connection);
+                }
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Не удалось удалить данные по проекту {0} в БД: {1}", prj.Name, ex.Message));
+            }
+        }
+
+        public async static Task<List<int>> CheckForEqual(ControlledProject prj)
+        {
+            try
+            {
+                List<int> result = new List<int>();
+                using (var Connection = await ConnectAsync())
+                {
+                    var command = Connection.CreateCommand();
+                    command.CommandText = string.Format("SELECT ProjectId FROM dbo.Projects WHERE Name='{0}' OR ReleaseDirectory='{1}' OR WorkingDirectory='{2}'", prj.Name, prj.ReleaseDirectory, prj.WorkingDirectory);
+                    var reader = await command.ExecuteReaderAsync();
+                    while(await reader.ReadAsync())
+                    {
+                        result.Add(Convert.ToInt32(reader["ProjectId"]));
+                    }
+                    reader.Close();
+                    Disconnect(Connection);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки уникальности проекта в БД: {0}",ex.Message));
+                return new List<int>();
+            }
+        }
+
+        #endregion
+
+        #region Application
 
         /// <summary>
         /// Получить перечень приложений для указанного проекта
@@ -197,6 +256,7 @@ namespace FridayLib
                         {
                             prj.Apps.Add(new ControlledApp
                             {
+                                Parent = prj,
                                 Id = Convert.ToInt32(reader["AppId"]),
                                 Name = reader["Name"].ToString(),
                                 ReleaseDirectory = reader["ReleaseDirectory"].ToString(),
@@ -223,9 +283,8 @@ namespace FridayLib
                                 Platform = reader["Platform"].ToString(),
                                 OtherSoft = reader["OtherSoft"].ToString(),
                                 IsInReestr = Convert.ToBoolean(reader["IsInReestr"]),
-                                UserCategories = reader["UserCategories"].ToString(),
-                                Parent = prj
-                            });                             
+                                UserCategories = reader["UserCategories"].ToString(),                                
+                            });
                         }
                         Disconnect(Connection);
                     }
@@ -233,27 +292,16 @@ namespace FridayLib
                         throw new Exception("Ошибка подключения!");
                 }
 
-                if (prj.Apps.Count>0)
+                foreach (var app in prj.Apps)
                 {
-                    foreach (var app in prj.Apps)
-                    {
-                        prj.AllAppsAreInReestr = true;
-                        if (!app.IsInReestr)
-                        {
-                            prj.AllAppsAreInReestr = false;
-                            break;
-                        }
-                    } 
+                    await app.UpdateMainFileInfoAsync();                    
                 }
-                else
-                {
-                    prj.AllAppsAreInReestr = false;
-                }
+                prj.UpdateState();
                 return prj;
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось получить перечень приложений для проекта {0} из БД: {1}",prj.Name, ex.Message));
+                MainClass.OnErrorInLibrary(string.Format("Не удалось получить перечень приложений для проекта {0} из БД: {1}", prj.Name, ex.Message));
                 return prj;
             }
         }
@@ -269,18 +317,18 @@ namespace FridayLib
             {
                 using (var Connection = await ConnectAsync())
                 {
-                    if (Connection!=null)
+                    if (Connection != null)
                     {
                         var command = Connection.CreateCommand();
                         command.CommandText = string.Format("INSERT INTO dbo.Applications (AppId, ProjectId, Name, ReleaseDirectory, SourceDirectory, DocumentDirectory,Description,MainFileName" +
                                 ",MainFileReleaseHash,MainFileReleaseVersion,MainFileReleaseDate,Status,CompatibleOSs,CompatibleScadas,CompatibleSZI,IdentificationType,Installer,Report" +
-                                ",BuildingComponents,FunctionalComponents,DataStoringMechanism,SUBD,LocalData,AuthorizationType,Platform,OtherSoft,IsInReestr) VALUES (" +
+                                ",BuildingComponents,FunctionalComponents,DataStoringMechanism,SUBD,LocalData,AuthorizationType,Platform,OtherSoft,IsInReestr, UserCategories) VALUES (" +
                                 "{0},{1},'{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}',{11},'{12}','{13}','{14}','{15}','{16}','{17}','{18}','{19}','{20}','{21}','{22}','{23}','{24}','{25}',{26},'{27}')",
                                 app.Id, app.Parent.Id, app.Name, app.ReleaseDirectory, app.SourceDirectory, app.DocumentDirectory, app.Description, app.MainFileName, app.MainFileReleaseHash, app.MainFileReleaseVersion
                                 , app.MainFileReleaseDate, (int)app.Status, app.CompatibleOSs, app.CompatibleScadas, app.CompatibleSZI, app.IdentificationType, app.Installer, app.Report
-                                , app.BuildingComponents, app.FunctionalComponents, app.DataStoringMechanism, app.SUBD, app.LocalData, app.AuthorizationType, app.Platform, app.OtherSoft, app.IsInReestr?1:0,app.UserCategories);
+                                , app.BuildingComponents, app.FunctionalComponents, app.DataStoringMechanism, app.SUBD, app.LocalData, app.AuthorizationType, app.Platform, app.OtherSoft, app.IsInReestr ? 1 : 0, app.UserCategories);
                         await command.ExecuteNonQueryAsync();
-                        Disconnect(Connection); 
+                        Disconnect(Connection);
                     }
                 }
             }
@@ -301,7 +349,7 @@ namespace FridayLib
             {
                 using (var Connection = await ConnectAsync())
                 {
-                    if (Connection!=null)
+                    if (Connection != null)
                     {
                         var command = Connection.CreateCommand();
                         command.CommandText = string.Format("UPDATE dbo.Applications SET Name = '{2}', ReleaseDirectory = '{3}', SourceDirectory = '{4}', DocumentDirectory = '{5}',Description = '{6}',MainFileName = '{7}'" +
@@ -311,7 +359,7 @@ namespace FridayLib
                                 , app.MainFileReleaseDate, (int)app.Status, app.CompatibleOSs, app.CompatibleScadas, app.CompatibleSZI, app.IdentificationType, app.Installer, app.Report
                                 , app.BuildingComponents, app.FunctionalComponents, app.DataStoringMechanism, app.SUBD, app.LocalData, app.AuthorizationType, app.Platform, app.OtherSoft, app.IsInReestr, app.UserCategories);
                         await command.ExecuteNonQueryAsync();
-                        Disconnect(Connection); 
+                        Disconnect(Connection);
                     }
                 }
             }
@@ -333,7 +381,7 @@ namespace FridayLib
                 using (var Connection = await ConnectAsync())
                 {
                     var command = Connection.CreateCommand();
-                    command.CommandText = string.Format("DELETE FROM dbo.Applications WHERE AppId={0} AND ProjectId={1}",app.Id, app.Parent.Id);
+                    command.CommandText = string.Format("DELETE FROM dbo.Applications WHERE AppId={0} AND ProjectId={1}", app.Id, app.Parent.Id);
                     await command.ExecuteNonQueryAsync();
                     Disconnect(Connection);
                 }
@@ -344,32 +392,34 @@ namespace FridayLib
             }
         }
 
-        /// <summary>
-        /// Удалить проект
-        /// </summary>
-        /// <param name="prj"></param>
-        /// <returns></returns>
-        public async static Task DeleteProject(ControlledProject prj)
+        public async static Task<List<int>> CheckForEqual(ControlledApp app)
         {
             try
             {
-                foreach(var app in prj.Apps)
-                {
-                    await DeleteApp(app);
-                }
+                List<int> result = new List<int>();
                 using (var Connection = await ConnectAsync())
                 {
                     var command = Connection.CreateCommand();
-                    command.CommandText = string.Format("DELETE FROM dbo.Projects WHERE ProjectId={0}", prj.Id);
-                    await command.ExecuteNonQueryAsync();
+                    command.CommandText = string.Format("SELECT AppId FROM dbo.Applications WHERE (Name='{0}' OR ReleaseDirectory='{1}' OR SourceDirectory='{2}') AND ProjectId={3}", app.Name, app.ReleaseDirectory, app.SourceDirectory, app.Parent.Id);
+                    var reader = await command.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        result.Add(Convert.ToInt32(reader["AppId"]));
+                    }
+                    reader.Close();
                     Disconnect(Connection);
                 }
+                return result;
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось удалить данные по проекту {0} в БД: {1}", prj.Name, ex.Message));
+                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки уникальности проекта в БД: {0}", ex.Message));
+                return new List<int>();
             }
         }
+
+        #endregion
+
 
         public static ObservableCollection<CFile> GetFileData()
         {

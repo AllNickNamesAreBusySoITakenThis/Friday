@@ -6,6 +6,8 @@
         xmlns:views="clr-namespace:SimpleFriday.Views"
         xmlns:vm="clr-namespace:SimpleFriday.ViewModels"
         xmlns:local="clr-namespace:SimpleFriday"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
+        xmlns:fl="clr-namespace:FridayLib;assembly=FridayLib"
         mc:Ignorable="d"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
@@ -30,7 +32,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="600"/>
         </Grid.ColumnDefinitions>
         <TextBlock Text="Имя проекта" Margin="5" Grid.Column="0" Grid.Row="0"/>
         <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="0"/>
@@ -40,6 +42,12 @@
         <TextBox Text="{Binding ReleaseDirectory, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="2"/>
         <TextBlock Text="Директория документации проекта" Margin="5" Grid.Column="0" Grid.Row="3"/>
         <TextBox Text="{Binding DocumentDirectory, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="3"/>
+        <TextBlock Text="Категория проекта" Margin="5" Grid.Column="0" Grid.Row="4"/>
+        <ComboBox Grid.Row="4" Grid.Column="1" Margin="5" ItemsSource="{Binding Path=Category, Converter={local:EnumToCollectionConverter}, Mode=OneTime}" SelectedValue="{Binding Category}"
+                  DisplayMemberPath="Description" SelectedValuePath="Value"/>
+        <TextBlock Text="Назначение проекта" Margin="5" Grid.Column="0" Grid.Row="5"/>
+        <ComboBox Grid.Row="5" Grid.Column="1" Margin="5" ItemsSource="{Binding Path=Task, Converter={local:EnumToCollectionConverter}, Mode=OneTime}" SelectedValue="{Binding Task}"
+                  DisplayMemberPath="Description" SelectedValuePath="Value"/>
 
 
         <Button Grid.Row="6" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="5,5,125,5" Width="110" Content="Ок" Command="{Binding ConfirmCommand}"/>

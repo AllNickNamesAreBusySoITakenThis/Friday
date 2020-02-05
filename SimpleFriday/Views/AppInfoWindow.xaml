@@ -50,7 +50,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="600"/>
         </Grid.ColumnDefinitions>
         <TextBlock Text="Имя приложения" Margin="5" Grid.Column="0" Grid.Row="0"/>
         <TextBox Text="{Binding Appl.Name, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="0"/>
@@ -61,7 +61,7 @@
         <TextBlock Text="Директория релиза приложения" Margin="5" Grid.Column="0" Grid.Row="3"/>
         <TextBox Text="{Binding Appl.ReleaseDirectory, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="3"/>
         <TextBlock Text="Имя исполняемого файла" Margin="5" Grid.Column="0" Grid.Row="4"/>
-        <TextBox Text="{Binding Appl.DocumentDirectory, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="4"/>
+        <TextBox Text="{Binding Appl.MainFileName, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="4"/>
         <TextBlock Text="Совместимые ОС" Margin="5" Grid.Column="0" Grid.Row="5"/>
         <TextBox Text="{Binding Appl.CompatibleOSs, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="5"/>
         <TextBlock Text="Совместимые СЗИ" Margin="5" Grid.Column="0" Grid.Row="6"/>
@@ -92,9 +92,11 @@
         <TextBox Text="{Binding Appl.Platform, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="18"/>
         <TextBlock Text="Категории пользователей" Margin="5" Grid.Column="0" Grid.Row="19"/>
         <TextBox Text="{Binding Appl.UserCategories, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="19"/>
-        <CheckBox Content="Приложение прошло в реестр" Margin="5" Grid.ColumnSpan="2" Grid.Row="20" IsChecked="{Binding Appl.IsInReestr, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBlock Text="Директория с документацией" Margin="5" Grid.Column="0" Grid.Row="20"/>
+        <TextBox Text="{Binding Appl.DocumentDirectory, UpdateSourceTrigger=PropertyChanged}" Margin="5"  Grid.Column="1" Grid.Row="20"/>
+        <CheckBox Content="Приложение прошло в реестр" Margin="5" Grid.ColumnSpan="2" Grid.Row="21" IsChecked="{Binding Appl.IsInReestr, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <Button Grid.Row="21" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="5,5,125,5" Width="110" Content="Ок" Command="{Binding ConfirmCommand}"/>
-        <Button Grid.Row="21" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="5,5,5,5" Width="110" Content="Отмена" Command="{Binding CancelCommand}"/>
+        <Button Grid.Row="22" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="5,5,125,5" Width="110" Content="Ок" Command="{Binding ConfirmCommand}"/>
+        <Button Grid.Row="22" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="5,5,5,5" Width="110" Content="Отмена" Command="{Binding CancelCommand}"/>
     </Grid>
 </Window>

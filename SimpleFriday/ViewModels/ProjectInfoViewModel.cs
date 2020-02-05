@@ -119,7 +119,7 @@ namespace SimpleFriday.ViewModels
             get { return new RelayCommand(ExecuteConfirm); }
         }
 
-        private void ExecuteConfirm()
+        private async void ExecuteConfirm()
         {
             Models.Model.Project.Name = Name;
             Models.Model.Project.ReleaseDirectory = ReleaseDirectory;
@@ -127,7 +127,12 @@ namespace SimpleFriday.ViewModels
             Models.Model.Project.DocumentDirectory = DocumentDirectory;
             Models.Model.Project.Category = Category;
             Models.Model.Project.Task = Task;
-            DialogResult = true;
+            if(await Models.Model.Project.CheckEquals())
+                DialogResult = true;
+            else
+            {
+                System.Windows.MessageBox.Show("Данные по проекту не уникальны!");
+            }
         }
 
         public ICommand CancelCommand

@@ -183,6 +183,62 @@ namespace FridayLib
             return new ControlledProject();
         }
 
+        public void UpdateState()
+        {
+            AllAppsAreInReestr = true;
+            AllApрsAreUpToDate = true;
+            for (int i = 0; i < Apps.Count; i++)
+            {
+                if (!Apps[i].UpToDate)
+                    AllApрsAreUpToDate = false;
+                if (!Apps[i].IsInReestr)
+                    AllAppsAreInReestr = false;
+            }
+        }
+
+        /// <summary>
+        /// Актуализировать все приложения данного проекта
+        /// </summary>
+        /// <returns></returns>
+        public async Task Update()
+        {
+            try
+            {
+                AllAppsAreInReestr = true;
+                AllApрsAreUpToDate = true;
+                for(int i=0;i<Apps.Count;i++)
+                {
+                    await Apps[i].CopyToFolderAsync(Apps[i].SourceDirectory, Apps[i].ReleaseDirectory);
+                    await Apps[i].UpdateMainFileInfoAsync();                    
+                }
+                UpdateState();
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка обновления проекта {0}: {1}", Name, ex.Message));
+            }
+        }
+
+        public async Task<bool> CheckEquals()
+        {
+            try
+            {
+                foreach(var i in await DatabaseClass.CheckForEqual(this))
+                {
+                    if(!i.Equals(Id))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", Name, ex.Message));
+                return false;
+            }
+        }
+
         public object Clone()
         {
             return new ControlledProject

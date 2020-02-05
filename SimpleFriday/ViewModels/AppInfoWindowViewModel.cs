@@ -54,9 +54,12 @@ namespace SimpleFriday.ViewModels
             get { return new RelayCommand(ExecuteConfirm); }
         }
 
-        private void ExecuteConfirm()
+        private async void ExecuteConfirm()
         {
-            DialogResult = true;
+            if(await Appl.CheckEquals())
+                DialogResult = true;
+            else
+                System.Windows.MessageBox.Show("Данные по приложению не уникальны!");
         }
 
         public ICommand CancelCommand

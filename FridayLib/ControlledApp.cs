@@ -16,14 +16,14 @@ namespace FridayLib
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private string name;
-        private string sourceDirectory;
-        private string description;
-        private string releaseDirectory;
-        private string documentDirectopry;
-        private string mainFileName;
-        private string mainFileVersion;
-        private string mainFileHash;
+        private string name = "";
+        private string sourceDirectory = "";
+        private string description = "";
+        private string releaseDirectory = "";
+        private string documentDirectopry = "";
+        private string mainFileName="";
+        private string mainFileVersion = "";
+        private string mainFileHash = "";
         private bool upToDate = false;
         private PPOReestrStatus status = PPOReestrStatus.NotTested;
         private string mainFileDate;
@@ -46,9 +46,9 @@ namespace FridayLib
         private ControlledProject parent;
         private bool isInReestr = false;
         private int id;
-        private string mainFileReleaseVersion;
-        private string mainFileReleaseHash;
-        private string mainFileReleaseDate;
+        private string mainFileReleaseVersion = "";
+        private string mainFileReleaseHash = "";
+        private string mainFileReleaseDate = "";
 
 
         /// <summary>
@@ -529,6 +529,7 @@ namespace FridayLib
                     if(Service.AllowedFileExtentions.Contains(new FileInfo(file).Extension))
                         File.Copy(file, Path.Combine(dest, new FileInfo(file).Name), true);
                 }
+                IsInReestr = false;
             }
             catch (Exception ex)
             {
@@ -555,7 +556,25 @@ namespace FridayLib
             }
         }
 
-
+        public async Task<bool> CheckEquals()
+        {
+            try
+            {
+                foreach (var i in await DatabaseClass.CheckForEqual(this))
+                {
+                    if (!i.Equals(Id))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по приложению {0}: {1}", Name, ex.Message));
+                return false;
+            }
+        }
         public static ControlledApp GetById(int id, ControlledProject prj)
         {
             foreach (var app in prj.Apps)

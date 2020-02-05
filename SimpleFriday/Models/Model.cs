@@ -39,6 +39,23 @@ namespace SimpleFriday.Models
                 OnStaticPropertyChanged("CApp");
             }
         }
+        internal static Task<ControlledProject> AddNewProject()
+        {
+            Project = new ControlledProject();
+            TaskCompletionSource<ControlledProject> tsc = new TaskCompletionSource<ControlledProject>();
+            ProjectInfoWindow window = new ProjectInfoWindow() { Owner = App.Current.MainWindow };
+            window.Closing += delegate
+            {
+                if (window.DialogResult == true)
+                {
+                    tsc.SetResult(Project);
+                }
+                else
+                    tsc.SetResult(null);
+            };
+            window.ShowDialog();
+            return tsc.Task;
+        }
         internal static Task<ControlledProject> UpdateProjectInfo(ControlledProject prj)
         {
             Project = prj.Clone() as ControlledProject;
@@ -53,6 +70,25 @@ namespace SimpleFriday.Models
                 }
                 else
                     tsc.SetResult(prj);
+            };
+            window.ShowDialog();
+            return tsc.Task;
+        }
+
+        internal static Task<ControlledApp> AddNewApp()
+        {
+            CApp = new ControlledApp();
+            //Project = ObjectCopier.CloneJson(prj);
+            TaskCompletionSource<ControlledApp> tsc = new TaskCompletionSource<ControlledApp>();
+            AppInfoWindow window = new AppInfoWindow() { Owner = App.Current.MainWindow };
+            window.Closing += delegate
+            {
+                if (window.DialogResult == true)
+                {
+                    tsc.SetResult(CApp);
+                }
+                else
+                    tsc.SetResult(null);
             };
             window.ShowDialog();
             return tsc.Task;
@@ -75,5 +111,6 @@ namespace SimpleFriday.Models
             window.ShowDialog();
             return tsc.Task;
         }
+        
     }
 }
