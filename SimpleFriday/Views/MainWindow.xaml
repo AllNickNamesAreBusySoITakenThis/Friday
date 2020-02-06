@@ -93,10 +93,12 @@
                                 <ContextMenu>
                                     <MenuItem Header="Добавить приложение" Command="{Binding AddAppCommand}" 
                                               CommandParameter="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent} }"/>
-                                    <MenuItem Header="Список исходных текстов"/>
-                                    <MenuItem Header="Подготовить документацию"/>
-                                    <MenuItem Header="Удалить приложение"/>
-                                    <MenuItem Header="Удалить проект"/>
+                                    <MenuItem Header="Список исходных текстов" Command="{Binding ShowSourceTextsCommand}" 
+                                              CommandParameter="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent} }"/>
+                                    <MenuItem Header="Подготовить документацию" Command="{Binding PrepareDocForProjectCommand}" 
+                                              CommandParameter="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent} }"/>                                    
+                                    <MenuItem Header="Удалить проект" Command="{Binding RemoveProjectCommand}" 
+                                              CommandParameter="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent} }"/>
                                 </ContextMenu>
                             </ddb:DropDownButton.DropDownContextMenu>
                            
@@ -136,7 +138,8 @@
                                               CommandParameter="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent} }"/>
                                             <MenuItem Header="Обновить информацию" Command="{Binding UpdateAppMainFileInfoCommand}" 
                                               CommandParameter="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent} }"/>
-                                            <MenuItem Header="Подготовить документацию"/>
+                                            <MenuItem Header="Подготовить документацию" Command="{Binding PrepareDocForAppCommand}" 
+                                              CommandParameter="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent} }"/>
                                             <MenuItem Header="Удалить приложение" Command="{Binding RemoveAppCommand}" 
                                               CommandParameter="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent} }"/>
                                         </ContextMenu>

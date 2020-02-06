@@ -555,6 +555,24 @@ namespace FridayLib
                 MainClass.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
             }
         }
+        public async Task PrepareDocumentation()
+        {
+            await Task.Run(() =>
+            {
+                PrepareRequest();
+                PrepareFormular();
+            });
+        }
+           
+        private void PrepareFormular()
+        {
+            Word_Module.DocumentCreation.CreateFormular(this);
+        }
+
+        private void PrepareRequest()
+        {
+            Word_Module.DocumentCreation.CreateRequest(this);
+        }
 
         public async Task<bool> CheckEquals()
         {

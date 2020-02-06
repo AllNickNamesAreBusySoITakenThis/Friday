@@ -151,7 +151,44 @@ namespace SimpleFriday.ViewModels
                 await DatabaseClass.AddProject(Projects.Last());
             }
         }
-        
+
+        public ICommand ShowSourceTextsCommand
+        {
+            get { return new RelayCommand<object>(ExecuteShowSourceTexts); }
+        }
+
+        private void ExecuteShowSourceTexts(object project)
+        {
+            Models.Model.Project = (project as ControlledProject).Clone() as ControlledProject;
+            Views.SourceTextWindow window = new Views.SourceTextWindow();
+            window.Owner = App.Current.MainWindow;
+            window.ShowDialog();
+        }
+
+        public ICommand RemoveProjectCommand
+        {
+            get { return new RelayCommand<object>(ExecuteRemoveProject); }
+        }
+
+        private async void ExecuteRemoveProject(object project)
+        {
+            if(System.Windows.MessageBox.Show(string.Format("Действительно удалить проект {0}?",(project as ControlledProject).Name),"Подтвердите действие",System.Windows.MessageBoxButton.YesNo,System.Windows.MessageBoxImage.Question)==System.Windows.MessageBoxResult.Yes)
+            {
+                Projects.Remove((project as ControlledProject));
+                await DatabaseClass.DeleteProject(project as ControlledProject);
+            }
+        }
+
+        public ICommand PrepareDocForProjectCommand
+        {
+            get { return new RelayCommand<object>(ExecutePrepareDocForProject); }
+        }
+
+        private async void ExecutePrepareDocForProject(object project)
+        {
+            await (project as ControlledProject).PrepareDocumentation();
+        }
+
         #endregion
 
         #region Application
@@ -233,6 +270,16 @@ namespace SimpleFriday.ViewModels
             await (application as ControlledApp).UpdateMainFileInfoAsync();
             await DatabaseClass.UpdateApp((application as ControlledApp));
             (application as ControlledApp).Parent.UpdateState();
+        }
+
+        public ICommand PrepareDocForAppCommand
+        {
+            get { return new RelayCommand<object>(ExecutePrepareDocForApp); }
+        }
+
+        private async void ExecutePrepareDocForApp(object application)
+        {
+            await (application as ControlledApp).PrepareDocumentation();
         }
 
         /// <summary>

@@ -42,6 +42,7 @@ namespace FridayLib
                 OnPropertyChanged("Id");
             }
         }
+        
         /// <summary>
         /// Имя контролируемого приложения
         /// </summary>
@@ -67,7 +68,7 @@ namespace FridayLib
                 OnPropertyChanged("ReleaseDirectory");
             }
         }
-        
+
         /// <summary>
         /// Рабочая директория проекта
         /// </summary>
@@ -219,6 +220,24 @@ namespace FridayLib
             }
         }
 
+        public async Task PrepareDocumentation()
+        {
+            await System.Threading.Tasks.Task.Run( async () =>
+            {
+                SaveSourceTextsAsExcel();
+                PrepareListing();
+                foreach(var app in Apps)
+                {
+                    await app.PrepareDocumentation();
+                }
+            });
+        }
+
+        private void PrepareListing()
+        {
+            FridayLib.Text_Module.Listing.CreateListing(this);
+        }
+
         public async Task<bool> CheckEquals()
         {
             try
@@ -237,6 +256,20 @@ namespace FridayLib
                 MainClass.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", Name, ex.Message));
                 return false;
             }
+        }
+
+        public void LoadSourceTexts()
+        {
+            SourceTextFiles = SourceTextCreation.ScanFolder(WorkingDirectory, "", System.IO.Path.Combine(DocumentDirectory, "SourceTexts.txt"));
+        }
+        public void SaveSourceTextsAsText()
+        {
+            SourceTextCreation.SaveAsTextFile(SourceTextFiles, System.IO.Path.Combine(DocumentDirectory, "SourceTexts.txt"));
+        }
+
+        public void SaveSourceTextsAsExcel()
+        {
+            SourceTextCreation.SaveAsExcel(SourceTextFiles, System.IO.Path.Combine(DocumentDirectory, "Ведомость исходных текстов.xlsx"));
         }
 
         public object Clone()

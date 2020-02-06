@@ -13,5 +13,14 @@ namespace SimpleFriday
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            FridayLib.MainClass.ErrorInLibrary += MainClass_ErrorInLibrary;
+        }
+
+        private void MainClass_ErrorInLibrary(string message)
+        {
+            MessageBox.Show(message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }

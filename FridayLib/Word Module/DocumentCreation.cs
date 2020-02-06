@@ -169,6 +169,10 @@ namespace FridayLib.Word_Module
                 //меняем описание ППО
                 document.Paragraphs[39].Range.Text = string.Format("{0}", app.Description);
 
+                if (!Directory.Exists(app.DocumentDirectory))
+                {
+                    Directory.CreateDirectory(app.DocumentDirectory);
+                }
                 Common.SaveDocument(document, Path.Combine(app.DocumentDirectory,"Заявка.docx"));
 
                 Common.CloseApp(wordApp);
@@ -236,7 +240,10 @@ namespace FridayLib.Word_Module
                 //6.2 Тип установщика
                 WriteLineInFormular(wordApp, document, 36, app.Installer);
                 #endregion
-
+                if (!Directory.Exists(app.DocumentDirectory))
+                {
+                    Directory.CreateDirectory(app.DocumentDirectory);
+                }
                 Common.SaveDocument(document, Path.Combine(app.DocumentDirectory, "Описание принятых решений.docx"));
                 Common.CloseApp(wordApp);
             }

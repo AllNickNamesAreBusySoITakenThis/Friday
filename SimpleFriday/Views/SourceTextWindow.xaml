@@ -3,13 +3,36 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SimpleFriday.Views"
+        xmlns:view="clr-namespace:SimpleFriday.Views"
+        xmlns:local ="clr-namespace:SimpleFriday"
+        xmlns:vm="clr-namespace:SimpleFriday.ViewModels"
         mc:Ignorable="d"
-        Title="SourceTextWindow" Height="450" Width="800">
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Title="SourceTextWindow" Height="450" Width="1500"
+        local:DialogCloser.DialogResult="{Binding DialogResult}">
+    <Window.DataContext>
+        <vm:SourceTextWindowViewModel/>
+    </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
+        <DataGrid AutoGenerateColumns="False" Margin="5" ItemsSource="{Binding Project.SourceTextFiles, Mode=TwoWay}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Путь" Binding="{Binding FullName}" Width="190"/>
+                <DataGridTextColumn Header="Имя файла" Binding="{Binding Name}" Width="120"/>
+                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="Размер" Binding="{Binding Size}" Width="90"/>
+                <DataGridTextColumn Header="Версия" Binding="{Binding Version}" Width="120"/>
+                <DataGridTextColumn Header="Контрольная сумма" Binding="{Binding Hash}" Width="210"/>
+                <DataGridTextColumn Header="Владелец" Binding="{Binding Owner}" Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button Grid.Row="1" HorizontalAlignment="Left" Margin="5" Content="Excel" Width="100" Command="{Binding SaveAsExcelCommand}"/>
+        <Button Grid.Row="1" HorizontalAlignment="Right" Margin="5,5,225,5" Content="Обновить" Width="100" Command="{Binding ReloadCommand}"/>
+        <Button Grid.Row="1" HorizontalAlignment="Right" Margin="5,5,115,5" Content="Сохранить" Width="100" Command="{Binding SaveAsTextCommand}"/>
+        <Button Grid.Row="1" HorizontalAlignment="Right" Margin="5,5,5,5" Content="Закрыть" Width="100" Command="{Binding CloseCommand}"/>
     </Grid>
 </Window>

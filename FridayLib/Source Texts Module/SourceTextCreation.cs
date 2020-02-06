@@ -19,14 +19,14 @@ namespace FridayLib
         /// <summary>
         /// Получить список файлов в проекте
         /// </summary>
-        /// <param name="rootAddress">Директория проекта</param>
+        /// <param name="rootDirectoryAddress">Директория проекта</param>
         /// <returns></returns>
-        internal static ObservableCollection<SourceTextFile> ScanFolder(string rootAddress, string addName = "", string savedPath = "")
+        internal static ObservableCollection<SourceTextFile> ScanFolder(string rootDirectoryAddress, string addName = "", string existingTextFileName = "")
         {
             try
             {
                 ObservableCollection<SourceTextFile> result = new ObservableCollection<SourceTextFile>();
-                DirectoryInfo root = new DirectoryInfo(rootAddress);
+                DirectoryInfo root = new DirectoryInfo(rootDirectoryAddress);
                 foreach (var file in root.GetFiles())
                 {
                     result.Add(new SourceTextFile(file, addName));
@@ -43,9 +43,9 @@ namespace FridayLib
                         }
                     }
                 }
-                if (savedPath != "")
+                if (existingTextFileName != "")
                 {
-                    var savedData = GetFromTextFile(savedPath);
+                    var savedData = GetFromTextFile(existingTextFileName);
                     foreach (var nFile in result)
                     {
                         foreach (var oFile in savedData)
@@ -75,6 +75,11 @@ namespace FridayLib
         {
             try
             {
+                FileInfo fInfo = new FileInfo(path);
+                if(!fInfo.Directory.Exists)
+                {
+                    Directory.CreateDirectory(fInfo.Directory.FullName);
+                }
                 List<string> writeData = new List<string>();
                 foreach (var file in collection)
                 {
@@ -114,11 +119,16 @@ namespace FridayLib
         {
             try
             {
+                FileInfo fInfo = new FileInfo(path);
+                if (!fInfo.Directory.Exists)
+                {
+                    Directory.CreateDirectory(fInfo.Directory.FullName);
+                }
                 string samplePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"Res", @"SampleTable.xlsx");
                 Excel.Application excelapp = null;
                 Excel.Sheets excelsheets; // переменная-список всх листов текущей книги
                 Excel.Worksheet excelworksheet;// переменная определяет рабочий лист текущей книги
-                Excel.Range excelcells;// переменные ячейки экселя
+                //Excel.Range excelcells;// переменные ячейки экселя
                 Excel.Workbooks excelappworkbooks;// Список всех книг приложения Эксель (ну там типо в одном окне работать можно с кучей документов)
                 Excel.Workbook excelappworkbook; // переменная текущая книга
                 excelapp = new Excel.Application();
