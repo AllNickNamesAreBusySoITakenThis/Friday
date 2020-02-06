@@ -13,6 +13,7 @@
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
         Title="{Binding Title}" Height="450" Width="800"
+        Icon="/;component/Images/Project_32x32.png"
         local:DialogCloser.DialogResult="{Binding DialogResult}">
     <Window.DataContext>
         <vm:ProjectInfoViewModel/>

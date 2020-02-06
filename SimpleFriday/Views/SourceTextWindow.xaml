@@ -6,10 +6,11 @@
         xmlns:view="clr-namespace:SimpleFriday.Views"
         xmlns:local ="clr-namespace:SimpleFriday"
         xmlns:vm="clr-namespace:SimpleFriday.ViewModels"
+        Icon="/;component/Images/TextBox_32x32.png"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Title="SourceTextWindow" Height="450" Width="1500"
+        Title="{Binding Title}" Height="450" Width="1500"
         local:DialogCloser.DialogResult="{Binding DialogResult}">
     <Window.DataContext>
         <vm:SourceTextWindowViewModel/>

@@ -117,6 +117,30 @@ namespace SimpleFriday
             throw new NotImplementedException();
         }
     }
+    public class BoolNegationConverter : MarkupExtension, IValueConverter
+    {
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return this;
+        }
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null || !(value is Boolean))
+            {
+                return null;
+            }
+            else
+            {
+                return !(bool)value;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public static class DialogCloser
     {
         public static readonly DependencyProperty DialogResultProperty =

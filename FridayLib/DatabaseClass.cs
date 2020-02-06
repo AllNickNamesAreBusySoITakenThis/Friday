@@ -69,6 +69,115 @@ namespace FridayLib
                 MainClass.OnErrorInLibrary(string.Format("Не удалось отключиться от БД: {0}", ex.Message));
             }
         }
+        /// <summary>
+        /// Проверить наличие таблицы в БД
+        /// </summary>
+        /// <param name="connection">Активное подключение</param>
+        /// <param name="tableName">Имя таблицы для поиска</param>
+        /// <returns></returns>
+        public async static Task<bool> CheckTableExistance(SqlConnection connection, string tableName)
+        {
+            try
+            {
+                SqlCommand checkCmd = connection.CreateCommand();
+                checkCmd.CommandText = string.Format("SELECT * FROM SYSOBJECTS WHERE NAME='{0}' AND xtype='U'", tableName);
+                var reader = await checkCmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    if (reader[0].ToString().ToUpper() == tableName.ToUpper())
+                    {
+                        reader.Close();
+                        return true;
+                    }
+                }
+                reader.Close();
+                return false;
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки существования таблицы в БД: {0}", ex.Message));
+                return false;
+            }
+        }
+
+        public async static Task CreateAppTable()
+        {
+            try
+            {
+                using (var Connection = await ConnectAsync())
+                {
+                    var command = Connection.CreateCommand();
+                    command.CommandText = string.Format("CREATE TABLE {0}.dbo.Applications (" +
+                        "Id INT IDENTITY" +
+                        ",AppId INT NOT NULL" +
+                        ", ProjectId INT NOT NULL" +
+                        ", Name VARCHAR(MAX) NULL" +
+                        ", Description VARCHAR(MAX) NULL" +
+                        ", SourceDirectory VARCHAR(MAX) NULL" +
+                        ", ReleaseDirectory VARCHAR(MAX) NULL" +
+                        ", DocumentDirectory VARCHAR(MAX) NULL" +
+                        " , MainFileName VARCHAR(MAX) NULL" +
+                        ", MainFileReleaseHash VARCHAR(MAX) NULL" +
+                        ", MainFileReleaseVersion VARCHAR(MAX) NULL" +
+                        ", MainFileReleaseDate VARCHAR(MAX) NULL" +
+                        ", Status VARCHAR(MAX) NULL" +
+                        ", CompatibleOSs VARCHAR(MAX) NULL" +
+                        ", CompatibleScadas VARCHAR(MAX) NULL" +
+                        ", CompatibleSZI VARCHAR(MAX) NULL" +
+                        ", IdentificationType VARCHAR(MAX) NULL" +
+                        ", Installer VARCHAR(MAX) NULL" +
+                        ", Report VARCHAR(MAX) NULL" +
+                        ", BuildingComponents VARCHAR(MAX) NULL" +
+                        ", FunctionalComponents VARCHAR(MAX) NULL" +
+                        ", DataStoringMechanism VARCHAR(MAX) NULL" +
+                        ", SUBD VARCHAR(MAX) NULL" +
+                        ", LocalData VARCHAR(MAX) NULL" +
+                        ", AuthorizationType VARCHAR(MAX) NULL" +
+                        ", Platform VARCHAR(MAX) NULL" +
+                        ", OtherSoft VARCHAR(MAX) NULL" +
+                        ", UserCategories VARCHAR(MAX) NULL" +
+                        ", IsInReestr BIT NULL" +
+                        ", CONSTRAINT PK_Applications_Id PRIMARY KEY CLUSTERED(Id)" +
+                        ") ON[PRIMARY] TEXTIMAGE_ON[PRIMARY]",
+                        Connection.Database);
+                    await command.ExecuteNonQueryAsync();
+                    Disconnect(Connection);
+                }
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка создания таблицы приложений: {0}", ex.Message));
+            }
+        }
+
+        public async static Task GenProjectTable()
+        {
+            try
+            {
+                using (var Connection = await ConnectAsync())
+                {
+                    var command = Connection.CreateCommand();
+                    command.CommandText = string.Format("CREATE TABLE {0}.dbo.Projects (" +
+                        "Id INT IDENTITY" +
+                        ", ProjectId INT NULL" +
+                        ", Name VARCHAR(MAX) NULL" +
+                        ", ReleaseDirectory VARCHAR(MAX) NULL" +
+                        ", WorkingDirectory VARCHAR(MAX) NULL" +
+                        ", DocumentDirectory VARCHAR(MAX) NULL" +
+                        ", Category INT NULL" +
+                        ", Task INT NULL" +
+                        ", CONSTRAINT PK_Projects_Id PRIMARY KEY CLUSTERED(Id)" +
+                        ") ON[PRIMARY] TEXTIMAGE_ON[PRIMARY]",
+                        Connection.Database);
+                    await command.ExecuteNonQueryAsync();
+                    Disconnect(Connection);
+                }
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка создания таблицы приложений: {0}", ex.Message));
+            }
+        }
 
         #region Project
 
@@ -85,6 +194,12 @@ namespace FridayLib
                 {
                     if (Connection != null)
                     {
+                        if (!await CheckTableExistance(Connection, "Projects"))
+                        {
+                            await GenProjectTable();
+                            Disconnect(Connection);
+                            return new ObservableCollection<ControlledProject>();
+                        }
                         var command = Connection.CreateCommand();
                         command.CommandText = "SELECT ProjectId, Name, ReleaseDirectory, WorkingDirectory, DocumentDirectory, Category, Task FROM dbo.Projects";
                         var reader = await command.ExecuteReaderAsync();
@@ -129,9 +244,13 @@ namespace FridayLib
             {
                 ObservableCollection<ControlledProject> result = new ObservableCollection<ControlledProject>();
                 using (var Connection = await ConnectAsync())
-                {
+                {                    
                     if (Connection != null)
                     {
+                        if (!await CheckTableExistance(Connection, "Projects"))
+                        {
+                            await GenProjectTable();
+                        }
                         var command = Connection.CreateCommand();
                         command.CommandText = string.Format("INSERT INTO dbo.Projects (ProjectId, Name, ReleaseDirectory, WorkingDirectory, DocumentDirectory, Category, Task) VALUES (" +
                             "{0},'{1}','{2}','{3}','{4}',{5},{6})", project.Id, project.Name, project.ReleaseDirectory, project.WorkingDirectory, project.DocumentDirectory, (int)project.Category, (int)project.Task);
@@ -247,6 +366,12 @@ namespace FridayLib
                 {
                     if (Connection != null)
                     {
+                        if (!await CheckTableExistance(Connection, "Applications"))
+                        {
+                            await CreateAppTable();
+                            Disconnect(Connection);
+                            return prj;
+                        }
                         var command = Connection.CreateCommand();
                         command.CommandText = string.Format("SELECT AppId, ProjectId, Name, ReleaseDirectory, SourceDirectory, DocumentDirectory,Description,MainFileName" +
                             ",MainFileReleaseHash,MainFileReleaseVersion,MainFileReleaseDate,Status,CompatibleOSs,CompatibleScadas,CompatibleSZI,IdentificationType,Installer,Report" +
@@ -319,6 +444,10 @@ namespace FridayLib
                 {
                     if (Connection != null)
                     {
+                        if (!await CheckTableExistance(Connection, "Applications"))
+                        {
+                            await CreateAppTable();                            
+                        }
                         var command = Connection.CreateCommand();
                         command.CommandText = string.Format("INSERT INTO dbo.Applications (AppId, ProjectId, Name, ReleaseDirectory, SourceDirectory, DocumentDirectory,Description,MainFileName" +
                                 ",MainFileReleaseHash,MainFileReleaseVersion,MainFileReleaseDate,Status,CompatibleOSs,CompatibleScadas,CompatibleSZI,IdentificationType,Installer,Report" +

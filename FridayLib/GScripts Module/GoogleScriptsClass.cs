@@ -27,10 +27,10 @@ namespace FridayLib
             {
                 var credential = GetCredintials();
                 var service = GetService(credential);
-                String spreadsheetId = "10dymgee_7SNKLRwf9nS533pJpTMk1tLbndR9BmdO8As";
+                String spreadsheetId = ServiceLib.Configuration.Configuration.Get("SpreadsheetAddress").ToString();
                 String range = "Test!A2:N100";
                 //int sheetId = 1539764994;
-                int sheetId = 1515691245;
+                int sheetId = Convert.ToInt32(ServiceLib.Configuration.Configuration.Get("SpreadsheetId"));
                 SpreadsheetsResource.ValuesResource.GetRequest dataRequest =
                         service.Spreadsheets.Values.Get(spreadsheetId, range);
                 ValueRange response = dataRequest.Execute();
@@ -121,9 +121,9 @@ namespace FridayLib
             {
                 var credeintial = GetCredintials();
                 var service = GetService(credeintial);
-                String spreadsheetId = "10dymgee_7SNKLRwf9nS533pJpTMk1tLbndR9BmdO8As";
+                String spreadsheetId = ServiceLib.Configuration.Configuration.Get("SpreadsheetAddress").ToString();
                 //int sheetId = 1539764994;
-                int sheetId = 1515691245;
+                int sheetId = Convert.ToInt32(ServiceLib.Configuration.Configuration.Get("SpreadsheetId"));
                 String range = "Test!A2:N100";
                 SpreadsheetsResource.ValuesResource.GetRequest dataRequest =
                         service.Spreadsheets.Values.Get(spreadsheetId, range);

@@ -44,6 +44,9 @@
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\x86\Release\</OutputPath>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Images\BOTask_32x32.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CommonServiceLocator, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.2.0.2\lib\net45\CommonServiceLocator.dll</HintPath>
@@ -64,6 +67,10 @@
       <HintPath>..\packages\NLog.4.6.8\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Luna" />
+    <Reference Include="ServiceLib, Version=1.0.2.10, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libs\ServiceLib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -93,12 +100,16 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ViewModels\AppInfoWindowViewModel.cs" />
+    <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SourceTextWindowViewModel.cs" />
     <Compile Include="Views\AppInfoWindow.xaml.cs">
       <DependentUpon>AppInfoWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ProjectInfoWindow.xaml.cs">
       <DependentUpon>ProjectInfoWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SettingWindow.xaml.cs">
+      <DependentUpon>SettingWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SourceTextWindow.xaml.cs">
       <DependentUpon>SourceTextWindow.xaml</DependentUpon>
@@ -131,6 +142,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\SettingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SourceTextWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -158,6 +173,15 @@
     <Resource Include="Images\Info_32x32.png" />
     <Resource Include="Images\green_circle.png" />
     <Resource Include="Images\red_circle.png" />
+    <Resource Include="Images\ProductShipments_16x16.png" />
+    <Resource Include="Images\ViewSetting_32x32.png" />
+    <Resource Include="Images\BOTask_32x32.png" />
+    <Resource Include="Images\Project_32x32.png" />
+    <Resource Include="Images\Tag_32x32.png" />
+    <Resource Include="Images\TextBox_32x32.png" />
+    <Resource Include="Images\IDE_32x32.png" />
+    <Resource Include="Images\BOTask_32x32.ico" />
+    <Content Include="Libs\ServiceLib.dll" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

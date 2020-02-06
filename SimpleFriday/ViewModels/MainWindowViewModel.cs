@@ -211,6 +211,7 @@ namespace SimpleFriday.ViewModels
                 await (project as ControlledProject).Apps.Last().UpdateMainFileInfoAsync();
                 (project as ControlledProject).UpdateState();
                 await DatabaseClass.AddApp((project as ControlledProject).Apps.Last());
+                GoogleScriptsClass.AddDataToSheet((project as ControlledProject).Apps.Last());
             }
         }
 
@@ -314,11 +315,16 @@ namespace SimpleFriday.ViewModels
         private async void ExecuteUpdateAll()
         {
             Processing = true;
-            Status = "Актуализация всего ПО";
-            foreach (var prj in Projects)
+            await Task.Run(async () =>
             {
-                await prj.Update();
-            }
+                Status = "Актуализация всего ПО";
+                foreach (var prj in Projects)
+                {
+                    await prj.Update();
+                }
+            });
+            
+            System.Windows.MessageBox.Show(App.Current.MainWindow, "Завершена актуализация всех приложений!", "Операция завершена!", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
             Processing = false;
         }
 
@@ -340,16 +346,24 @@ namespace SimpleFriday.ViewModels
                 Projects[i] = await DatabaseClass.GetAppsForProject(Projects[i]);
                 Status = "Подождите";
             }
+            System.Windows.MessageBox.Show(App.Current.MainWindow, "Завершено получение данных по всем приложениям!", "Операция завершена!", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
             Processing = false;
         }
 
+
+        public ICommand ShowSettingsCommand
+        {
+            get { return new RelayCommand(ExecuteShowSettings); }
+        }
+
+        private void ExecuteShowSettings()
+        {
+            Views.SettingWindow window = new Views.SettingWindow();
+            window.Owner = App.Current.MainWindow;
+            window.ShowDialog();
+        }
+
         #endregion
-
-
-
-        
-
-        
 
         #endregion
     }
