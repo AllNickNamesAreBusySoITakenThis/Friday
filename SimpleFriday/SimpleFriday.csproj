@@ -93,11 +93,15 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ViewModels\AppInfoWindowViewModel.cs" />
+    <Compile Include="ViewModels\SourceTextWindowViewModel.cs" />
     <Compile Include="Views\AppInfoWindow.xaml.cs">
       <DependentUpon>AppInfoWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ProjectInfoWindow.xaml.cs">
       <DependentUpon>ProjectInfoWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SourceTextWindow.xaml.cs">
+      <DependentUpon>SourceTextWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\AppInfoWindow.xaml">
       <SubType>Designer</SubType>
@@ -124,6 +128,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\ProjectInfoWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SourceTextWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

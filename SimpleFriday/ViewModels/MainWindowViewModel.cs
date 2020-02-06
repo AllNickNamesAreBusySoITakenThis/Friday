@@ -15,6 +15,14 @@ namespace SimpleFriday.ViewModels
     {
 
         private ObservableCollection<ControlledProject> projects = new ObservableCollection<ControlledProject>();
+        private bool processing = false;
+        private int maxProgress = 100;
+        private int currentProgress = 0;
+        private string status = "Подождите";
+
+        /// <summary>
+        /// Коллекция проектов
+        /// </summary>
         public ObservableCollection<ControlledProject> Projects
         {
             get { return projects; }
@@ -24,8 +32,9 @@ namespace SimpleFriday.ViewModels
                 RaisePropertyChanged("Projects");
             }
         }
-
-        private bool processing=false;
+        /// <summary>
+        /// Флаг заработы алгоритмов приложения
+        /// </summary>
         public bool Processing
         {
             get { return processing; }
@@ -35,8 +44,9 @@ namespace SimpleFriday.ViewModels
                 RaisePropertyChanged("Processing");
             }
         }
-
-        private int maxProgress=100;
+        /// <summary>
+        /// Макимальный прогресс
+        /// </summary>
         public int MaxProgress
         {
             get { return maxProgress; }
@@ -46,8 +56,9 @@ namespace SimpleFriday.ViewModels
                 RaisePropertyChanged("MaxProgress");
             }
         }
-
-        private int currentProgress=0;
+        /// <summary>
+        /// Текущий прогресс
+        /// </summary>
         public int CurrentProgress
         {
             get { return currentProgress; }
@@ -57,8 +68,9 @@ namespace SimpleFriday.ViewModels
                 RaisePropertyChanged("CurrentProgress");
             }
         }
-
-        private string status="Подождите";
+        /// <summary>
+        /// Текущий статус
+        /// </summary>
         public string Status
         {
             get { return status; }
@@ -74,6 +86,7 @@ namespace SimpleFriday.ViewModels
             StartApp();
         }
 
+
         public async void StartApp()
         {
             Processing = true;
@@ -88,49 +101,17 @@ namespace SimpleFriday.ViewModels
             Processing = false;
         }
 
-
         #region Команды
 
+        #region Project
 
-        public ICommand UpdateAllCommand
-        {
-            get { return new RelayCommand(ExecuteUpdateAll); }
-        }
-
-        private async void ExecuteUpdateAll()
-        {
-            Processing = true;
-            Status = "Актуализация всего ПО";
-            foreach(var prj in Projects)
-            {
-                await prj.Update();
-            }
-            Processing = false;
-        }
-
-        public ICommand RefreshDataCommand
-        {
-            get { return new RelayCommand(ExecuteRefreshData); }
-        }
-
-        private async void ExecuteRefreshData()
-        {
-            Processing = true;
-            Status = "Получение данных о проектах из БД";
-            Projects = await DatabaseClass.GetProjects();
-            for (int i = 0; i < Projects.Count; i++)
-            {
-                Status = string.Format("Получение перечня приложений для проекта :{0}", Projects[i].Name);
-                Projects[i] = await DatabaseClass.GetAppsForProject(Projects[i]);
-                Status = "Подождите";
-            }
-            Processing = false;
-        }
+        /// <summary>
+        /// Отобразить окно с информацией по проекту
+        /// </summary>
         public ICommand ShowProjectInfoCommand
         {
             get { return new RelayCommand<object>(ExecuteShowProjectInfo); }
         }
-
         private async void ExecuteShowProjectInfo(object prj)
         {
             var temp = await Models.Model.UpdateProjectInfo(prj as ControlledProject);
@@ -145,11 +126,13 @@ namespace SimpleFriday.ViewModels
             }
         }
 
+        /// <summary>
+        /// Отобразить окно добавления нового проекта
+        /// </summary>
         public ICommand AddProjectCommand
         {
             get { return new RelayCommand(ExecuteAddProject); }
         }
-
         private async void ExecuteAddProject()
         {
             var temp = await Models.Model.AddNewProject();
@@ -168,16 +151,22 @@ namespace SimpleFriday.ViewModels
                 await DatabaseClass.AddProject(Projects.Last());
             }
         }
+        
+        #endregion
 
+        #region Application
+
+        /// <summary>
+        /// Добавить новое приложение в проект
+        /// </summary>
         public ICommand AddAppCommand
         {
             get { return new RelayCommand<object>(ExecuteAddApp); }
         }
-
         private async void ExecuteAddApp(object project)
         {
             var temp = await Models.Model.AddNewApp();
-            if(temp!=null)
+            if (temp != null)
             {
                 temp.Id = (project as ControlledProject).Apps.Count;
                 temp.Parent = (project as ControlledProject);
@@ -188,11 +177,13 @@ namespace SimpleFriday.ViewModels
             }
         }
 
+        /// <summary>
+        /// Отобразить окно с информацией по приложению
+        /// </summary>
         public ICommand ShowAppInfoCommand
         {
             get { return new RelayCommand<object>(ExecuteShowAppInfo); }
         }
-
         private async void ExecuteShowAppInfo(object app)
         {
             var temp = Models.Model.UpdateAppInfo(app as ControlledApp).Result;
@@ -216,24 +207,27 @@ namespace SimpleFriday.ViewModels
             }
         }
 
+        /// <summary>
+        /// Актуализировать релиз конкретного приложения
+        /// </summary>
         public ICommand ActualizeReleaseCommand
         {
             get { return new RelayCommand<object>(ExecuteActualizeRelease); }
         }
-
         private async void ExecuteActualizeRelease(object application)
         {
-            await Task.Run(()=>(application as ControlledApp).CopyToFolder((application as ControlledApp).SourceDirectory, (application as ControlledApp).ReleaseDirectory));
+            await Task.Run(() => (application as ControlledApp).CopyToFolder((application as ControlledApp).SourceDirectory, (application as ControlledApp).ReleaseDirectory));
             await (application as ControlledApp).UpdateMainFileInfoAsync();
             await DatabaseClass.UpdateApp((application as ControlledApp));
             (application as ControlledApp).Parent.UpdateState();
         }
-
+        /// <summary>
+        /// Обновить данные по приложению
+        /// </summary>
         public ICommand UpdateAppMainFileInfoCommand
         {
             get { return new RelayCommand<object>(ExecuteUpdateAppMainFileInfo); }
         }
-
         private async void ExecuteUpdateAppMainFileInfo(object application)
         {
             await (application as ControlledApp).UpdateMainFileInfoAsync();
@@ -241,22 +235,74 @@ namespace SimpleFriday.ViewModels
             (application as ControlledApp).Parent.UpdateState();
         }
 
+        /// <summary>
+        /// Удалить приложение
+        /// </summary>
         public ICommand RemoveAppCommand
         {
             get { return new RelayCommand<object>(ExecuteRemoveApp); }
         }
-
         private async void ExecuteRemoveApp(object application)
         {
-            for(int i=0;i<(application as ControlledApp).Parent.Apps.Count;i++)
+            for (int i = 0; i < (application as ControlledApp).Parent.Apps.Count; i++)
             {
-                if((application as ControlledApp).Parent.Apps[i].Id.Equals((application as ControlledApp).Id))
+                if ((application as ControlledApp).Parent.Apps[i].Id.Equals((application as ControlledApp).Id))
                 {
                     await DatabaseClass.DeleteApp(application as ControlledApp);
                     (application as ControlledApp).Parent.Apps.RemoveAt(i);
                 }
             }
         }
+        #endregion
+
+        #region Common
+
+        /// <summary>
+        /// Команда "Актуализировать все"
+        /// </summary>
+        public ICommand UpdateAllCommand
+        {
+            get { return new RelayCommand(ExecuteUpdateAll); }
+        }
+        private async void ExecuteUpdateAll()
+        {
+            Processing = true;
+            Status = "Актуализация всего ПО";
+            foreach (var prj in Projects)
+            {
+                await prj.Update();
+            }
+            Processing = false;
+        }
+
+        /// <summary>
+        /// Обновить данные по всем проектам
+        /// </summary>
+        public ICommand RefreshDataCommand
+        {
+            get { return new RelayCommand(ExecuteRefreshData); }
+        }
+        private async void ExecuteRefreshData()
+        {
+            Processing = true;
+            Status = "Получение данных о проектах из БД";
+            Projects = await DatabaseClass.GetProjects();
+            for (int i = 0; i < Projects.Count; i++)
+            {
+                Status = string.Format("Получение перечня приложений для проекта :{0}", Projects[i].Name);
+                Projects[i] = await DatabaseClass.GetAppsForProject(Projects[i]);
+                Status = "Подождите";
+            }
+            Processing = false;
+        }
+
+        #endregion
+
+
+
+        
+
+        
 
         #endregion
     }
