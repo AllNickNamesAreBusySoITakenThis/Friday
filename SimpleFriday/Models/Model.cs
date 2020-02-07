@@ -75,9 +75,9 @@ namespace SimpleFriday.Models
             return tsc.Task;
         }
 
-        internal static Task<ControlledApp> AddNewApp()
+        internal static Task<ControlledApp> AddNewApp(ControlledProject prj)
         {
-            CApp = new ControlledApp();
+            CApp = new ControlledApp() { Parent = prj };
             //Project = ObjectCopier.CloneJson(prj);
             TaskCompletionSource<ControlledApp> tsc = new TaskCompletionSource<ControlledApp>();
             AppInfoWindow window = new AppInfoWindow() { Owner = App.Current.MainWindow };

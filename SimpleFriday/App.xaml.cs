@@ -34,7 +34,7 @@ namespace SimpleFriday
 
         private void MainClass_ErrorInLibrary(string message)
         {
-            MessageBox.Show(Current.MainWindow,message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+            Dispatcher.Invoke(()=>MessageBox.Show(Current.MainWindow,message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error));
         }
     }
 }

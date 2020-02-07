@@ -315,7 +315,8 @@ namespace FridayLib
         public void LoadSourceTexts()
         {
             WorkStatus = "Загрузка данных по исходным текстам";
-            SourceTextFiles = SourceTextCreation.ScanFolder(WorkingDirectory, "", System.IO.Path.Combine(DocumentDirectory, "SourceTexts.txt"));
+            SourceTextFiles = SourceTextCreation.ScanFolder(WorkingDirectory, "", System.IO.Path.Combine(DocumentDirectory, "SourceTexts.txt"),
+                System.IO.Path.Combine(DocumentDirectory, "Ведомость исходных текстов.xlsx"));
         }
         /// <summary>
         /// Сохранить исходные тексты в текстовом файле

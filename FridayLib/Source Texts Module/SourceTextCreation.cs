@@ -21,7 +21,7 @@ namespace FridayLib
         /// </summary>
         /// <param name="rootDirectoryAddress">Директория проекта</param>
         /// <returns></returns>
-        internal static ObservableCollection<SourceTextFile> ScanFolder(string rootDirectoryAddress, string addName = "", string existingTextFileName = "")
+        internal static ObservableCollection<SourceTextFile> ScanFolder(string rootDirectoryAddress, string addName = "", string existingTextFileName = "", string excelFileName="")
         {
             try
             {
@@ -43,6 +43,22 @@ namespace FridayLib
                         }
                     }
                 }
+                if (excelFileName != "")
+                {
+                    var savedData = GetFromExcel(excelFileName);
+                    foreach (var nFile in result)
+                    {
+                        foreach (var oFile in savedData)
+                        {
+                            if (nFile.FullName == oFile.FullName && !string.IsNullOrEmpty(oFile.Description))
+                            {
+                                nFile.Description = oFile.Description;
+                                nFile.Owner = oFile.Owner;
+                                break;
+                            }
+                        }
+                    }
+                }   
                 if (existingTextFileName != "")
                 {
                     var savedData = GetFromTextFile(existingTextFileName);
@@ -50,9 +66,10 @@ namespace FridayLib
                     {
                         foreach (var oFile in savedData)
                         {
-                            if (nFile.FullName == oFile.FullName)
+                            if (nFile.FullName == oFile.FullName && !string.IsNullOrEmpty(oFile.Description))
                             {
                                 nFile.Description = oFile.Description;
+                                nFile.Owner = oFile.Owner;
                                 break;
                             }
                         }
@@ -159,6 +176,55 @@ namespace FridayLib
             catch (Exception ex)
             {
                 MainClass.OnErrorInLibrary(string.Format("Ошибка при создании таблицы исходных кодов: {0}", ex.Message));
+            }
+        }
+
+        public static ObservableCollection<SourceTextFile> GetFromExcel(string path)
+        {
+            try
+            {
+                if(File.Exists(path))
+                {
+                    ObservableCollection<SourceTextFile> result = new ObservableCollection<SourceTextFile>();
+                    Excel.Application excelapp = null;
+                    Excel.Sheets excelsheets; // переменная-список всх листов текущей книги
+                    Excel.Worksheet excelworksheet;
+                    Excel.Workbooks excelappworkbooks;// Список всех книг приложения Эксель (ну там типо в одном окне работать можно с кучей документов)
+                    Excel.Workbook excelappworkbook; // переменная текущая книга
+                    excelapp = new Excel.Application();
+                    excelapp.Visible = false;
+                    excelapp.Workbooks.Open(path,
+                    Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                    Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                    Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                    Type.Missing, Type.Missing);
+                    excelappworkbooks = excelapp.Workbooks; // готовим Эксель к работе: получаем список книг, выбираем первую (а в нашем случае и единственную) книгу, получаем список ее листов и выбираем первый 
+                    excelappworkbook = excelappworkbooks[1];
+                    excelsheets = excelappworkbook.Worksheets;
+                    excelworksheet = (Excel.Worksheet)excelsheets.get_Item(1);
+                    int counter = 2;
+                    do
+                    {
+                        result.Add(new SourceTextFile()
+                        {
+                            FullName = excelworksheet.Cells[counter, 3].Value,
+                            Name = excelworksheet.Cells[counter, 1].Value,
+                            Description = excelworksheet.Cells[counter, 2].Value,
+                            Owner = excelworksheet.Cells[counter, 7].Value,
+                        });
+                        counter++;
+                    }
+                    while (excelworksheet.Cells[counter + 1, 1].Value != null);
+                    excelappworkbook.Save();
+                    excelapp.Quit();
+                    return result;
+                }
+                return new ObservableCollection<SourceTextFile>();
+            }
+            catch (Exception ex)
+            {
+                MainClass.OnErrorInLibrary(string.Format("Ошибка при прочтении таблицы исходных кодов: {0}", ex.Message));
+                return new ObservableCollection<SourceTextFile>();
             }
         }
 

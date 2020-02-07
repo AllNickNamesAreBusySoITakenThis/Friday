@@ -29,7 +29,6 @@ namespace FridayLib
                 var service = GetService(credential);
                 String spreadsheetId = ServiceLib.Configuration.Configuration.Get("SpreadsheetAddress").ToString();
                 String range = "Test!A2:N100";
-                //int sheetId = 1539764994;
                 int sheetId = Convert.ToInt32(ServiceLib.Configuration.Configuration.Get("SpreadsheetId"));
                 SpreadsheetsResource.ValuesResource.GetRequest dataRequest =
                         service.Spreadsheets.Values.Get(spreadsheetId, range);
@@ -43,17 +42,22 @@ namespace FridayLib
                     foreach (var val in exValues)
                     {
 
-                        if (app.Name == val[1].ToString() & !string.IsNullOrEmpty(app.SourceDirectory))
+                        if (app.Name == val[1].ToString())
                         {
                             List<CellData> values = new List<CellData>()
                         {
-                            new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = app.Id }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = Convert.ToInt32(val[0]) }},
                             new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Name }},
                             new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileName }},
                             new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseVersion }},
-                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = val[4].ToString() }},
-                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseDate.Remove(app.MainFileReleaseDate.IndexOf(" "))}},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = val.Count>=4?val[4].ToString():"АО \"НПО \"Спецэлектромеханика\"" }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = string.IsNullOrEmpty(app.MainFileReleaseDate)?"":app.MainFileReleaseDate.Remove(app.MainFileReleaseDate.IndexOf(" "))}},
                             new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseHash }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Description }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = EnumHelper.Description(app.Parent.Category) }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.CompatibleOSs }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.CompatibleScadas }},
+                            new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.CompatibleSZI }},
                         };
 
                             requests.Add(new Request()
@@ -64,7 +68,7 @@ namespace FridayLib
                                     {
                                         SheetId = sheetId,
                                         ColumnIndex = 0,
-                                        RowIndex = app.Id
+                                        RowIndex = Convert.ToInt32(val[0])
                                     },
                                     Rows = new List<RowData>() { new RowData() { Values = values } },
                                     Fields = "userEnteredValue"
@@ -131,17 +135,20 @@ namespace FridayLib
                 IList<IList<Object>> exValues = response.Values;
                 List<Request> requests = new List<Request>();
                 List<CellData> values = new List<CellData>()
-            {
-                new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = exValues.Count+1 }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Name }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileName }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseVersion }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = "" }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseDate.Remove(app.MainFileReleaseDate.IndexOf(" "))}},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseHash }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Description }},
-                new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Parent.Category.ToString() }}                
-            };
+                {
+                    new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = exValues==null?1:exValues.Count+1 }},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Name }},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileName }},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseVersion }},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = "АО \"НПО \"Спецэлектромеханика\"" }},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = string.IsNullOrEmpty(app.MainFileReleaseDate)?"":app.MainFileReleaseDate.Remove(app.MainFileReleaseDate.IndexOf(" "))}},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.MainFileReleaseHash }},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.Description }},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = EnumHelper.Description(app.Parent.Category) }},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.CompatibleOSs}},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.CompatibleScadas}},
+                    new CellData(){UserEnteredValue = new ExtendedValue { StringValue = app.CompatibleSZI}},
+                };
                 requests.Add(new Request()
                 {
                     UpdateCells = new UpdateCellsRequest()
@@ -150,7 +157,7 @@ namespace FridayLib
                         {
                             SheetId = sheetId,
                             ColumnIndex = 0,
-                            RowIndex = exValues.Count+1
+                            RowIndex = exValues == null ? 1 : exValues.Count + 1
                         },
                         Rows = new List<RowData>() { new RowData() { Values = values } },
                         Fields = "userEnteredValue"

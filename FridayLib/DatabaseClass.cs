@@ -331,7 +331,7 @@ namespace FridayLib
                 using (var Connection = await ConnectAsync())
                 {
                     var command = Connection.CreateCommand();
-                    command.CommandText = string.Format("SELECT ProjectId FROM dbo.Projects WHERE Name='{0}' OR ReleaseDirectory='{1}' OR WorkingDirectory='{2}'", prj.Name, prj.ReleaseDirectory, prj.WorkingDirectory);
+                    command.CommandText = string.Format("SELECT ProjectId FROM dbo.Projects WHERE Name='{0}' ", prj.Name);
                     var reader = await command.ExecuteReaderAsync();
                     while(await reader.ReadAsync())
                     {
@@ -529,7 +529,7 @@ namespace FridayLib
                 using (var Connection = await ConnectAsync())
                 {
                     var command = Connection.CreateCommand();
-                    command.CommandText = string.Format("SELECT AppId FROM dbo.Applications WHERE (Name='{0}' OR ReleaseDirectory='{1}' OR SourceDirectory='{2}') AND ProjectId={3}", app.Name, app.ReleaseDirectory, app.SourceDirectory, app.Parent.Id);
+                    command.CommandText = string.Format("SELECT AppId FROM dbo.Applications WHERE Name='{0}' AND ProjectId={1}", app.Name,  app.Parent.Id);
                     var reader = await command.ExecuteReaderAsync();
                     while (await reader.ReadAsync())
                     {

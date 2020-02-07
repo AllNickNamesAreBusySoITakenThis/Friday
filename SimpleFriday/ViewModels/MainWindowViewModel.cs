@@ -202,16 +202,16 @@ namespace SimpleFriday.ViewModels
         }
         private async void ExecuteAddApp(object project)
         {
-            var temp = await Models.Model.AddNewApp();
+            var temp = await Models.Model.AddNewApp(project as ControlledProject);
             if (temp != null)
             {
                 temp.Id = (project as ControlledProject).Apps.Count;
                 temp.Parent = (project as ControlledProject);
                 (project as ControlledProject).Apps.Add(temp);
+                GoogleScriptsClass.AddDataToSheet((project as ControlledProject).Apps.Last());
                 await (project as ControlledProject).Apps.Last().UpdateMainFileInfoAsync();
                 (project as ControlledProject).UpdateState();
-                await DatabaseClass.AddApp((project as ControlledProject).Apps.Last());
-                GoogleScriptsClass.AddDataToSheet((project as ControlledProject).Apps.Last());
+                await DatabaseClass.AddApp((project as ControlledProject).Apps.Last());                
             }
         }
 
@@ -254,10 +254,12 @@ namespace SimpleFriday.ViewModels
         }
         private async void ExecuteActualizeRelease(object application)
         {
-            await Task.Run(() => (application as ControlledApp).CopyToFolder((application as ControlledApp).SourceDirectory, (application as ControlledApp).ReleaseDirectory));
-            await (application as ControlledApp).UpdateMainFileInfoAsync();
-            await DatabaseClass.UpdateApp((application as ControlledApp));
-            (application as ControlledApp).Parent.UpdateState();
+            await Task.Run(() => (application as ControlledApp).CopyToFolder((application as ControlledApp).SourceDirectory, (application as ControlledApp).ReleaseDirectory)).ContinueWith(async (T) => {
+                await (application as ControlledApp).UpdateMainFileInfoAsync();
+                await DatabaseClass.UpdateApp((application as ControlledApp));
+                (application as ControlledApp).Parent.UpdateState();
+            });
+            
         }
         /// <summary>
         /// Обновить данные по приложению

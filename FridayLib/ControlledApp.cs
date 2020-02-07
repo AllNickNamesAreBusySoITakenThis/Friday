@@ -535,7 +535,11 @@ namespace FridayLib
                 foreach(var file in Directory.GetFiles(source))
                 {
                     if(Service.GetListFromString(ServiceLib.Configuration.Configuration.Get("AllowedExtentions").ToString()).Contains(new FileInfo(file).Extension))
+                    {
+                        if (!Directory.Exists(dest))
+                            Directory.CreateDirectory(dest);
                         File.Copy(file, Path.Combine(dest, new FileInfo(file).Name), true);
+                    }
                 }
                 IsInReestr = false;
             }
@@ -549,7 +553,7 @@ namespace FridayLib
                 Blocked = false;
             }            
         }
-        public void CopyToFolder(string source, string dest)
+        public void CopyToFolder(string source, string dest, bool st = true)
         {
             Blocked = true;
             WorkingStatus = "Копирование файлов в релиз";
@@ -557,20 +561,27 @@ namespace FridayLib
             {
                 foreach (var dir in Directory.GetDirectories(source))
                 {
-                    CopyToFolder(dir, Path.Combine(dest, new DirectoryInfo(dir).Name));
+                    CopyToFolder(dir, Path.Combine(dest, new DirectoryInfo(dir).Name),false);
                 }
                 foreach (var file in Directory.GetFiles(source))
                 {
                     if (Service.GetListFromString(ServiceLib.Configuration.Configuration.Get("AllowedExtentions").ToString()).Contains(new FileInfo(file).Extension))
+                    {
+                        if(!Directory.Exists(dest))
+                            Directory.CreateDirectory(dest);
                         File.Copy(file, Path.Combine(dest, new FileInfo(file).Name), true);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 MainClass.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
             }
-            WorkingStatus = "";
-            Blocked = false;
+            if (st)
+            {
+                WorkingStatus = "";
+                Blocked = false;
+            }
         }
         public async Task PrepareDocumentation()
         {
