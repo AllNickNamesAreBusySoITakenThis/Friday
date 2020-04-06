@@ -11,7 +11,7 @@
         Title="{Binding Title}" Height="auto" Width="auto"
         WindowStartupLocation="CenterOwner"
         local:DialogCloser.DialogResult="{Binding DialogResult}"
-        >
+        Icon="/;component/Images/Tag_32x32.png">
     <Window.DataContext>
         <vm:AppInfoWindowViewModel/>
     </Window.DataContext>

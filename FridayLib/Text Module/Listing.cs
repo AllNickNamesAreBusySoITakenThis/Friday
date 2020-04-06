@@ -16,6 +16,10 @@ namespace FridayLib.Text_Module
                 var fData = ScanFolder(project.WorkingDirectory);
                 if(fData!=null)
                 {
+                    if(!Directory.Exists(project.DocumentDirectory))
+                    {
+                        Directory.CreateDirectory(project.DocumentDirectory);
+                    }
                     File.WriteAllLines(Path.Combine(project.DocumentDirectory, "Листинг.txt"), fData.ToArray());
                 }
             }

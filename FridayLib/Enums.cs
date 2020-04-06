@@ -61,7 +61,7 @@ namespace FridayLib
     }
     public enum PPOTasks
     {
-        [Description("SCADA. Дополнение функционала")]
+        [Description("ППО, созданное с целью реализации функций, дополняющих базовый функционал SCADA-систем")]
         SCADA_Addons,
         [Description("ОС. Дополнение функционала")]
         OS_Addons,

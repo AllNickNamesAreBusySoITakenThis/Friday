@@ -9,17 +9,18 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 using DevExpress.Xpf.Core;
 
-namespace Friday
+namespace Frifull
 {
     /// <summary>
-    /// Interaction logic for WaitScreen.xaml
+    /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class WaitScreen : UserControl
+    public partial class MainWindow : ThemedWindow
     {
-        public WaitScreen()
+        public MainWindow()
         {
             InitializeComponent();
         }

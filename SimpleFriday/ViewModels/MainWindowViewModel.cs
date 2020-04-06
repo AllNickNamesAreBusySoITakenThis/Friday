@@ -151,7 +151,44 @@ namespace SimpleFriday.ViewModels
                 await DatabaseClass.AddProject(Projects.Last());
             }
         }
-        
+
+        public ICommand ShowSourceTextsCommand
+        {
+            get { return new RelayCommand<object>(ExecuteShowSourceTexts); }
+        }
+
+        private void ExecuteShowSourceTexts(object project)
+        {
+            Models.Model.Project = (project as ControlledProject).Clone() as ControlledProject;
+            Views.SourceTextWindow window = new Views.SourceTextWindow();
+            window.Owner = App.Current.MainWindow;
+            window.ShowDialog();
+        }
+
+        public ICommand RemoveProjectCommand
+        {
+            get { return new RelayCommand<object>(ExecuteRemoveProject); }
+        }
+
+        private async void ExecuteRemoveProject(object project)
+        {
+            if(System.Windows.MessageBox.Show(string.Format("Действительно удалить проект {0}?",(project as ControlledProject).Name),"Подтвердите действие",System.Windows.MessageBoxButton.YesNo,System.Windows.MessageBoxImage.Question)==System.Windows.MessageBoxResult.Yes)
+            {
+                Projects.Remove((project as ControlledProject));
+                await DatabaseClass.DeleteProject(project as ControlledProject);
+            }
+        }
+
+        public ICommand PrepareDocForProjectCommand
+        {
+            get { return new RelayCommand<object>(ExecutePrepareDocForProject); }
+        }
+
+        private async void ExecutePrepareDocForProject(object project)
+        {
+            await (project as ControlledProject).PrepareDocumentation();
+        }
+
         #endregion
 
         #region Application
@@ -165,15 +202,16 @@ namespace SimpleFriday.ViewModels
         }
         private async void ExecuteAddApp(object project)
         {
-            var temp = await Models.Model.AddNewApp();
+            var temp = await Models.Model.AddNewApp(project as ControlledProject);
             if (temp != null)
             {
                 temp.Id = (project as ControlledProject).Apps.Count;
                 temp.Parent = (project as ControlledProject);
                 (project as ControlledProject).Apps.Add(temp);
+                GoogleScriptsClass.AddDataToSheet((project as ControlledProject).Apps.Last());
                 await (project as ControlledProject).Apps.Last().UpdateMainFileInfoAsync();
                 (project as ControlledProject).UpdateState();
-                await DatabaseClass.AddApp((project as ControlledProject).Apps.Last());
+                await DatabaseClass.AddApp((project as ControlledProject).Apps.Last());                
             }
         }
 
@@ -216,10 +254,12 @@ namespace SimpleFriday.ViewModels
         }
         private async void ExecuteActualizeRelease(object application)
         {
-            await Task.Run(() => (application as ControlledApp).CopyToFolder((application as ControlledApp).SourceDirectory, (application as ControlledApp).ReleaseDirectory));
-            await (application as ControlledApp).UpdateMainFileInfoAsync();
-            await DatabaseClass.UpdateApp((application as ControlledApp));
-            (application as ControlledApp).Parent.UpdateState();
+            await Task.Run(() => (application as ControlledApp).CopyToFolder((application as ControlledApp).SourceDirectory, (application as ControlledApp).ReleaseDirectory)).ContinueWith(async (T) => {
+                await (application as ControlledApp).UpdateMainFileInfoAsync();
+                await DatabaseClass.UpdateApp((application as ControlledApp));
+                (application as ControlledApp).Parent.UpdateState();
+            });
+            
         }
         /// <summary>
         /// Обновить данные по приложению
@@ -233,6 +273,16 @@ namespace SimpleFriday.ViewModels
             await (application as ControlledApp).UpdateMainFileInfoAsync();
             await DatabaseClass.UpdateApp((application as ControlledApp));
             (application as ControlledApp).Parent.UpdateState();
+        }
+
+        public ICommand PrepareDocForAppCommand
+        {
+            get { return new RelayCommand<object>(ExecutePrepareDocForApp); }
+        }
+
+        private async void ExecutePrepareDocForApp(object application)
+        {
+            await (application as ControlledApp).PrepareDocumentation();
         }
 
         /// <summary>
@@ -267,11 +317,16 @@ namespace SimpleFriday.ViewModels
         private async void ExecuteUpdateAll()
         {
             Processing = true;
-            Status = "Актуализация всего ПО";
-            foreach (var prj in Projects)
+            await Task.Run(async () =>
             {
-                await prj.Update();
-            }
+                Status = "Актуализация всего ПО";
+                foreach (var prj in Projects)
+                {
+                    await prj.Update();
+                }
+            });
+            
+            System.Windows.MessageBox.Show(App.Current.MainWindow, "Завершена актуализация всех приложений!", "Операция завершена!", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
             Processing = false;
         }
 
@@ -293,16 +348,24 @@ namespace SimpleFriday.ViewModels
                 Projects[i] = await DatabaseClass.GetAppsForProject(Projects[i]);
                 Status = "Подождите";
             }
+            System.Windows.MessageBox.Show(App.Current.MainWindow, "Завершено получение данных по всем приложениям!", "Операция завершена!", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
             Processing = false;
         }
 
+
+        public ICommand ShowSettingsCommand
+        {
+            get { return new RelayCommand(ExecuteShowSettings); }
+        }
+
+        private void ExecuteShowSettings()
+        {
+            Views.SettingWindow window = new Views.SettingWindow();
+            window.Owner = App.Current.MainWindow;
+            window.ShowDialog();
+        }
+
         #endregion
-
-
-
-        
-
-        
 
         #endregion
     }

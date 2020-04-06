@@ -10,13 +10,16 @@ namespace FridayLib
 {
     public class ControlledProject : INotifyPropertyChanged, ICloneable
     {
-        //[NonSerialized]
+        
+        #region Events
         public event PropertyChangedEventHandler PropertyChanged;
         void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
+        } 
+        #endregion
 
+        #region Private variables
         private int id;
         private string name;
         private string workingDirectory;
@@ -28,7 +31,11 @@ namespace FridayLib
         private bool allAppsAreInReestr;
         private ObservableCollection<ControlledApp> apps = new ObservableCollection<ControlledApp>();
         private ObservableCollection<SourceTextFile> sourceTextFiles = new ObservableCollection<SourceTextFile>();
+        private bool blocked=false;
+        private string workStatus="";
+        #endregion
 
+        #region Public properties
 
         /// <summary>
         /// Идентификатор проекта
@@ -54,7 +61,6 @@ namespace FridayLib
                 OnPropertyChanged("Name");
             }
         }
-        
         /// <summary>
         /// Директория для релиза проекта
         /// </summary>
@@ -67,7 +73,6 @@ namespace FridayLib
                 OnPropertyChanged("ReleaseDirectory");
             }
         }
-        
         /// <summary>
         /// Рабочая директория проекта
         /// </summary>
@@ -80,7 +85,6 @@ namespace FridayLib
                 OnPropertyChanged("WorkingDirectory");
             }
         }
-                
         /// <summary>
         /// Директория с документацией на проект
         /// </summary>
@@ -93,7 +97,6 @@ namespace FridayLib
                 OnPropertyChanged("DocumentDirectory");
             }
         }
-
         /// <summary>
         /// Категория ППО
         /// </summary>
@@ -106,7 +109,6 @@ namespace FridayLib
                 OnPropertyChanged("Category");
             }
         }
-
         /// <summary>
         /// Задача ППО (по классификации реестра)
         /// </summary>
@@ -119,7 +121,6 @@ namespace FridayLib
                 OnPropertyChanged("Task");
             }
         }
-
         /// <summary>
         /// Все приложения проекта обновлены
         /// </summary>
@@ -132,7 +133,6 @@ namespace FridayLib
                 OnPropertyChanged("AllApрsAreUpToDate");
             }
         }
-        
         /// <summary>
         /// Все приложения проекта прошли в реестр ППО
         /// </summary>
@@ -145,7 +145,6 @@ namespace FridayLib
                 OnPropertyChanged("AllAppsAreInReestr");
             }
         }
-
         /// <summary>
         /// Коллекция приложений данного проекта
         /// </summary>
@@ -158,7 +157,6 @@ namespace FridayLib
                 OnPropertyChanged("Apps");
             }
         }
-
         /// <summary>
         /// Коллекция для списка исходных текстов
         /// </summary>
@@ -171,18 +169,56 @@ namespace FridayLib
                 OnPropertyChanged("SourceTextFiles");
             }
         }
+        /// <summary>
+        /// Возможность управления проектом ограничена
+        /// </summary>
+        public bool Blocked
+        {
+            get { return blocked; }
+            set
+            {
+                blocked = value;
+                OnPropertyChanged("Blocked");
+            }
+        }
+        /// <summary>
+        /// Статус обработки проекта
+        /// </summary>
+        public string WorkStatus
+        {
+            get { return workStatus; }
+            set
+            {
+                workStatus = value;
+                OnPropertyChanged("WorkStatus");
+            }
+        }
+        #endregion
 
+        #region Public methods
 
+        #region Static
+        /// <summary>
+        /// Получить проект по его Id в коллекции
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="collection"></param>
+        /// <returns></returns>
         public static ControlledProject GetById(int id, IEnumerable<ControlledProject> collection)
         {
-            foreach(var prj in collection)
+            foreach (var prj in collection)
             {
                 if (prj.Id == id)
                     return prj;
             }
             return new ControlledProject();
         }
+        #endregion
 
+        #region Not static
+        /// <summary>
+        /// Обновить состояние проекта
+        /// </summary>
         public void UpdateState()
         {
             AllAppsAreInReestr = true;
@@ -195,7 +231,6 @@ namespace FridayLib
                     AllAppsAreInReestr = false;
             }
         }
-
         /// <summary>
         /// Актуализировать все приложения данного проекта
         /// </summary>
@@ -204,28 +239,64 @@ namespace FridayLib
         {
             try
             {
+                Blocked = true;
+                WorkStatus = "Актуализация проекта";
                 AllAppsAreInReestr = true;
                 AllApрsAreUpToDate = true;
-                for(int i=0;i<Apps.Count;i++)
+                for (int i = 0; i < Apps.Count; i++)
                 {
                     await Apps[i].CopyToFolderAsync(Apps[i].SourceDirectory, Apps[i].ReleaseDirectory);
-                    await Apps[i].UpdateMainFileInfoAsync();                    
+                    await Apps[i].UpdateMainFileInfoAsync();
                 }
                 UpdateState();
+                WorkStatus = "";
+                Blocked = false;
             }
             catch (Exception ex)
             {
                 MainClass.OnErrorInLibrary(string.Format("Ошибка обновления проекта {0}: {1}", Name, ex.Message));
             }
         }
-
+        /// <summary>
+        /// Подготовить документацию по проекту
+        /// </summary>
+        /// <returns></returns>
+        public async Task PrepareDocumentation()
+        {
+            Blocked = true;
+            WorkStatus = "Подготовка документации по проекту";
+            await System.Threading.Tasks.Task.Run(async () =>
+           {
+               LoadSourceTexts();
+               SaveSourceTextsAsExcel();
+               PrepareListing();
+               foreach (var app in Apps)
+               {
+                   await app.PrepareDocumentation();
+               }
+           });
+            WorkStatus = "";
+            Blocked = false;
+        }
+        /// <summary>
+        /// Подготовить листинг проекта
+        /// </summary>
+        private void PrepareListing()
+        {
+            WorkStatus = "Подготовка листинга";
+            FridayLib.Text_Module.Listing.CreateListing(this);
+        }
+        /// <summary>
+        /// Проверить новый/обноленный проект на совпадение с существующими
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> CheckEquals()
         {
             try
             {
-                foreach(var i in await DatabaseClass.CheckForEqual(this))
+                foreach (var i in await DatabaseClass.CheckForEqual(this))
                 {
-                    if(!i.Equals(Id))
+                    if (!i.Equals(Id))
                     {
                         return false;
                     }
@@ -238,23 +309,53 @@ namespace FridayLib
                 return false;
             }
         }
-
+        /// <summary>
+        /// Загрузить данные по списку исходных текстов
+        /// </summary>
+        public void LoadSourceTexts()
+        {
+            WorkStatus = "Загрузка данных по исходным текстам";
+            SourceTextFiles = SourceTextCreation.ScanFolder(WorkingDirectory, "", System.IO.Path.Combine(DocumentDirectory, "SourceTexts.txt"),
+                System.IO.Path.Combine(DocumentDirectory, "Ведомость исходных текстов.xlsx"));
+        }
+        /// <summary>
+        /// Сохранить исходные тексты в текстовом файле
+        /// </summary>
+        public void SaveSourceTextsAsText()
+        {
+            SourceTextCreation.SaveAsTextFile(SourceTextFiles, System.IO.Path.Combine(DocumentDirectory, "SourceTexts.txt"));
+        }
+        /// <summary>
+        /// Свормировать ведомость исходных текстов
+        /// </summary>
+        public void SaveSourceTextsAsExcel()
+        {
+            WorkStatus = "Подготовка ведомости исходных текстов";
+            SourceTextCreation.SaveAsExcel(SourceTextFiles, System.IO.Path.Combine(DocumentDirectory, "Ведомость исходных текстов.xlsx"));
+        }
+        /// <summary>
+        /// Клонировать объет проекта
+        /// </summary>
+        /// <returns></returns>
         public object Clone()
         {
             return new ControlledProject
             {
-                AllAppsAreInReestr= this.AllAppsAreInReestr,
+                AllAppsAreInReestr = this.AllAppsAreInReestr,
                 AllApрsAreUpToDate = this.AllApрsAreUpToDate,
-                Apps=this.Apps,
-                Category=this.Category,
-                DocumentDirectory=this.DocumentDirectory,
-                Id=this.Id,
-                Name=this.Name,
-                ReleaseDirectory=this.ReleaseDirectory,
+                Apps = this.Apps,
+                Category = this.Category,
+                DocumentDirectory = this.DocumentDirectory,
+                Id = this.Id,
+                Name = this.Name,
+                ReleaseDirectory = this.ReleaseDirectory,
                 SourceTextFiles = this.SourceTextFiles,
-                Task=this.Task,
-                WorkingDirectory=this.WorkingDirectory
+                Task = this.Task,
+                WorkingDirectory = this.WorkingDirectory
             };
-        }
+        }  
+        #endregion
+
+        #endregion
     }
 }

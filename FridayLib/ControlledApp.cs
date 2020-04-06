@@ -49,6 +49,8 @@ namespace FridayLib
         private string mainFileReleaseVersion = "";
         private string mainFileReleaseHash = "";
         private string mainFileReleaseDate = "";
+        private bool blocked;
+        private string workingStatus;
 
 
         /// <summary>
@@ -63,7 +65,6 @@ namespace FridayLib
                 OnPropertyChanged("Id");
             }
         }
-
         /// <summary>
         /// Имя приложения
         /// </summary>
@@ -75,8 +76,7 @@ namespace FridayLib
                 name = value;
                 OnPropertyChanged("Name");
             }
-        }
-        
+        }        
         /// <summary>
         /// Описание назначния приложения
         /// </summary>
@@ -88,8 +88,7 @@ namespace FridayLib
                 description = value;
                 OnPropertyChanged("Description");
             }
-        }
-        
+        }        
         /// <summary>
         /// Директория-источник
         /// </summary>
@@ -102,7 +101,6 @@ namespace FridayLib
                 OnPropertyChanged("SourceDirectory");
             }
         }
-
         /// <summary>
         /// Директория для релиза приложения
         /// </summary>
@@ -115,7 +113,6 @@ namespace FridayLib
                 OnPropertyChanged("ReleaseDirectory");
             }
         }
-
         /// <summary>
         /// Имя основного исполняемого файла
         /// </summary>
@@ -128,7 +125,6 @@ namespace FridayLib
                 OnPropertyChanged("MainFileName");
             }
         }
-
         /// <summary>
         /// Версия основного исполняемого файла
         /// </summary>
@@ -141,7 +137,6 @@ namespace FridayLib
                 OnPropertyChanged("MainFileVersion");
             }
         }
-
         /// <summary>
         /// Контрольная сумма (SHA1) основного исполняемого файла
         /// </summary>
@@ -154,7 +149,6 @@ namespace FridayLib
                 OnPropertyChanged("MainFileHash");
             }
         }
-
         /// <summary>
         /// Дата изменения основного исполняемого файла
         /// </summary>
@@ -167,7 +161,6 @@ namespace FridayLib
                 OnPropertyChanged("MainFileDate");
             }
         }
-
         /// <summary>
         /// Приложение в релизе актуально
         /// </summary>
@@ -180,7 +173,6 @@ namespace FridayLib
                 OnPropertyChanged("UpToDate");
             }
         }
-
         /// <summary>
         /// Статус проверки на прохождение в реестр ППО
         /// </summary>
@@ -192,8 +184,7 @@ namespace FridayLib
                 status = value;
                 OnPropertyChanged("Status");
             }
-        }
-        
+        }        
         /// <summary>
         /// Платформа
         /// </summary>
@@ -206,7 +197,6 @@ namespace FridayLib
                 OnPropertyChanged("Platform");
             }
         }
-
         /// <summary>
         /// Совместимые ОС
         /// </summary>
@@ -219,7 +209,6 @@ namespace FridayLib
                 OnPropertyChanged("CompatibleOSs");
             }
         }
-
         /// <summary>
         /// Совместимые SCADA
         /// </summary>
@@ -232,7 +221,6 @@ namespace FridayLib
                 OnPropertyChanged("CompatibleScadas");
             }
         }
-
         /// <summary>
         /// Совместимые СЗИ
         /// </summary>
@@ -245,7 +233,6 @@ namespace FridayLib
                 OnPropertyChanged("CompatibleSZI");
             }
         }
-
         /// <summary>
         /// Другие необходимые ПО с указанием версий и назначения
         /// </summary>
@@ -258,7 +245,6 @@ namespace FridayLib
                 OnPropertyChanged("OtherSoft");
             }
         }
-
         /// <summary>
         /// Тип идентификации и аутентификации
         /// </summary>
@@ -271,7 +257,6 @@ namespace FridayLib
                 OnPropertyChanged("IdentificationType");
             }
         }
-
         /// <summary>
         /// Тип авторизации
         /// </summary>
@@ -284,7 +269,6 @@ namespace FridayLib
                 OnPropertyChanged("AuthorizationType");
             }
         }
-
         /// <summary>
         /// Состав рзделяемых и локально хранимых данных
         /// </summary>
@@ -297,7 +281,6 @@ namespace FridayLib
                 OnPropertyChanged("LocalData");
             }
         }
-
         /// <summary>
         /// Используемая СУБД
         /// </summary>
@@ -310,7 +293,6 @@ namespace FridayLib
                 OnPropertyChanged("SUBD");
             }
         }
-
         /// <summary>
         /// Механизмы и средства хранения данных
         /// </summary>
@@ -323,7 +305,6 @@ namespace FridayLib
                 OnPropertyChanged("DataStoringMechanism");
             }
         }
-
         /// <summary>
         /// Компоненты требуемые для функционирования
         /// </summary>
@@ -336,7 +317,6 @@ namespace FridayLib
                 OnPropertyChanged("FunctionalComponents");
             }
         }
-
         /// <summary>
         /// Компоненты, требуемые для сборки
         /// </summary>
@@ -349,7 +329,6 @@ namespace FridayLib
                 OnPropertyChanged("BuildingComponents");
             }
         }
-
         /// <summary>
         /// Средства предоставления отчетности
         /// </summary>
@@ -362,7 +341,6 @@ namespace FridayLib
                 OnPropertyChanged("Report");
             }
         }
-
         /// <summary>
         /// Тип установщика
         /// </summary>
@@ -375,7 +353,6 @@ namespace FridayLib
                 OnPropertyChanged("Installer");
             }
         }
-
         /// <summary>
         /// Проект, к которому приналдежит приложение
         /// </summary>        
@@ -388,7 +365,6 @@ namespace FridayLib
                 OnPropertyChanged("Parent");
             }
         }
-
         /// <summary>
         /// допущено в реестр
         /// </summary>
@@ -401,7 +377,6 @@ namespace FridayLib
                 OnPropertyChanged("IsInReestr");
             }
         }
-
         /// <summary>
         /// Директория с документацией по проекту
         /// </summary>
@@ -414,7 +389,6 @@ namespace FridayLib
                 OnPropertyChanged("DocumentDirectory");
             }
         }
-
         /// <summary>
         /// Версия основного исполняемого файла в релизе
         /// </summary>
@@ -427,7 +401,6 @@ namespace FridayLib
                 OnPropertyChanged("MainFileReleaseVersion");
             }
         }
-
         /// <summary>
         /// Контрольная сумма (SHA1) основного исполняемого файла в релизе
         /// </summary>
@@ -440,7 +413,6 @@ namespace FridayLib
                 OnPropertyChanged("MainFileReleaseHash");
             }
         }
-
         /// <summary>
         /// Дата изменения основного исполняемого файла в релизе
         /// </summary>
@@ -452,8 +424,7 @@ namespace FridayLib
                 mainFileReleaseDate = value;
                 OnPropertyChanged("MainFileReleaseDate");
             }
-        }
-        
+        }        
         /// <summary>
         /// Предполагаемые категори пользователей
         /// </summary>
@@ -466,16 +437,46 @@ namespace FridayLib
                 OnPropertyChanged("UserCategories");
             }
         }
-
+        /// <summary>
+        /// Управление приложением ограничено
+        /// </summary>
+        public bool Blocked
+        {
+            get { return blocked; }
+            set
+            {
+                blocked = value;
+                OnPropertyChanged("Blocked");
+            }
+        }
+        /// <summary>
+        /// Статус обработки приложения
+        /// </summary>
+        public string WorkingStatus
+        {
+            get { return workingStatus; }
+            set
+            {
+                workingStatus = value;
+                OnPropertyChanged("WorkingStatus");
+            }
+        }
+        /// <summary>
+        /// Путь к оснвоному исполняемому файлу приложения 
+        /// </summary>
         public string MainFilePath
         {
             get { return Path.Combine(SourceDirectory, MainFileName); }
         }
+        /// <summary>
+        /// Путь к основному исполнямому файлу в релизе прилоения
+        /// </summary>
         public string MainFileReleasePath
         {
             get { return Path.Combine(ReleaseDirectory, MainFileName); }
         }
 
+        
 
         /// <summary>
         /// Обновить данные по основному исполняемому файлу в рабочей директории и в релизе
@@ -483,6 +484,8 @@ namespace FridayLib
         /// <returns></returns>
         public async Task UpdateMainFileInfoAsync()
         {
+            Blocked = true;
+            WorkingStatus = "Проверка актуальности приложения в релизе";
             await Task.Run(() =>
             {
                 MainFileDate = FileOperations.GetChangeDate(MainFilePath);
@@ -491,8 +494,11 @@ namespace FridayLib
                 MainFileReleaseDate = FileOperations.GetChangeDate(MainFileReleasePath);
                 MainFileReleaseHash = FileOperations.GetCheckSumm(MainFileReleasePath);
                 MainFileReleaseVersion = FileOperations.GetVersion(MainFileReleasePath);
-            });           
+            });     
+            GoogleScriptsClass.UpdateSheetsData(new List<ControlledApp>() { this});
             UpToDate = (MainFileVersion.Equals(MainFileReleaseVersion) && MainFileHash.Equals(MainFileReleaseHash));
+            WorkingStatus = "";
+            Blocked = false;
         }
 
         /// <summary>
@@ -516,18 +522,24 @@ namespace FridayLib
         /// <param name="source">Каталог-источник</param>
         /// <param name="dest">Католог-цель</param>
         /// <returns></returns>
-        public async Task CopyToFolderAsync(string source, string dest)
+        public async Task CopyToFolderAsync(string source, string dest, bool st=true)
         {
+            Blocked = true;
+            WorkingStatus = "Копирование файлов в релиз";
             try
             {
                 foreach(var dir in Directory.GetDirectories(source))
                 {
-                    await CopyToFolderAsync(dir, Path.Combine(dest, new DirectoryInfo(dir).Name));
+                    await CopyToFolderAsync(dir, Path.Combine(dest, new DirectoryInfo(dir).Name),false);
                 }
                 foreach(var file in Directory.GetFiles(source))
                 {
-                    if(Service.AllowedFileExtentions.Contains(new FileInfo(file).Extension))
+                    if(Service.GetListFromString(ServiceLib.Configuration.Configuration.Get("AllowedExtentions").ToString()).Contains(new FileInfo(file).Extension))
+                    {
+                        if (!Directory.Exists(dest))
+                            Directory.CreateDirectory(dest);
                         File.Copy(file, Path.Combine(dest, new FileInfo(file).Name), true);
+                    }
                 }
                 IsInReestr = false;
             }
@@ -535,25 +547,63 @@ namespace FridayLib
             {
                 MainClass.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
             }
+            if(st)
+            {
+                WorkingStatus = "";
+                Blocked = false;
+            }            
         }
-        public void CopyToFolder(string source, string dest)
+        public void CopyToFolder(string source, string dest, bool st = true)
         {
+            Blocked = true;
+            WorkingStatus = "Копирование файлов в релиз";
             try
             {
                 foreach (var dir in Directory.GetDirectories(source))
                 {
-                    CopyToFolder(dir, Path.Combine(dest, new DirectoryInfo(dir).Name));
+                    CopyToFolder(dir, Path.Combine(dest, new DirectoryInfo(dir).Name),false);
                 }
                 foreach (var file in Directory.GetFiles(source))
                 {
-                    if (Service.AllowedFileExtentions.Contains(new FileInfo(file).Extension))
+                    if (Service.GetListFromString(ServiceLib.Configuration.Configuration.Get("AllowedExtentions").ToString()).Contains(new FileInfo(file).Extension))
+                    {
+                        if(!Directory.Exists(dest))
+                            Directory.CreateDirectory(dest);
                         File.Copy(file, Path.Combine(dest, new FileInfo(file).Name), true);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 MainClass.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
             }
+            if (st)
+            {
+                WorkingStatus = "";
+                Blocked = false;
+            }
+        }
+        public async Task PrepareDocumentation()
+        {
+            Blocked = true;
+            WorkingStatus = "Подготовка документации";
+            await Task.Run(() =>
+            {
+                PrepareRequest();
+                PrepareFormular();
+            });
+            WorkingStatus = "";
+            Blocked = false;
+        }
+           
+        private void PrepareFormular()
+        {
+            Word_Module.DocumentCreation.CreateFormular(this);
+        }
+
+        private void PrepareRequest()
+        {
+            Word_Module.DocumentCreation.CreateRequest(this);
         }
 
         public async Task<bool> CheckEquals()
