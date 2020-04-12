@@ -27,7 +27,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при получении хеш-суммы: {0}",ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при получении хеш-суммы: {0}", ex.Message));
                 return "";
             }
         }
@@ -41,7 +41,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при получении даты изменения: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при получении даты изменения: {0}", ex.Message));
                 return "";
             }
         }
@@ -60,7 +60,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при получении версии: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при получении версии: {0}", ex.Message));
                 return "";
             }
         }

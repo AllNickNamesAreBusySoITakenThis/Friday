@@ -1,0 +1,40 @@
+﻿<dx:ThemedWindow
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+        xmlns:vm="clr-namespace:Frifull.ViewModels"
+        xmlns:local="clr-namespace:Frifull"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:cmd="http://www.galasoft.ch/mvvmlight"
+        xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+        xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+        xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"        
+        xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" x:Class="Frifull.MainWindow"
+        Title="Пятница" Height="350" Width="800" MinWidth="800" Icon="{dx:DXImage Image=BOTask_32x32.png}"
+     >
+    <dx:ThemedWindow.DataContext>
+        <vm:MainWindowViewModel />
+    </dx:ThemedWindow.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <!--<dxwui:AppBar  Margin="0" IsOpen="True" HideMode="AlwaysVisible">
+            <dxwui:AppBarButton  Label="Добавить проект" Glyph="{dx:DXImageGrayscale Image=Add_32x32.png}"  GlyphStretch="Uniform" IsEllipseEnabled="False"/>
+            <dxwui:AppBarButton Content="" Label="Актуализировать все" Glyph="{dx:DXImageGrayscale Image=TimeLineView_32x32.png}" IsEllipseEnabled="False"/>
+            <dxwui:AppBarButton Label="Обновить данные" Glyph="{dx:DXImageGrayscale Image=Refresh_32x32.png}" IsEllipseEnabled="False"/>
+            <dxwui:AppBarButton Label="Настройки" HorizontalAlignment="Right" IsEllipseEnabled="False" Glyph="{dx:DXImageGrayscale Image=Customization_32x32.png}"/>
+        </dxwui:AppBar>-->
+        <dxwui:NavigationFrame  AnimationType="SlideHorizontal" Grid.Row="1" Margin="5">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Navigating">
+                    <cmd:EventToCommand Command="{Binding DataContext.NavigatingCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"  PassEventArgsToCommand="True" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <dxwui:NavigationFrame.Source>
+                <local:ProjectManagerControl ItemsSource="{Binding Projects}"/>
+            </dxwui:NavigationFrame.Source>
+        </dxwui:NavigationFrame>
+    </Grid>
+</dx:ThemedWindow>

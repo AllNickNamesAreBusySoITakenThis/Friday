@@ -25,7 +25,7 @@ namespace FridayLib.Text_Module
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка создания листинга проекта {0}: {1}", project.Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка создания листинга проекта {0}: {1}", project.Name, ex.Message));
             }
         }
         internal static List<string> ScanFolder(string folder)
@@ -55,7 +55,7 @@ namespace FridayLib.Text_Module
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary( string.Format("Ошибка сканироания папки: {0}\r\n", ex.Message));
+                Service.OnErrorInLibrary( string.Format("Ошибка сканироания папки: {0}\r\n", ex.Message));
                 return null;
             }
         }
@@ -66,7 +66,7 @@ namespace FridayLib.Text_Module
                 List<string> result = new List<string>();
                 if (fileInfo.Extension == ".cs" | fileInfo.Extension == ".xaml")
                 {
-                    result.Add("-------------" + fileInfo.Name + "-------------");
+                    result.Add(string.Format("-------------{0}-------------", fileInfo.Name));
                     result.Add("");
                     result.AddRange(File.ReadAllLines(fileInfo.FullName));
                     result.Add("");
@@ -76,7 +76,7 @@ namespace FridayLib.Text_Module
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка добавления файла в листинг {0}: {1}\r\n", fileInfo.Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка добавления файла в листинг {0}: {1}\r\n", fileInfo.Name, ex.Message));
                 return null;
             }
         }

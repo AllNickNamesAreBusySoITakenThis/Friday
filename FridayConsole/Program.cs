@@ -11,7 +11,7 @@ namespace FridayConsole
     {
         static void Main(string[] args)
         {
-            MainClass.ErrorInLibrary += MainClass_ErrorInLibrary;
+            //MainClass.ErrorInLibrary += MainClass_ErrorInLibrary;
             //ControlledProject project = new ControlledProject()
             //{
             //    Id = 0,
@@ -59,36 +59,36 @@ namespace FridayConsole
             //DatabaseClass.AddProject(project);
             //DatabaseClass.AddApp(app);
 
-            var projects = DatabaseClass.GetProjects().Result;
-            for (int i = 0; i < projects.Count; i++)
-            {
-                projects[i] = DatabaseClass.GetAppsForProject(projects[i]).Result;
-            }
-            foreach (var prj in projects)
-            {
-                foreach (var app in prj.Apps)
-                {
-                    //app.UpdateMainFileInfo();
-                    //app.CopyToFolderAsync(app.SourceDirectory, app.ReleaseDirectory);
-                    //Console.WriteLine("Begin preparing formular");
-                    //FridayLib.Word_Module.DocumentCreation.CreateFormular(app);
-                    //Console.WriteLine("{0} - {1}", prj.Name, app.Name);
-                    //app.UpdateMainFileInfo();
-                    //DatabaseClass.UpdateApp(app);
-                    GoogleScriptsClass.AddDataToSheet(app);
+            //var projects = DatabaseClass.GetProjects().Result;
+            //for (int i = 0; i < projects.Count; i++)
+            //{
+            //    projects[i] = DatabaseClass.GetAppsForProject(projects[i]).Result;
+            //}
+            //foreach (var prj in projects)
+            //{
+            //    foreach (var app in prj.Apps)
+            //    {
+            //        //app.UpdateMainFileInfo();
+            //        //app.CopyToFolderAsync(app.SourceDirectory, app.ReleaseDirectory);
+            //        //Console.WriteLine("Begin preparing formular");
+            //        //FridayLib.Word_Module.DocumentCreation.CreateFormular(app);
+            //        //Console.WriteLine("{0} - {1}", prj.Name, app.Name);
+            //        //app.UpdateMainFileInfo();
+            //        //DatabaseClass.UpdateApp(app);
+            //        GoogleScriptsClass.AddDataToSheet(app);
                     
-                }
-                //GoogleScriptsClass.UpdateSheetsData(prj.Apps);
-                //Console.WriteLine("Запуск формирования листинга для проекта {0}",prj.Name);
-                //FridayLib.Text_Module.Listing.CreateListing(prj);
-                //Console.WriteLine("Окончено формирования листинга для проекта {0}", prj.Name);
-                //Console.WriteLine("Запуск формирования ведомости исходных текстов для проекта {0}", prj.Name);
-                //SourceTextCreation.CreateSourceTextList(prj);
-                //Console.WriteLine("Окончено формирования ведомости исходных текстов для проекта {0}", prj.Name);
-            }
+            //    }
+            //    //GoogleScriptsClass.UpdateSheetsData(prj.Apps);
+            //    //Console.WriteLine("Запуск формирования листинга для проекта {0}",prj.Name);
+            //    //FridayLib.Text_Module.Listing.CreateListing(prj);
+            //    //Console.WriteLine("Окончено формирования листинга для проекта {0}", prj.Name);
+            //    //Console.WriteLine("Запуск формирования ведомости исходных текстов для проекта {0}", prj.Name);
+            //    //SourceTextCreation.CreateSourceTextList(prj);
+            //    //Console.WriteLine("Окончено формирования ведомости исходных текстов для проекта {0}", prj.Name);
+            //}
 
-            //
-            Console.Read();
+            ////
+            //Console.Read();
         }
 
         private static void MainClass_ErrorInLibrary(string message)

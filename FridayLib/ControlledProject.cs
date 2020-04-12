@@ -217,25 +217,19 @@ namespace FridayLib
 
         #region Not static
         /// <summary>
-        /// Обновить состояние проекта
+        /// Добавить приложение
         /// </summary>
-        public void UpdateState()
+        public async void AddApp()
         {
-            AllAppsAreInReestr = true;
-            AllApрsAreUpToDate = true;
-            for (int i = 0; i < Apps.Count; i++)
-            {
-                if (!Apps[i].UpToDate)
-                    AllApрsAreUpToDate = false;
-                if (!Apps[i].IsInReestr)
-                    AllAppsAreInReestr = false;
-            }
+            ControlledApp app = new ControlledApp() { Name = "Новое приложение", Parent=this, Id = GetNewAppId() };
+            Apps.Add(app);
+            await DatabaseClass.AddApp(app);
         }
         /// <summary>
         /// Актуализировать все приложения данного проекта
         /// </summary>
         /// <returns></returns>
-        public async Task Update()
+        public async Task Actualize()
         {
             try
             {
@@ -254,7 +248,42 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка обновления проекта {0}: {1}", Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка обновления проекта {0}: {1}", Name, ex.Message));
+            }
+        }
+        /// <summary>
+        /// Обновить состояние проекта
+        /// </summary>
+        public void UpdateState()
+        {
+            AllAppsAreInReestr = true;
+            AllApрsAreUpToDate = true;
+            for (int i = 0; i < Apps.Count; i++)
+            {
+                if (!Apps[i].UpToDate)
+                    AllApрsAreUpToDate = false;
+                if (!Apps[i].IsInReestr)
+                    AllAppsAreInReestr = false;
+            }
+        }
+        /// <summary>
+        /// Получить приложения для проекта
+        /// </summary>
+        public async void GetApps()
+        {
+            Apps = new ObservableCollection<ControlledApp>();
+            Apps = await DatabaseClass.GetAppsForProject(this);
+            UpdateState();
+        }
+        /// <summary>
+        /// Обновить информацию о проекте
+        /// </summary>
+        public async void UpdateInfo()
+        {
+            await DatabaseClass.UpdateProject(this);
+            foreach (var app in Apps)
+            {
+                app.Update();
             }
         }
         /// <summary>
@@ -305,7 +334,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", Name, ex.Message));
                 return false;
             }
         }
@@ -354,8 +383,30 @@ namespace FridayLib
                 WorkingDirectory = this.WorkingDirectory
             };
         }  
+       
+        /// <summary>
+        /// Удалить приложение
+        /// </summary>
+        /// <param name="app"></param>
+        public async void RemoveApp(ControlledApp app)
+        {
+            await DatabaseClass.DeleteApp(app);
+            Apps.Remove(app);
+        }
         #endregion
 
+        #endregion
+        #region Private methods
+        int GetNewAppId()
+        {
+            int id = 0;
+            foreach(var app in Apps)
+            {
+                if (app.Id == id)
+                    id = app.Id + 1;
+            }
+            return id;
+        }
         #endregion
     }
 }

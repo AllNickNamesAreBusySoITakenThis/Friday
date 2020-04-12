@@ -79,7 +79,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при сканировании папки: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при сканировании папки: {0}", ex.Message));
                 return new ObservableCollection<SourceTextFile>();
             }
         }
@@ -106,7 +106,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при сохранении файла данных об исходных кодах: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при сохранении файла данных об исходных кодах: {0}", ex.Message));
             }
         }
         /// <summary>
@@ -128,7 +128,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при чтении файла данных об исходных кодах: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при чтении файла данных об исходных кодах: {0}", ex.Message));
                 return new ObservableCollection<SourceTextFile>();
             }
         }
@@ -175,7 +175,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при создании таблицы исходных кодов: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при создании таблицы исходных кодов: {0}", ex.Message));
             }
         }
 
@@ -223,7 +223,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при прочтении таблицы исходных кодов: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при прочтении таблицы исходных кодов: {0}", ex.Message));
                 return new ObservableCollection<SourceTextFile>();
             }
         }
@@ -238,7 +238,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при сохранении исходных текстов: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при сохранении исходных текстов: {0}", ex.Message));
             }
         }
 
@@ -264,7 +264,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при создании исходных текстов: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при создании исходных текстов: {0}", ex.Message));
                 return new ObservableCollection<SourceTextFile>();
             }
         }

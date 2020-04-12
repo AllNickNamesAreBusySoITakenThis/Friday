@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,24 +62,27 @@ namespace FridayLib
     }
     public enum PPOTasks
     {
-        [Description("ППО, созданное с целью реализации функций, дополняющих базовый функционал SCADA-систем")]
+        //[Description("ППО, созданное с целью реализации функций, дополняющих базовый функционал SCADA-систем")]
+        [Display(Name = "Дополнение SCADA", Description = "ППО, созданное с целью реализации функций, дополняющих базовый функционал SCADA-систем")]
         SCADA_Addons,
         [Description("ОС. Дополнение функционала")]
+        [Display(Name = "Дополнение ОС", Description = "ОС. Дополнение функционала")]
         OS_Addons,
         [Description("Информационная безопасность")]
+        [Display(Name = "Информационная безопасность", Description = "Информационная безопасность")]
         IB
     }
     public enum PPOReestrStatus
     {
-        [Description("Проверка не требуется")]
+        [Display(Name = "Проверка не требуется", Description = "Приложение не требуется регистрировать в реестре ППО")]
         TestsNotNeeded,
-        [Description("Не проверено")]
+        [Display(Name = "Проверка не проводилась", Description = "Приложение не требуется регистрировать в реестре ППО")]
         NotTested,
-        [Description("Проверяется")]
+        [Display(Name = "Находится на проверке", Description = "Приложение не требуется регистрировать в реестре ППО")]
         OnTesting,
-        [Description("Прошла проверку")]
+        [Display(Name = "Прошел проверку", Description = "Приложение не требуется регистрировать в реестре ППО")]
         PassTests,
-        [Description("Не прошла проверку")]
+        [Display(Name = "Провалил проверку", Description = "Приложение не требуется регистрировать в реестре ППО")]
         FailTests
     }
     public enum MoveDirection

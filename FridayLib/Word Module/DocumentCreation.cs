@@ -73,7 +73,7 @@ namespace FridayLib.Word_Module
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка в формировании строки {0} описания принятых решений: {1}", paragraph, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка в формировании строки {0} описания принятых решений: {1}", paragraph, ex.Message));
             }
         }
         /// <summary>
@@ -180,7 +180,7 @@ namespace FridayLib.Word_Module
             }
             catch(Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка создания заявки для приложения {0}: {1}", app.Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка создания заявки для приложения {0}: {1}", app.Name, ex.Message));
             }
         }
         /// <summary>
@@ -249,7 +249,7 @@ namespace FridayLib.Word_Module
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка создания описания принятых решений для приложения {0}: {1}", app.Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка создания описания принятых решений для приложения {0}: {1}", app.Name, ex.Message));
             }
         }
     }

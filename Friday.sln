@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29503.13
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FridayLib", "FridayLib\FridayLib.csproj", "{F7A25713-2999-4BB3-891B-6CB790E1A2C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FridayConsole", "FridayConsole\FridayConsole.csproj", "{FFD9797E-F031-4062-BACF-01C0E700800E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFriday", "SimpleFriday\SimpleFriday.csproj", "{919CDAC0-6874-4657-B00B-2634AF062D7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frifull", "Frifull\Frifull.csproj", "{12CC90A8-3DE7-4D76-808F-FE0FEE8B6AE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,14 @@ Global
 		{919CDAC0-6874-4657-B00B-2634AF062D7B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{919CDAC0-6874-4657-B00B-2634AF062D7B}.Release|x86.ActiveCfg = Release|x86
 		{919CDAC0-6874-4657-B00B-2634AF062D7B}.Release|x86.Build.0 = Release|x86
+		{12CC90A8-3DE7-4D76-808F-FE0FEE8B6AE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12CC90A8-3DE7-4D76-808F-FE0FEE8B6AE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12CC90A8-3DE7-4D76-808F-FE0FEE8B6AE6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{12CC90A8-3DE7-4D76-808F-FE0FEE8B6AE6}.Debug|x86.Build.0 = Debug|Any CPU
+		{12CC90A8-3DE7-4D76-808F-FE0FEE8B6AE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12CC90A8-3DE7-4D76-808F-FE0FEE8B6AE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12CC90A8-3DE7-4D76-808F-FE0FEE8B6AE6}.Release|x86.ActiveCfg = Release|Any CPU
+		{12CC90A8-3DE7-4D76-808F-FE0FEE8B6AE6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

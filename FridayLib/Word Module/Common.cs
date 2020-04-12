@@ -45,7 +45,7 @@ namespace FridayLib.Word_Module
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка создания документа: {0}",ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка создания документа: {0}",ex.Message));
                 return null;
             }
         }
@@ -81,7 +81,7 @@ namespace FridayLib.Word_Module
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка сохранения документа: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка сохранения документа: {0}", ex.Message));
             }
         }
 

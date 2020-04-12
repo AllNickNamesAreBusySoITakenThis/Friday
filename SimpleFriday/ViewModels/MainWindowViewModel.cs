@@ -208,7 +208,7 @@ namespace SimpleFriday.ViewModels
                 temp.Id = (project as ControlledProject).Apps.Count;
                 temp.Parent = (project as ControlledProject);
                 (project as ControlledProject).Apps.Add(temp);
-                GoogleScriptsClass.AddDataToSheet((project as ControlledProject).Apps.Last());
+                //GoogleScriptsClass.AddDataToSheet((project as ControlledProject).Apps.Last());
                 await (project as ControlledProject).Apps.Last().UpdateMainFileInfoAsync();
                 (project as ControlledProject).UpdateState();
                 await DatabaseClass.AddApp((project as ControlledProject).Apps.Last());                
@@ -322,7 +322,7 @@ namespace SimpleFriday.ViewModels
                 Status = "Актуализация всего ПО";
                 foreach (var prj in Projects)
                 {
-                    await prj.Update();
+                    await prj.Actualize();
                 }
             });
             

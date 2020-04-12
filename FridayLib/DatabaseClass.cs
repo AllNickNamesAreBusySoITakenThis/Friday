@@ -28,7 +28,7 @@ namespace FridayLib
             }
             catch(Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось подключиться к БД: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось подключиться к БД: {0}", ex.Message));
                 return null;
             }            
         }
@@ -48,7 +48,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось подключиться к БД: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось подключиться к БД: {0}", ex.Message));
                 return null;
             }
         }
@@ -66,7 +66,7 @@ namespace FridayLib
             }
             catch(Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось отключиться от БД: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось отключиться от БД: {0}", ex.Message));
             }
         }
         /// <summary>
@@ -95,7 +95,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки существования таблицы в БД: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка проверки существования таблицы в БД: {0}", ex.Message));
                 return false;
             }
         }
@@ -146,7 +146,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка создания таблицы приложений: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка создания таблицы приложений: {0}", ex.Message));
             }
         }
 
@@ -175,7 +175,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка создания таблицы приложений: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка создания таблицы приложений: {0}", ex.Message));
             }
         }
 
@@ -228,7 +228,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось получить перечень проектов из БД: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось получить перечень проектов из БД: {0}", ex.Message));
                 return new ObservableCollection<ControlledProject>();
             }
         }
@@ -263,7 +263,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось сохранить проект в БД: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось сохранить проект в БД: {0}", ex.Message));
             }
         }
 
@@ -293,7 +293,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось обновитб проект в БД: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось обновитб проект в БД: {0}", ex.Message));
             }
         }
         /// <summary>
@@ -319,7 +319,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось удалить данные по проекту {0} в БД: {1}", prj.Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось удалить данные по проекту {0} в БД: {1}", prj.Name, ex.Message));
             }
         }
 
@@ -344,7 +344,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки уникальности проекта в БД: {0}",ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности проекта в БД: {0}",ex.Message));
                 return new List<int>();
             }
         }
@@ -358,10 +358,11 @@ namespace FridayLib
         /// </summary>
         /// <param name="prj"></param>
         /// <returns></returns>
-        public async static Task<ControlledProject> GetAppsForProject(ControlledProject prj)
+        public async static Task<ObservableCollection<ControlledApp>> GetAppsForProject(ControlledProject prj)
         {
             try
             {
+                ObservableCollection<ControlledApp> result = new ObservableCollection<ControlledApp>();
                 using (var Connection = await ConnectAsync())
                 {
                     if (Connection != null)
@@ -370,7 +371,7 @@ namespace FridayLib
                         {
                             await CreateAppTable();
                             Disconnect(Connection);
-                            return prj;
+                            return result;
                         }
                         var command = Connection.CreateCommand();
                         command.CommandText = string.Format("SELECT AppId, ProjectId, Name, ReleaseDirectory, SourceDirectory, DocumentDirectory,Description,MainFileName" +
@@ -379,7 +380,7 @@ namespace FridayLib
                         var reader = await command.ExecuteReaderAsync();
                         while (await reader.ReadAsync())
                         {
-                            prj.Apps.Add(new ControlledApp
+                            result.Add(new ControlledApp
                             {
                                 Parent = prj,
                                 Id = Convert.ToInt32(reader["AppId"]),
@@ -417,17 +418,16 @@ namespace FridayLib
                         throw new Exception("Ошибка подключения!");
                 }
 
-                foreach (var app in prj.Apps)
+                foreach (var app in result)
                 {
                     await app.UpdateMainFileInfoAsync();                    
-                }
-                prj.UpdateState();
-                return prj;
+                }                
+                return result;
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось получить перечень приложений для проекта {0} из БД: {1}", prj.Name, ex.Message));
-                return prj;
+                Service.OnErrorInLibrary(string.Format("Не удалось получить перечень приложений для проекта {0} из БД: {1}", prj.Name, ex.Message));
+                return new ObservableCollection<ControlledApp>();
             }
         }
 
@@ -463,7 +463,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось сохранить данные по приложению {0} в БД: {1}", app.Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось сохранить данные по приложению {0} в БД: {1}", app.Name, ex.Message));
             }
         }
 
@@ -494,7 +494,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось обновить данные по приложению {0} в БД: {1}", app.Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось обновить данные по приложению {0} в БД: {1}", app.Name, ex.Message));
             }
         }
 
@@ -517,7 +517,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Не удалось удалить данные по приложению {0} в БД: {1}", app.Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Не удалось удалить данные по приложению {0} в БД: {1}", app.Name, ex.Message));
             }
         }
 
@@ -542,7 +542,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки уникальности проекта в БД: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности проекта в БД: {0}", ex.Message));
                 return new List<int>();
             }
         }
@@ -550,96 +550,6 @@ namespace FridayLib
         #endregion
 
 
-        public static ObservableCollection<CFile> GetFileData()
-        {
-            try
-            {
-                ObservableCollection<CFile> cFiles = new ObservableCollection<CFile>();
-                var connection = Connect();
-                if(connection!=null)
-                {
-                    string query = string.Format("SELECT ID,ProjectName, SourceDir, ReleaseDir, RelatievePath, LastHash, Date, Version FROM dbo.Friday");
-                    SqlCommand command = connection.CreateCommand();
-                    command.CommandText = query;
-                    SqlDataReader reader = command.ExecuteReader();
-                    while(reader.Read())
-                    {
-                        var cFile = new CFile()
-                        {
-                            Name = reader["RelatievePath"].ToString(),
-                            SourcePath = reader["SourceDir"].ToString(),
-                            ReleasePath = reader["ReleaseDir"].ToString(),
-                            ID = Convert.ToInt32(reader["ID"]),
-                            ProjectName = reader["ProjectName"].ToString()
-                        };
-                        cFiles.Add(cFile);
-                    }
-                }
-                return cFiles;
-            }
-            catch(Exception ex)
-            {
-                return new ObservableCollection<CFile>();
-            }
-        }
-
-        public static void UpdateCFile(CFile file)
-        {
-            try
-            {
-                var connection = Connect();
-                if (connection != null)
-                {
-                    string query = string.Format("UPDATE dbo.Friday SET ProjectName = N'{5}', SourceDir=N'{0}', ReleaseDir = N'{1}', RelatievePath = N'{2}' WHERE ID = {4}", 
-                        file.SourcePath, file.ReleasePath, file.Name, file.SourceHash, file.ID, file.ProjectName);
-                    SqlCommand command = connection.CreateCommand();
-                    command.CommandText = query;
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch(Exception ex)
-            {
-
-            }
-        }
-
-        public static void AddCFile(CFile file)
-        {
-            try
-            {
-                var connection = Connect();
-                if (connection != null)
-                {
-                    string query = string.Format("INSERT INTO dbo.Friday (ID, SourceDir, ReleaseDir, RelatievePath, ProjectName) VALUES ({0},N'{1}',N'{2}',N'{3}',N'{4}')",
-                        file.ID,file.SourcePath, file.ReleasePath, file.Name, file.ProjectName);
-                    SqlCommand command = connection.CreateCommand();
-                    command.CommandText = query;
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
-
-        public static void DeleteCFile(CFile file)
-        {
-            try
-            {
-                var connection = Connect();
-                if (connection != null)
-                {
-                    string query = string.Format("DELETE FROM dbo.Friday WHERE ID={0}", file.ID);
-                    SqlCommand command = connection.CreateCommand();
-                    command.CommandText = query;
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
+        
     }
 }

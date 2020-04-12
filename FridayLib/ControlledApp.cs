@@ -56,6 +56,7 @@ namespace FridayLib
         /// <summary>
         /// Идентификатор приложения
         /// </summary>
+        [Category("Common")]
         public int Id
         {
             get { return id; }
@@ -65,6 +66,7 @@ namespace FridayLib
                 OnPropertyChanged("Id");
             }
         }
+        [Category("Common"), Description("Имя приложения"), DisplayName("Название")]
         /// <summary>
         /// Имя приложения
         /// </summary>
@@ -76,10 +78,11 @@ namespace FridayLib
                 name = value;
                 OnPropertyChanged("Name");
             }
-        }        
+        }
         /// <summary>
         /// Описание назначния приложения
         /// </summary>
+        [Category("Common"), Description("Описание назначения приложения"), DisplayName("Описание")]
         public string Description
         {
             get { return description; }
@@ -88,10 +91,11 @@ namespace FridayLib
                 description = value;
                 OnPropertyChanged("Description");
             }
-        }        
+        }
         /// <summary>
         /// Директория-источник
         /// </summary>
+        [Category("Dir"), Description("Директория, где расположена последняя собранная версияя"), DisplayName("Рабочая директория")]
         public string SourceDirectory
         {
             get { return sourceDirectory; }
@@ -104,6 +108,7 @@ namespace FridayLib
         /// <summary>
         /// Директория для релиза приложения
         /// </summary>
+        [Category("Dir"), Description("Директория с релизной версией приложения"), DisplayName("Релиз")]
         public string ReleaseDirectory
         {
             get { return releaseDirectory; }
@@ -116,6 +121,7 @@ namespace FridayLib
         /// <summary>
         /// Имя основного исполняемого файла
         /// </summary>
+        [Category("Dir"), Description("Имя основного исполняемого файла"), DisplayName("Исполняемый файл")]
         public string MainFileName
         {
             get { return mainFileName; }
@@ -176,6 +182,7 @@ namespace FridayLib
         /// <summary>
         /// Статус проверки на прохождение в реестр ППО
         /// </summary>
+        [Category("Formular"), Description("Статус приложения в реестре ППО"), DisplayName("Статус в реестре")]
         public PPOReestrStatus Status
         {
             get { return status; }
@@ -184,10 +191,11 @@ namespace FridayLib
                 status = value;
                 OnPropertyChanged("Status");
             }
-        }        
+        }
         /// <summary>
         /// Платформа
         /// </summary>
+        [Category("Formular"), Description("Исполняемая среда каждого из звеньев приложения"), DisplayName("Платформа")]
         public string Platform
         {
             get { return platform; }
@@ -200,6 +208,7 @@ namespace FridayLib
         /// <summary>
         /// Совместимые ОС
         /// </summary>
+        [Category("Formular"), Description("Соваместимые версии ОС"), DisplayName("Совместимые ОС")]
         public string CompatibleOSs
         {
             get { return compatibleOSs; }
@@ -212,6 +221,7 @@ namespace FridayLib
         /// <summary>
         /// Совместимые SCADA
         /// </summary>
+        [Category("Formular"), Description("Совместимые SCADA с указанием версий"), DisplayName("Совместимые SCADA")]
         public string CompatibleScadas
         {
             get { return compatibleScadas; }
@@ -224,6 +234,7 @@ namespace FridayLib
         /// <summary>
         /// Совместимые СЗИ
         /// </summary>
+        [Category("Formular"), Description("Совместимые СЗИ с указанием версий"), DisplayName("Совместимые СЗИ")]
         public string CompatibleSZI
         {
             get { return compatibleSZI; }
@@ -236,6 +247,7 @@ namespace FridayLib
         /// <summary>
         /// Другие необходимые ПО с указанием версий и назначения
         /// </summary>
+        [Category("Formular"), Description("Другие необходимые типы ПО с указанием версий"), DisplayName("Прочее ПО")]
         public string OtherSoft
         {
             get { return otherSoft; }
@@ -248,6 +260,7 @@ namespace FridayLib
         /// <summary>
         /// Тип идентификации и аутентификации
         /// </summary>
+        [Category("Formular"), Description("Тип идентификации и аутентификации"), DisplayName("Тип идентификации")]
         public string IdentificationType
         {
             get { return identificationType; }
@@ -260,6 +273,7 @@ namespace FridayLib
         /// <summary>
         /// Тип авторизации
         /// </summary>
+        [Category("Formular"), Description("Тип авторизации"), DisplayName("Авторизация")]
         public string AuthorizationType
         {
             get { return authorizationType; }
@@ -272,6 +286,7 @@ namespace FridayLib
         /// <summary>
         /// Состав рзделяемых и локально хранимых данных
         /// </summary>
+        [Category("Formular"), Description("Состав разделяемых и локально хранимых данных"), DisplayName("Локальные данные")]
         public string LocalData
         {
             get { return localData; }
@@ -284,6 +299,7 @@ namespace FridayLib
         /// <summary>
         /// Используемая СУБД
         /// </summary>
+        [Category("Formular"), Description("Используемые СУБД"), DisplayName("СУБД")]
         public string SUBD
         {
             get { return subd; }
@@ -296,6 +312,7 @@ namespace FridayLib
         /// <summary>
         /// Механизмы и средства хранения данных
         /// </summary>
+        [Category("Formular"), Description("Механизмы и средства хранения локальных данных"), DisplayName("Механизмы хранения данных")]
         public string DataStoringMechanism
         {
             get { return dataStoringMechanism; }
@@ -308,6 +325,7 @@ namespace FridayLib
         /// <summary>
         /// Компоненты требуемые для функционирования
         /// </summary>
+        [Category("Formular"), Description("Компоненты и платформы, требуемые для функционирования приложения"), DisplayName("Компоненты для функционирования")]
         public string FunctionalComponents
         {
             get { return functionalComponents; }
@@ -320,6 +338,7 @@ namespace FridayLib
         /// <summary>
         /// Компоненты, требуемые для сборки
         /// </summary>
+        [Category("Formular"), Description("Компоненты и платформы, требуемые для сборки приложения"), DisplayName("Компоненты для сборки")]
         public string BuildingComponents
         {
             get { return buildingComponents; }
@@ -332,6 +351,7 @@ namespace FridayLib
         /// <summary>
         /// Средства предоставления отчетности
         /// </summary>
+        [Category("Formular"), Description("Средства предоставления отчетности"), DisplayName("Отчетность")]
         public string Report
         {
             get { return report; }
@@ -344,6 +364,7 @@ namespace FridayLib
         /// <summary>
         /// Тип установщика
         /// </summary>
+        [Category("Formular"), Description("Тип установщика"), DisplayName("Установщик")]
         public string Installer
         {
             get { return installer; }
@@ -380,6 +401,7 @@ namespace FridayLib
         /// <summary>
         /// Директория с документацией по проекту
         /// </summary>
+        [Category("Dir"), Description("Директория документации проекта"), DisplayName("Директория документации")]
         public string DocumentDirectory
         {
             get { return documentDirectopry; }
@@ -424,10 +446,11 @@ namespace FridayLib
                 mainFileReleaseDate = value;
                 OnPropertyChanged("MainFileReleaseDate");
             }
-        }        
+        }
         /// <summary>
         /// Предполагаемые категори пользователей
         /// </summary>
+        [Category("Formular"), Description("Предполагаемые категории пользователей"), DisplayName("Категории пользователей")]
         public string UserCategories
         {
             get { return userCategories; }
@@ -495,7 +518,7 @@ namespace FridayLib
                 MainFileReleaseHash = FileOperations.GetCheckSumm(MainFileReleasePath);
                 MainFileReleaseVersion = FileOperations.GetVersion(MainFileReleasePath);
             });     
-            GoogleScriptsClass.UpdateSheetsData(new List<ControlledApp>() { this});
+            //GoogleScriptsClass.UpdateSheetsData(new List<ControlledApp>() { this});
             UpToDate = (MainFileVersion.Equals(MainFileReleaseVersion) && MainFileHash.Equals(MainFileReleaseHash));
             WorkingStatus = "";
             Blocked = false;
@@ -545,7 +568,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
             }
             if(st)
             {
@@ -575,7 +598,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка копирования в релиз: {0}", ex.Message));
             }
             if (st)
             {
@@ -621,7 +644,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по приложению {0}: {1}", Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по приложению {0}: {1}", Name, ex.Message));
                 return false;
             }
         }
@@ -671,6 +694,17 @@ namespace FridayLib
                 UpToDate = this.UpToDate,
                 UserCategories=this.UserCategories                
             };
+        }
+        /// <summary>
+        /// Обновить данные о приложении в БД
+        /// </summary>
+        public async void Update()
+        {
+            await DatabaseClass.UpdateApp(this);
+        }
+        public async void Remove()
+        {
+            
         }
     }
 }

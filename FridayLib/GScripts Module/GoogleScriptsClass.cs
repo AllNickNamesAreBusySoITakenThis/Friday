@@ -88,7 +88,7 @@ namespace FridayLib
             }
             catch (Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при обновлении таблицы Google: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при обновлении таблицы Google: {0}", ex.Message));
             }
 
         }
@@ -171,7 +171,7 @@ namespace FridayLib
             }
             catch(Exception ex)
             {
-                MainClass.OnErrorInLibrary(string.Format("Ошибка при добавлениии данных в таблицу Google: {0}", ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка при добавлениии данных в таблицу Google: {0}", ex.Message));
             }
 
         }
