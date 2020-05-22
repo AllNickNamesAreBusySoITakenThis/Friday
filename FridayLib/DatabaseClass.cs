@@ -390,9 +390,9 @@ namespace FridayLib
                                 DocumentDirectory = reader["DocumentDirectory"].ToString(),
                                 Description = reader["Description"].ToString(),
                                 MainFileName = reader["MainFileName"].ToString(),
-                                MainFileReleaseHash = reader["MainFileReleaseHash"].ToString(),
-                                MainFileReleaseVersion = reader["MainFileReleaseVersion"].ToString(),
-                                MainFileReleaseDate = reader["MainFileReleaseDate"].ToString(),
+                                //MainFileReleaseHash = reader["MainFileReleaseHash"].ToString(),
+                                //MainFileReleaseVersion = reader["MainFileReleaseVersion"].ToString(),
+                                //MainFileReleaseDate = reader["MainFileReleaseDate"].ToString(),
                                 Status = (PPOReestrStatus)Convert.ToInt32(reader["Status"]),
                                 CompatibleOSs = reader["CompatibleOSs"].ToString(),
                                 CompatibleScadas = reader["CompatibleScadas"].ToString(),
@@ -420,7 +420,7 @@ namespace FridayLib
 
                 foreach (var app in result)
                 {
-                    await app.UpdateMainFileInfoAsync();                    
+                    await app.UpdateFileInfoAsync();                    
                 }                
                 return result;
             }
@@ -453,8 +453,8 @@ namespace FridayLib
                                 ",MainFileReleaseHash,MainFileReleaseVersion,MainFileReleaseDate,Status,CompatibleOSs,CompatibleScadas,CompatibleSZI,IdentificationType,Installer,Report" +
                                 ",BuildingComponents,FunctionalComponents,DataStoringMechanism,SUBD,LocalData,AuthorizationType,Platform,OtherSoft,IsInReestr, UserCategories) VALUES (" +
                                 "{0},{1},'{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}',{11},'{12}','{13}','{14}','{15}','{16}','{17}','{18}','{19}','{20}','{21}','{22}','{23}','{24}','{25}',{26},'{27}')",
-                                app.Id, app.Parent.Id, app.Name, app.ReleaseDirectory, app.SourceDirectory, app.DocumentDirectory, app.Description, app.MainFileName, app.MainFileReleaseHash, app.MainFileReleaseVersion
-                                , app.MainFileReleaseDate, (int)app.Status, app.CompatibleOSs, app.CompatibleScadas, app.CompatibleSZI, app.IdentificationType, app.Installer, app.Report
+                                app.Id, app.Parent.Id, app.Name, app.ReleaseDirectory, app.SourceDirectory, app.DocumentDirectory, app.Description, app.MainFileName, app.CurrentFile.Hash, app.CurrentFile.Version
+                                , app.CurrentFile.ChangeDate, (int)app.Status, app.CompatibleOSs, app.CompatibleScadas, app.CompatibleSZI, app.IdentificationType, app.Installer, app.Report
                                 , app.BuildingComponents, app.FunctionalComponents, app.DataStoringMechanism, app.SUBD, app.LocalData, app.AuthorizationType, app.Platform, app.OtherSoft, app.IsInReestr ? 1 : 0, app.UserCategories);
                         await command.ExecuteNonQueryAsync();
                         Disconnect(Connection);
@@ -484,8 +484,8 @@ namespace FridayLib
                         command.CommandText = string.Format("UPDATE dbo.Applications SET Name = '{2}', ReleaseDirectory = '{3}', SourceDirectory = '{4}', DocumentDirectory = '{5}',Description = '{6}',MainFileName = '{7}'" +
                                 ",MainFileReleaseHash = '{8}',MainFileReleaseVersion = '{9}',MainFileReleaseDate = '{10}',Status = {11},CompatibleOSs = '{12}',CompatibleScadas = '{13}',CompatibleSZI = '{14}',IdentificationType = '{15}',Installer = '{16}',Report = '{17}'" +
                                 ",BuildingComponents = '{18}',FunctionalComponents = '{19}',DataStoringMechanism = '{20}',SUBD = '{21}',LocalData = '{22}',AuthorizationType = '{23}',Platform = '{24}',OtherSoft = '{25}',IsInReestr = '{26}', UserCategories='{27}' WHERE AppId={0} AND ProjectId={1} ",
-                                app.Id, app.Parent.Id, app.Name, app.ReleaseDirectory, app.SourceDirectory, app.DocumentDirectory, app.Description, app.MainFileName, app.MainFileReleaseHash, app.MainFileReleaseVersion
-                                , app.MainFileReleaseDate, (int)app.Status, app.CompatibleOSs, app.CompatibleScadas, app.CompatibleSZI, app.IdentificationType, app.Installer, app.Report
+                                app.Id, app.Parent.Id, app.Name, app.ReleaseDirectory, app.SourceDirectory, app.DocumentDirectory, app.Description, app.MainFileName, app.CurrentFile.Hash, app.CurrentFile.Version
+                                , app.CurrentFile.ChangeDate, (int)app.Status, app.CompatibleOSs, app.CompatibleScadas, app.CompatibleSZI, app.IdentificationType, app.Installer, app.Report
                                 , app.BuildingComponents, app.FunctionalComponents, app.DataStoringMechanism, app.SUBD, app.LocalData, app.AuthorizationType, app.Platform, app.OtherSoft, app.IsInReestr, app.UserCategories);
                         await command.ExecuteNonQueryAsync();
                         Disconnect(Connection);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ServiceLib.Configuration;
+using System.IO;
 
 namespace FridayLib
 {
@@ -33,6 +34,26 @@ namespace FridayLib
         {
             var data = source.Split(new char[] { ';' });
             return data.ToList();
+        }
+        public static bool FilterXMLFiles(string name)
+        {
+            try
+            {
+                FileInfo fi = new FileInfo(name);
+                if(fi.Extension.ToUpper()==".XML")
+                {
+                    foreach(var f in fi.Directory.GetFiles())
+                    {
+                        if (f.Name.ToUpper() == fi.Name.ToUpper().Replace(".XML", ".DLL"))
+                            return false;
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return true;
+            }
         }
 
         public static void Init()

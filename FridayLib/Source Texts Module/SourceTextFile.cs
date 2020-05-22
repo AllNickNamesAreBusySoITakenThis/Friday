@@ -122,7 +122,9 @@ namespace FridayLib
                 OnPropertyChanged("CreationDate");
             }
         }
-
+        public int Id { get; set; }
+        public ControlledProject Parent { get; set; }
+        public int ParentId { get; set; }
 
 
         public SourceTextFile()

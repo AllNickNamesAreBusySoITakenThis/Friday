@@ -4,6 +4,7 @@ using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,6 +42,7 @@ namespace Frifull.ViewModels
         /// <summary>
         /// Текущий статус
         /// </summary>
+        
         public string Status
         {
             get { return status; }
@@ -71,13 +73,30 @@ namespace Frifull.ViewModels
         public async void StartApp()
         {
             Processing = true;
-            Status = "Получение данных о проектах из БД";
-            Projects = await DatabaseClass.GetProjects();
-            for (int i = 0; i < Projects.Count; i++)
+            ////Status = "Получение данных о проектах из БД";
+            //Projects = await DatabaseClass.GetProjects();
+            //for (int i = 0; i < Projects.Count; i++)
+            //{
+            //    Status = string.Format("Получение перечня приложений для проекта :{0}", Projects[i].Name);
+            //    await Projects[i].GetApps();
+            //    Status = "Подождите";
+            //}
+            using (ProjectContext pc = new ProjectContext())
             {
-                Status = string.Format("Получение перечня приложений для проекта :{0}", Projects[i].Name);
-                Projects[i].GetApps();
-                Status = "Подождите";
+                //foreach (var prj in Projects)
+                //{
+                //    prj.LoadSourceTexts();
+                //    pc.Projects.Add(prj);
+                //    foreach (var stf in prj.SourceTextFiles)
+                //    {
+                //        pc.SourceTextFiles.Add(stf);
+                //    }
+                //}
+                //pc.SaveChanges();
+                foreach (ControlledProject prj in pc.Projects.Include(a => a.Apps).Include(s=>s.SourceTextFiles))
+                {
+                    Projects.Add(prj);
+                }
             }
             Processing = false;
         }

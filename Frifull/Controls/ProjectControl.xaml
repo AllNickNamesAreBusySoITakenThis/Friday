@@ -23,7 +23,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <dxwui:AppBar  Margin="0" IsOpen="True" HideMode="AlwaysVisible" IsBackButtonEnabled="True" >            
-            <dxwui:AppBarButton  Label="Добавить приложение" Glyph="{dx:DXImageGrayscale Image=Add_32x32.png}"  GlyphStretch="Uniform" IsEllipseEnabled="False" AllowGlyphTheming="True"/>
+            <dxwui:AppBarButton  Label="Добавить приложение" Glyph="{dx:DXImageGrayscale Image=Add_32x32.png}"  GlyphStretch="Uniform" IsEllipseEnabled="False" AllowGlyphTheming="True" Command="{DXCommand Execute='AddApp();'}"/>
             <dxwui:AppBarButton Content="" Label="Актуализировать все" Glyph="{dx:DXImageOffice2013 Image=HistoryItem_32x32.png}" IsEllipseEnabled="False" AllowGlyphTheming="True"/>
             <dxwui:AppBarButton Label="Обновить данные" Glyph="{dx:DXImageGrayscale Image=Refresh_32x32.png}" IsEllipseEnabled="False" AllowGlyphTheming="True"/>
             <dxe:TextEdit Margin="5" EditValue="{Binding Name, UpdateSourceTrigger=PropertyChanged}" FontSize="24" Foreground="Black" HorizontalAlignment="Center" Background="Transparent" ShowBorder="False"/>            

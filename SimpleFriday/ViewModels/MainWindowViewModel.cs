@@ -209,7 +209,7 @@ namespace SimpleFriday.ViewModels
                 temp.Parent = (project as ControlledProject);
                 (project as ControlledProject).Apps.Add(temp);
                 //GoogleScriptsClass.AddDataToSheet((project as ControlledProject).Apps.Last());
-                await (project as ControlledProject).Apps.Last().UpdateMainFileInfoAsync();
+                await (project as ControlledProject).Apps.Last().UpdateFileInfoAsync();
                 (project as ControlledProject).UpdateState();
                 await DatabaseClass.AddApp((project as ControlledProject).Apps.Last());                
             }
@@ -234,7 +234,7 @@ namespace SimpleFriday.ViewModels
                         if (Projects[i].Apps[j].Id == temp.Id)
                         {
                             Projects[i].Apps[j] = temp;
-                            await Projects[i].Apps[j].UpdateMainFileInfoAsync();
+                            await Projects[i].Apps[j].UpdateFileInfoAsync();
                             Projects[i].UpdateState();
                             await DatabaseClass.UpdateApp(Projects[i].Apps[j]);
                             break;
@@ -255,7 +255,7 @@ namespace SimpleFriday.ViewModels
         private async void ExecuteActualizeRelease(object application)
         {
             await Task.Run(() => (application as ControlledApp).CopyToFolder((application as ControlledApp).SourceDirectory, (application as ControlledApp).ReleaseDirectory)).ContinueWith(async (T) => {
-                await (application as ControlledApp).UpdateMainFileInfoAsync();
+                await (application as ControlledApp).UpdateFileInfoAsync();
                 await DatabaseClass.UpdateApp((application as ControlledApp));
                 (application as ControlledApp).Parent.UpdateState();
             });
@@ -270,7 +270,7 @@ namespace SimpleFriday.ViewModels
         }
         private async void ExecuteUpdateAppMainFileInfo(object application)
         {
-            await (application as ControlledApp).UpdateMainFileInfoAsync();
+            await (application as ControlledApp).UpdateFileInfoAsync();
             await DatabaseClass.UpdateApp((application as ControlledApp));
             (application as ControlledApp).Parent.UpdateState();
         }
@@ -322,7 +322,7 @@ namespace SimpleFriday.ViewModels
                 Status = "Актуализация всего ПО";
                 foreach (var prj in Projects)
                 {
-                    await prj.Actualize();
+                    await prj.ActualizeRelease();
                 }
             });
             

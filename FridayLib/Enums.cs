@@ -38,26 +38,37 @@ namespace FridayLib
     public enum PPOCategories
     {
         [Description("Уставки")]
+        [Display(Name = "Уставки", Description = "Уставки")]
         Ustavki,
         [Description("Печать и выгрузка файлов")]
+        [Display(Name = "Печать и выгрузка файлов", Description = "Печать и выгрузка файлов")]
         PrintingExporting,
         [Description("Тренды")]
+        [Display(Name = "Тренды", Description = "Тренды")]
         Trends,
         [Description("Регистрация и отображение событий")]
+        [Display(Name = "Регистрация и отображение событий", Description = "Регистрация и отображение событий")]
         Events,
         [Description("Конфигурирование ПО")]
+        [Display(Name = "Конфигурирование ПО", Description = "Конфигурирование ПО")]
         Config,
         [Description("Резервное копирование")]
+        [Display(Name = "Резервное копирование", Description = "Резервное копирование")]
         Backup,
         [Description("Управление доступом")]
+        [Display(Name = "Управление доступом", Description = "Управление доступом")]
         Access,
         [Description("Служебные библиотеки")]
+        [Display(Name = "Служебные библиотеки", Description = "Служебные библиотеки")]
         Sevice,
         [Description("Связь и синхронизация")]
+        [Display(Name = "Связь и синхронизация", Description = "Связь и синхронизация")]
         Connection,
         [Description("Контроль целостности")]
+        [Display(Name = "Контроль целостности", Description = "Контроль целостности")]
         FileControl,
         [Description("Иное")]
+        [Display(Name = "Иное", Description = "Иное")]
         Other
     }
     public enum PPOTasks
@@ -76,13 +87,13 @@ namespace FridayLib
     {
         [Display(Name = "Проверка не требуется", Description = "Приложение не требуется регистрировать в реестре ППО")]
         TestsNotNeeded,
-        [Display(Name = "Проверка не проводилась", Description = "Приложение не требуется регистрировать в реестре ППО")]
+        [Display(Name = "Проверка не проводилась", Description = "Приложение не отправлялось на проверку в реестр ППО")]
         NotTested,
-        [Display(Name = "Находится на проверке", Description = "Приложение не требуется регистрировать в реестре ППО")]
+        [Display(Name = "Находится на проверке", Description = "Приложение находится на проверке в реестре ППО")]
         OnTesting,
-        [Display(Name = "Прошел проверку", Description = "Приложение не требуется регистрировать в реестре ППО")]
+        [Display(Name = "Прошел проверку", Description = "Приложение находится в реестре ППО")]
         PassTests,
-        [Display(Name = "Провалил проверку", Description = "Приложение не требуется регистрировать в реестре ППО")]
+        [Display(Name = "Провалил проверку", Description = "Приложение не не находится в реестре ППО")]
         FailTests
     }
     public enum MoveDirection

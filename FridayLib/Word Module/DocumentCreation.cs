@@ -155,16 +155,16 @@ namespace FridayLib.Word_Module
                 document.Paragraphs[19].Range.Text = string.Format("{0}", app.Name);
 
                 //Меняем версию ппо
-                document.Paragraphs[23].Range.Text = string.Format("{0}", app.MainFileReleaseVersion);
+                document.Paragraphs[23].Range.Text = string.Format("{0}", app.ReestrFile.Version);
 
                 //меняем разработчика
                 document.Paragraphs[27].Range.Text = string.Format("{0}", "АО \"НПО \"Спецэлектромеханика\"");
 
                 //меняем контрольную сумму
-                document.Paragraphs[31].Range.Text = string.Format("{0}", app.MainFileReleaseHash);
+                document.Paragraphs[31].Range.Text = string.Format("{0}", app.ReleaseFile.Hash);
 
                 //меняем дату выпуска ППО
-                document.Paragraphs[35].Range.Text = string.Format("{0}", app.MainFileReleaseDate.Remove(app.MainFileReleaseDate.IndexOf(" ")));
+                document.Paragraphs[35].Range.Text = string.Format("{0}", app.ReleaseFile.ChangeDate.Remove(app.ReleaseFile.ChangeDate.IndexOf(" ")));
 
                 //меняем описание ППО
                 document.Paragraphs[39].Range.Text = string.Format("{0}", app.Description);
