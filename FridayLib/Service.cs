@@ -19,7 +19,7 @@ namespace FridayLib
 
         
         public static string ConnectionString { get; set; }
-        //public static List<string> AllowedFileExtentions { get; set; } = new List<string>() { ".dll", ".exe", ".xml", ".txt",".png",".jpg", ".jpeg", ".bmp", ".ico", ".config", ".json" };
+        public static List<string> AllowedFileExtentions { get; set; } = new List<string>() { ".dll", ".exe", ".xml", ".txt",".png",".jpg", ".jpeg", ".bmp", ".ico", ".config", ".json" };
 
         public static string GetStringFromCollecction(IEnumerable<string> collection)
         {
@@ -60,7 +60,7 @@ namespace FridayLib
         {
             try
             {
-                //ServiceLib.Configuration.Configuration.Add("AllowedExtentions", ServiceLib.Configuration.SettingType.String, AllowedExtentions);
+                ServiceLib.Configuration.Configuration.Add("AllowedExtentions", ServiceLib.Configuration.SettingType.String, GetStringFromCollecction(AllowedFileExtentions));
                 ServiceLib.Configuration.Configuration.Add("Server", ServiceLib.Configuration.SettingType.String, "192.168.77.132\\SQLEXPRESS");
                 ServiceLib.Configuration.Configuration.Add("Database", ServiceLib.Configuration.SettingType.String, "TestDataBase");
                 ServiceLib.Configuration.Configuration.Add("User", ServiceLib.Configuration.SettingType.String, "ORPO");

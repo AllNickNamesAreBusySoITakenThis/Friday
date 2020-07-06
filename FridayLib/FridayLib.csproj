@@ -102,9 +102,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Migrations\202005121142162_InitialCreate.cs" />
-    <Compile Include="Migrations\202005121142162_InitialCreate.designer.cs">
-      <DependentUpon>202005121142162_InitialCreate.cs</DependentUpon>
+    <Compile Include="Migrations\202005291054421_removeFilesData.cs" />
+    <Compile Include="Migrations\202005291054421_removeFilesData.designer.cs">
+      <DependentUpon>202005291054421_removeFilesData.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ControlledApp.cs" />
@@ -185,8 +185,8 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202005121142162_InitialCreate.resx">
-      <DependentUpon>202005121142162_InitialCreate.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202005291054421_removeFilesData.resx">
+      <DependentUpon>202005291054421_removeFilesData.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

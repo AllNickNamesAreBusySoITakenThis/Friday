@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -50,11 +51,11 @@ namespace FridayLib
         //private string mainFileReleaseHash = "";
         //private string mainFileReleaseDate = "";
         private bool blocked;
-        private string workingStatus;
+        private string workingStatus="";
         private string reestrDirectory = "";
-        private ControlledFile currentFile;
-        private ControlledFile reestrFile;
-        private ControlledFile releaseFile;
+        private ControlledFile currentFile=new ControlledFile();
+        private ControlledFile reestrFile = new ControlledFile();
+        private ControlledFile releaseFile = new ControlledFile();
         private string subdext = "Нет";
         private string ide = "Visual Studio 2017";
         private string propagation = "Копирование";
@@ -113,6 +114,7 @@ namespace FridayLib
             set
             {
                 sourceDirectory = value;
+                CurrentFile = new ControlledFile(Path.Combine(SourceDirectory, MainFileName));
                 OnPropertyChanged("SourceDirectory");
             }
         }
@@ -126,6 +128,7 @@ namespace FridayLib
             set
             {
                 releaseDirectory = value;
+                ReleaseFile = new ControlledFile(Path.Combine(ReleaseDirectory, MainFileName));
                 OnPropertyChanged("ReleaseDirectory");
             }
         }
@@ -152,6 +155,7 @@ namespace FridayLib
             set
             {
                 reestrDirectory = value;
+                ReestrFile = new ControlledFile(Path.Combine(ReestrDirectory, MainFileName));
                 OnPropertyChanged("ReestrDirectory");
             }
         }
@@ -174,10 +178,12 @@ namespace FridayLib
         /// <summary>
         /// файл в истончике
         /// </summary>
+        [Category("Dir"), Description("Информация о рабочем файле"), DisplayName("Рабочий файл"), TypeConverter(typeof(ExpandableObjectConverter))]
+        [NotMapped]
         public ControlledFile CurrentFile
         {
             get { return currentFile; }
-            set
+            private set
             {
                 currentFile = value;
                 OnPropertyChanged("CurrentFile");
@@ -186,10 +192,13 @@ namespace FridayLib
         /// <summary>
         /// Исполняемый файл в релизе
         /// </summary>
+        [Category("Dir"), Description("Информация о файле в релизе"), DisplayName("Релизный файл")]
+        [TypeConverter(typeof(ExpandableObjectConverter))]
+        [NotMapped]
         public ControlledFile ReleaseFile
         {
             get { return releaseFile; }
-            set
+            private set
             {
                 releaseFile = value;
                 OnPropertyChanged("ReleaseFile");
@@ -198,10 +207,13 @@ namespace FridayLib
         /// <summary>
         /// Исполняемый файл в реестре
         /// </summary>
+        [Category("Dir"), Description("Информация о файле в реестре"), DisplayName("Файл в реестре")]
+        [TypeConverter(typeof(ExpandableObjectConverter))]
+        [NotMapped]
         public ControlledFile ReestrFile
         {
             get { return reestrFile; }
-            set
+            private set
             {
                 reestrFile = value;
                 OnPropertyChanged("ReestrFile");
@@ -224,7 +236,7 @@ namespace FridayLib
         /// <summary>
         /// Совместимые ОС
         /// </summary>
-        [Category("Formular"), Description("Соваместимые версии ОС"), DisplayName("Совместимые ОС")]
+        [Category("Formular"), Description("Совместимые версии ОС"), DisplayName("Совместимые ОС")]
         public string CompatibleOSs
         {
             get { return compatibleOSs; }
@@ -472,8 +484,6 @@ namespace FridayLib
                 OnPropertyChanged("Parent");
             }
         }
-
-        
         public int ParentId
         {
             get { return parentId; }

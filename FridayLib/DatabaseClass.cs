@@ -214,8 +214,6 @@ namespace FridayLib
                                 Category = (PPOCategories)Convert.ToInt32(reader["Category"]),
                                 Task = (PPOTasks)Convert.ToInt32(reader["Task"]),
                                 Name = reader["Name"].ToString(),
-                                AllAppsAreInReestr = false,
-                                AllApрsAreUpToDate = false,
                                 Apps = new ObservableCollection<ControlledApp>()
                             });
                         }

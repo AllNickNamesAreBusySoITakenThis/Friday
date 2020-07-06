@@ -36,6 +36,7 @@ namespace FridayLib
         private ObservableCollection<SourceTextFile> sourceTextFiles = new ObservableCollection<SourceTextFile>();
         private bool blocked=false;
         private string workStatus="";
+        private ControlledApp currentApp;
         #endregion
 
         #region Public properties
@@ -43,7 +44,6 @@ namespace FridayLib
         /// <summary>
         /// Идентификатор проекта
         /// </summary>
-        
         public int Id
         {
             get { return id; }
@@ -56,6 +56,7 @@ namespace FridayLib
         /// <summary>
         /// Имя контролируемого приложения
         /// </summary>
+        [Category("Общее"), Description("Имя проекта"), DisplayName("Название")]
         public string Name
         {
             get { return name; }
@@ -68,6 +69,7 @@ namespace FridayLib
         /// <summary>
         /// Директория для релиза проекта
         /// </summary>
+        [Category("Общее"), Description("Директория релиза проекта"), DisplayName("Директория релиза")]
         public string ReleaseDirectory
         {
             get { return releaseDirectory; }
@@ -80,6 +82,7 @@ namespace FridayLib
         /// <summary>
         /// Рабочая директория проекта
         /// </summary>
+        [Category("Общее"), Description("Рабочая директория проекта"), DisplayName("Рабочая директория")]
         public string WorkingDirectory
         {
             get { return workingDirectory; }
@@ -92,6 +95,7 @@ namespace FridayLib
         /// <summary>
         /// Директория с документацией на проект
         /// </summary>
+        [Category("Общее"), Description("Директория с документацией на проект"), DisplayName("Директория документации")]
         public string DocumentDirectory
         {
             get { return docDirectory; }
@@ -128,10 +132,11 @@ namespace FridayLib
         /// <summary>
         /// Все приложения проекта обновлены
         /// </summary>
+        [Category("Статистика"), Description("Все приложения в проекте актуальны"), DisplayName("Проект актуализирован")]
         public bool AllApрsAreUpToDate
         {
             get { return allAppsAreUpToDate; }
-            set
+            private set
             {
                 allAppsAreUpToDate = value;
                 OnPropertyChanged("AllApрsAreUpToDate");
@@ -140,10 +145,11 @@ namespace FridayLib
         /// <summary>
         /// Все приложения проекта прошли в реестр ППО
         /// </summary>
+        [Category("Статистика"), Description("Все приложения проекта находятся в Реестре ППО"), DisplayName("Внесен в Реестр ППО")]
         public bool AllAppsAreInReestr
         {
             get { return allAppsAreInReestr; }
-            set
+            private set
             {
                 allAppsAreInReestr = value;
                 OnPropertyChanged("AllAppsAreInReestr");
@@ -197,6 +203,19 @@ namespace FridayLib
                 OnPropertyChanged("WorkStatus");
             }
         }
+        /// <summary>
+        /// Текущее приложение
+        /// </summary>
+        public ControlledApp CurrentApp
+        {
+            get { return currentApp; }
+            set
+            {
+                currentApp = value;
+                OnPropertyChanged("CurrentApp");
+            }
+        }
+        
         #endregion
 
         #region Public methods
@@ -281,7 +300,9 @@ namespace FridayLib
             Apps.Add(app);
             using (var pc = new ProjectContext())
             {
-                pc.Applications.Add(app);
+                var prj = pc.Projects.Find(Id);
+                prj.Apps = Apps;
+                pc.Entry(prj).State = EntityState.Modified;
                 pc.SaveChanges();
             }
         }
@@ -358,7 +379,7 @@ namespace FridayLib
             try
             {
                 //Актуализируем документацию
-                await PrepareDocumentation();
+                //await PrepareDocumentation();
                 //Готовим структуру для формата разработки
                 Directory.CreateDirectory(Path.Combine(folderName, "Формат разработки"));
                 CopyDataForReestr(WorkingDirectory, Path.Combine(folderName, "Формат разработки"));
@@ -469,12 +490,13 @@ namespace FridayLib
         /// <summary>
         /// Обновить состояние проекта
         /// </summary>
-        public void UpdateState()
+        public async void UpdateState()
         {
             AllAppsAreInReestr = true;
             AllApрsAreUpToDate = true;
             for (int i = 0; i < Apps.Count; i++)
             {
+                await Apps[i].UpdateFileInfoAsync();
                 if (!Apps[i].UpToDate)
                     AllApрsAreUpToDate = false;
                 if (!Apps[i].IsInReestr)
@@ -577,6 +599,10 @@ namespace FridayLib
         void CopyDataForReestr(string sourceFolderName, string destFolderName)
         {
             DirectoryInfo di = new DirectoryInfo(sourceFolderName);
+            if(!Directory.Exists(destFolderName))
+            {
+                Directory.CreateDirectory(destFolderName);
+            }
             foreach (var folder in di.GetDirectories())
             {
                 if (folder.Name.ToUpper() != "OBJ" && folder.Name.ToUpper() != "BIN")

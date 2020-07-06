@@ -28,6 +28,7 @@ namespace FridayLib
         /// <summary>
         /// Полное имя файла
         /// </summary>
+        [Category("Общее"), Description("Относительный путь до файла от исходной директории"), DisplayName("Путь к файлу")]
         public string FullName
         {
             get { return fullName; }
@@ -36,6 +37,7 @@ namespace FridayLib
         /// <summary>
         /// Короткое имя программы
         /// </summary>
+        [Category("Общее"), Description("Имя файла"), DisplayName("Имя файла")]
         public string Name
         {
             get { return name; }
@@ -48,6 +50,7 @@ namespace FridayLib
         /// <summary>
         /// Описание файла
         /// </summary>
+        [Category("Общее"), Description("Описание содержимого файла"), DisplayName("Описание")]
         public string Description
         {
             get { return descr; }
@@ -56,6 +59,7 @@ namespace FridayLib
         /// <summary>
         /// Собственник файла
         /// </summary>
+        [Category("Общее"), Description("Создатель файла"), DisplayName("Создатель")]
         public string Owner
         {
             get { return owner; }
@@ -68,6 +72,7 @@ namespace FridayLib
         /// <summary>
         /// Размер файла
         /// </summary>
+        [Category("Общее"), Description("Размер файла"), DisplayName("Размер")]
         public string Size
         {
             get { return size; }
@@ -91,6 +96,7 @@ namespace FridayLib
         //}
 
         private string hash;
+        [Category("Общее"), Description("Хеш-сумма файла"), DisplayName("Хеш")]
         public string Hash
         {
             get { return hash; }
@@ -102,6 +108,7 @@ namespace FridayLib
         }
 
         private string version;
+        [Category("Общее"), Description("Версия файла (только для исполняемых)"), DisplayName("Версия")]
         public string Version
         {
             get { return version; }
@@ -113,6 +120,7 @@ namespace FridayLib
         }
 
         private string creationDate;
+        [Category("Общее"), Description("Дата изменения файла"), DisplayName("Дата изменения")]
         public string CreationDate
         {
             get { return creationDate; }

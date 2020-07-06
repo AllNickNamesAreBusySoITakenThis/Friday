@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace FridayLib
 {
-
+    [Description("Исполняемый файл"), DisplayName("Исполняемый файл")]
     public class ControlledFile : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -20,17 +21,25 @@ namespace FridayLib
         }
 
         private string address="";
+        [Description("Адрес исполняемого файла"), DisplayName("Адрес")]
+        [NotMapped]
         public string Address
         {
             get { return address; }
             set
             {
-                address = value;
-                OnPropertyChanged("Address");
+                //if (address!=value)
+                //{
+                    address = value;
+                    GetFileData();
+                    OnPropertyChanged("Address"); 
+                //}
             }
         }
 
         private string hash = "";
+        [Description("Хеш-сумма файла (SHA1)"), DisplayName("Хеш")]
+        [NotMapped]
         public string Hash
         {
             get { return hash; }
@@ -41,6 +50,8 @@ namespace FridayLib
             }
         }
         private string version = "";
+        [Description("Версия файла"), DisplayName("Версия")]
+        [NotMapped]
         public string Version
         {
             get { return version; }
@@ -51,6 +62,8 @@ namespace FridayLib
             }
         }
         private string changeDate = "";
+        [Description("Дата изменения файла"), DisplayName("Дата изменения")]
+        [NotMapped]
         public string ChangeDate
         {
             get { return changeDate; }
