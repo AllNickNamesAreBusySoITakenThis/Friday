@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
+using MongoDB.Driver.GeoJsonObjectModel;
+using Newtonsoft.Json;
 
 namespace FridayLib
 {
@@ -16,6 +22,7 @@ namespace FridayLib
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+        [NonSerialized]
         private int parentId;
         private string name = "";
         private string sourceDirectory = "";
@@ -23,11 +30,10 @@ namespace FridayLib
         private string releaseDirectory = "";
         private string documentDirectopry = "";
         private string mainFileName="";
-        //private string mainFileVersion = "";
-        //private string mainFileHash = "";
+        [NonSerialized]
         private bool upToDate = false;
+        [NonSerialized]
         private PPOReestrStatus status = PPOReestrStatus.NotTested;
-        //private string mainFileDate;
         private string compatibleOSs = "Windows 7, 10";
         private string compatibleScadas = "iFix 5.8, 5.9, 6.0";
         private string otherSoft = "отсутствует";
@@ -45,22 +51,28 @@ namespace FridayLib
         private string userCategories = "Нет";
         [NonSerialized]
         private ControlledProject parent;
+        [NonSerialized]
         private bool isInReestr = false;
+        [NonSerialized]
         private int id;
-        //private string mainFileReleaseVersion = "";
-        //private string mainFileReleaseHash = "";
-        //private string mainFileReleaseDate = "";
+        [NonSerialized]
         private bool blocked;
+        [NonSerialized]
         private string workingStatus="";
         private string reestrDirectory = "";
+        [NonSerialized]
         private ControlledFile currentFile=new ControlledFile();
+        [NonSerialized]
         private ControlledFile reestrFile = new ControlledFile();
+        [NonSerialized]
         private ControlledFile releaseFile = new ControlledFile();
         private string subdext = "Нет";
         private string ide = "Visual Studio 2017";
         private string propagation = "Копирование";
         private string licenseType = "Нет";
+        [NonSerialized]
         private bool selected = false;
+
         #region Properties
 
         //---------------------------------------------------------------------------------------------------------Общие данные
@@ -180,6 +192,7 @@ namespace FridayLib
         /// </summary>
         [Category("Dir"), Description("Информация о рабочем файле"), DisplayName("Рабочий файл"), TypeConverter(typeof(ExpandableObjectConverter))]
         [NotMapped]
+        [BsonIgnore]
         public ControlledFile CurrentFile
         {
             get { return currentFile; }
@@ -195,6 +208,7 @@ namespace FridayLib
         [Category("Dir"), Description("Информация о файле в релизе"), DisplayName("Релизный файл")]
         [TypeConverter(typeof(ExpandableObjectConverter))]
         [NotMapped]
+        [BsonIgnore]
         public ControlledFile ReleaseFile
         {
             get { return releaseFile; }
@@ -210,6 +224,7 @@ namespace FridayLib
         [Category("Dir"), Description("Информация о файле в реестре"), DisplayName("Файл в реестре")]
         [TypeConverter(typeof(ExpandableObjectConverter))]
         [NotMapped]
+        [BsonIgnore]
         public ControlledFile ReestrFile
         {
             get { return reestrFile; }
@@ -475,6 +490,7 @@ namespace FridayLib
         /// <summary>
         /// Проект, к которому приналдежит приложение
         /// </summary>        
+        [BsonIgnore]
         public ControlledProject Parent
         {
             get { return parent; }
@@ -484,6 +500,7 @@ namespace FridayLib
                 OnPropertyChanged("Parent");
             }
         }
+        [BsonIgnore]
         public int ParentId
         {
             get { return parentId; }
@@ -496,6 +513,7 @@ namespace FridayLib
         /// <summary>
         /// Проект выбран
         /// </summary>
+        [BsonIgnore]
         public bool Selected
         {
             get { return selected; }
@@ -509,6 +527,7 @@ namespace FridayLib
         /// <summary>
         /// Приложение в релизе актуально
         /// </summary>
+        [BsonIgnore]
         public bool UpToDate
         {
             get { return upToDate; }
@@ -521,6 +540,7 @@ namespace FridayLib
         /// <summary>
         /// допущено в реестр
         /// </summary>
+        [BsonIgnore]
         public bool IsInReestr
         {
             get { return isInReestr; }
@@ -533,6 +553,7 @@ namespace FridayLib
         /// <summary>
         /// Управление приложением ограничено
         /// </summary>
+        [BsonIgnore]
         public bool Blocked
         {
             get { return blocked; }
@@ -546,6 +567,7 @@ namespace FridayLib
         /// <summary>
         /// Статус обработки приложения
         /// </summary>
+        [BsonIgnore]
         public string WorkingStatus
         {
             get { return workingStatus; }
@@ -559,6 +581,7 @@ namespace FridayLib
         /// Статус проверки на прохождение в реестр ППО
         /// </summary>
         [Category("Formular"), Description("Статус приложения в реестре ППО"), DisplayName("Статус в реестре")]
+        [BsonIgnore]
         public PPOReestrStatus Status
         {
             get { return status; }
@@ -634,6 +657,99 @@ namespace FridayLib
         {
             if(await CheckEquals())
                 await DatabaseClass.UpdateApp(this);
+        }
+
+        public BsonDocument ToBsonElement()
+        {
+            return new BsonDocument
+            {
+                {"Name",Name},
+                {"Description",Description},
+                {"SourceDirectory",SourceDirectory},
+                {"ReleaseDirectory",ReleaseDirectory},
+                {"DocumentDirectory",DocumentDirectory},
+                {"ReestrDirectory",ReestrDirectory},
+                {"MainFileName",MainFileName},
+                {"Platform",Platform},
+                {"CompatibleOSs",CompatibleOSs},
+                {"CompatibleScadas",CompatibleScadas},
+                {"CompatibleSZI",CompatibleSZI},
+                {"OtherSoft",OtherSoft},
+                {"IdentificationType",IdentificationType},
+                {"AuthorizationType",AuthorizationType},
+                {"UserCategories",UserCategories},
+                {"LocalData",LocalData},
+                {"SUBD",SUBD},
+                {"SUBDExt",SUBDExt},
+                {"DataStoringMechanism",DataStoringMechanism},
+                {"IDE",IDE},
+                {"FunctionalComponents",FunctionalComponents},
+                {"BuildingComponents",BuildingComponents},
+                {"Report",Report},
+                {"Propagation",Propagation},
+                {"Installer",Installer},
+                {"LicenseType",LicenseType},
+            };
+        }
+        public static BsonArray GetAppArray(ICollection<ControlledApp> apps)
+        {
+            BsonArray result = new BsonArray();
+            foreach(var ap in apps)
+            {
+                result.Add(ap.ToBsonElement());
+            }
+            return result;
+        }
+        public static ControlledApp FromBsonDocument(BsonDocument source)
+        {
+            try
+            {
+                return new ControlledApp
+                {
+                    Name = source["Name"].ToString(),
+                    Description = source["Description"].ToString(),
+                    SourceDirectory = source["SourceDirectory"].ToString(),
+                    ReleaseDirectory = source["ReleaseDirectory"].ToString(),
+                    DocumentDirectory = source["DocumentDirectory"].ToString(),
+                    ReestrDirectory = source["ReestrDirectory"].ToString(),
+                    MainFileName = source["MainFileName"].ToString(),
+                    Platform = source["Platform"].ToString(),
+                    CompatibleOSs = source["CompatibleOSs"].ToString(),
+                    CompatibleScadas = source["CompatibleScadas"].ToString(),
+                    CompatibleSZI = source["CompatibleSZI"].ToString(),
+                    OtherSoft = source["OtherSoft"].ToString(),
+                    IdentificationType = source["IdentificationType"].ToString(),
+                    AuthorizationType = source["AuthorizationType"].ToString(),
+                    UserCategories = source["UserCategories"].ToString(),
+                    LocalData = source["LocalData"].ToString(),
+                    SUBD = source["SUBD"].ToString(),
+                    SUBDExt = source["SUBDExt"].ToString(),
+                    DataStoringMechanism = source["DataStoringMechanism"].ToString(),
+                    IDE = source["IDE"].ToString(),
+                    FunctionalComponents = source["FunctionalComponents"].ToString(),
+                    BuildingComponents = source["BuildingComponents"].ToString(),
+                    Report = source["Report"].ToString(),
+                    Propagation = source["Propagation"].ToString(),
+                    Installer = source["Installer"].ToString(),
+                    LicenseType = source["LicenseType"].ToString()
+                };
+            }
+            catch (Exception ex)
+            {
+                Service.OnErrorInLibrary(string.Format("Ошибка получения данных о приложении из БД: {0}", ex.Message));
+                return null;
+            }
+        }
+        public static ObservableCollection<ControlledApp> GetAppsFromBsonArray(BsonArray source)
+        {
+            ObservableCollection<ControlledApp> result = new ObservableCollection<ControlledApp>();
+            foreach(BsonDocument item in source)
+            {
+                var res = ControlledApp.FromBsonDocument(item);
+                if(res!=null)
+                    result.Add(res);
+            }
+            return result;
         }
         #endregion
 

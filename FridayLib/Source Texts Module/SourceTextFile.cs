@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using MongoDB.Bson;
+using Google.Apis.Upload;
+using System.Collections.ObjectModel;
 
 namespace FridayLib
 {
@@ -23,6 +26,9 @@ namespace FridayLib
         private string name="";
         private string owner;
         private string size;
+        private string version;
+        private string hash;
+        private string creationDate;
         //private CFileData fileData;
 
         /// <summary>
@@ -82,20 +88,9 @@ namespace FridayLib
                 OnPropertyChanged("Size");
             }
         }
-        ///// <summary>
-        ///// Общие данные по файлу
-        ///// </summary>
-        //public CFileData FileData
-        //{
-        //    get { return fileData; }
-        //    set
-        //    {
-        //        fileData = value;
-        //        OnPropertyChanged("FileData");
-        //    }
-        //}
-
-        private string hash;
+        /// <summary>
+        /// Хеш-сумма файла
+        /// </summary>
         [Category("Общее"), Description("Хеш-сумма файла"), DisplayName("Хеш")]
         public string Hash
         {
@@ -107,7 +102,9 @@ namespace FridayLib
             }
         }
 
-        private string version;
+        /// <summary>
+        /// Версия файла
+        /// </summary>
         [Category("Общее"), Description("Версия файла (только для исполняемых)"), DisplayName("Версия")]
         public string Version
         {
@@ -119,7 +116,9 @@ namespace FridayLib
             }
         }
 
-        private string creationDate;
+        /// <summary>
+        /// Дата создания файла
+        /// </summary>
         [Category("Общее"), Description("Дата изменения файла"), DisplayName("Дата изменения")]
         public string CreationDate
         {
@@ -185,6 +184,62 @@ namespace FridayLib
             {
                 return new SourceTextFile();
             }
+        }
+        public static BsonArray GetSourceTextsArray(ICollection<SourceTextFile> files)
+        {
+            BsonArray result = new BsonArray();
+            foreach(var f in files)
+            {
+                result.Add(f.ToBsonElement());
+            }
+            return result;
+        }
+        public BsonDocument ToBsonElement()
+        {
+            return new BsonDocument
+            {
+                {"Name",Name},
+                {"Description",Description},
+                {"Owner",Owner},
+                {"Size",Size},
+                {"Hash",Hash},
+                {"CreationDate",CreationDate},
+                {"Version",Version},
+                {"FullName",FullName}
+            };
+        }
+        public static SourceTextFile FromBsonDocument(BsonDocument source)
+        {
+            try
+            {
+                return new SourceTextFile
+                {
+                    Name = source["Name"].ToString(),
+                    Description = source["Description"].ToString(),
+                    Owner = source["Owner"].ToString(),
+                    Size = source["Size"].ToString(),
+                    Version = source["Version"].ToString(),
+                    Hash = source["Hash"].ToString(),
+                    CreationDate = source["CreationDate"].ToString(),
+                    FullName = source["FullName"].ToString()
+                };
+            }
+            catch (Exception ex)
+            {
+                Service.OnErrorInLibrary(string.Format("Ошибка получения данных о приложении из БД: {0}", ex.Message));
+                return null;
+            }
+        }
+        public static ObservableCollection<SourceTextFile> GetFilesFromBsonArray(BsonArray source)
+        {
+            ObservableCollection<SourceTextFile> result = new ObservableCollection<SourceTextFile>();
+            foreach (BsonDocument item in source)
+            {
+                var res = SourceTextFile.FromBsonDocument(item);
+                if (res != null)
+                    result.Add(res);
+            }
+            return result;
         }
     }
 }

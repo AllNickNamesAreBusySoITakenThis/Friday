@@ -19,7 +19,7 @@ namespace FridayLib
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
-
+        [NonSerialized]
         private string address="";
         [Description("Адрес исполняемого файла"), DisplayName("Адрес")]
         [NotMapped]
@@ -36,7 +36,7 @@ namespace FridayLib
                 //}
             }
         }
-
+        [NonSerialized]
         private string hash = "";
         [Description("Хеш-сумма файла (SHA1)"), DisplayName("Хеш")]
         [NotMapped]
@@ -49,6 +49,7 @@ namespace FridayLib
                 OnPropertyChanged("Hash");
             }
         }
+        [NonSerialized]
         private string version = "";
         [Description("Версия файла"), DisplayName("Версия")]
         [NotMapped]
@@ -61,6 +62,7 @@ namespace FridayLib
                 OnPropertyChanged("Version");
             }
         }
+        [NonSerialized]
         private string changeDate = "";
         [Description("Дата изменения файла"), DisplayName("Дата изменения")]
         [NotMapped]

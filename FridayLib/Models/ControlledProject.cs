@@ -6,8 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data.Entity;
+//using System.Data.Entity;
 using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using MongoDB.Driver.GeoJsonObjectModel;
+using NLog.LayoutRenderers;
 
 namespace FridayLib
 {
@@ -24,13 +28,13 @@ namespace FridayLib
 
         #region Private variables
         private int id;
-        private string name;
-        private string workingDirectory;
+        private string name = "";
+        private string workingDirectory="";
         private PPOCategories category = PPOCategories.Other;
-        private string releaseDirectory;
+        private string releaseDirectory = "";
         private PPOTasks task = PPOTasks.SCADA_Addons;
         private bool allAppsAreUpToDate;
-        private string docDirectory;
+        private string docDirectory = "";
         private bool allAppsAreInReestr;
         private ObservableCollection<ControlledApp> apps = new ObservableCollection<ControlledApp>();
         private ObservableCollection<SourceTextFile> sourceTextFiles = new ObservableCollection<SourceTextFile>();
@@ -239,6 +243,40 @@ namespace FridayLib
         #endregion
 
         #region Not static
+        public BsonDocument ToBsonDocument()
+        {
+            var doc = new BsonDocument
+            {
+                {"Name",Name },
+                {"WorkingDirectory",WorkingDirectory },
+                {"DocumentDirectory",DocumentDirectory },
+                {"ReleaseDirectory",ReleaseDirectory },
+                {"Applications",ControlledApp.GetAppArray(Apps) },
+                {"SourceFiles",SourceTextFile.GetSourceTextsArray(SourceTextFiles) }
+            };
+            return doc;
+        }
+        public static ControlledProject FromBsonDocument(BsonDocument source)
+        {
+            try
+            {
+                var result = new ControlledProject
+                {
+                    Name = source["Name"].ToString(),
+                    WorkingDirectory = source["WorkingDirectory"].ToString(),
+                    DocumentDirectory = source["DocumentDirectory"].ToString(),
+                    ReleaseDirectory = source["ReleaseDirectory"].ToString(),
+                    Apps = ControlledApp.GetAppsFromBsonArray(source["Applications"].AsBsonArray),
+                    SourceTextFiles = SourceTextFile.GetFilesFromBsonArray(source["SourceFiles"].AsBsonArray)
+                };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Service.OnErrorInLibrary(string.Format("Ошибка получения данных для проекта : {0}", ex.Message));
+                return null;
+            }
+        }
         /// <summary>
         /// Сохранить проект в БД
         /// </summary>
@@ -246,16 +284,7 @@ namespace FridayLib
         {
             try
             {
-                using (var pc = new ProjectContext())
-                {
-                    var curPrjs = pc.Projects.Where(i => i.Id == Id);
-                    var curPrj = curPrjs.First();
-                    if(curPrj!=null)
-                    {
-                        curPrj = this;
-                    }
-                    pc.SaveChanges();
-                }
+               
             }
             catch (Exception ex)
             {
@@ -269,22 +298,7 @@ namespace FridayLib
         {
             try
             {
-                using (var pc = new ProjectContext())
-                {
-                    var curPrjs = pc.Projects.Where(i => i.Id == Id);
-                    var curPrj = curPrjs.First();
-                    if (curPrj != null)
-                    {
-                        this.Apps = curPrj.Apps;
-                        Name = curPrj.Name;
-                        ReleaseDirectory = curPrj.ReleaseDirectory;
-                        WorkingDirectory = curPrj.WorkingDirectory;
-                        DocumentDirectory = curPrj.DocumentDirectory;
-                        Category = curPrj.Category;
-                        Task = curPrj.Task;
-                        SourceTextFiles = curPrj.SourceTextFiles;
-                    }
-                }
+
             }
             catch (Exception ex)
             {
@@ -298,13 +312,6 @@ namespace FridayLib
         {
             ControlledApp app = new ControlledApp() { Name = "Новое приложение", Parent = this, ParentId=this.Id };
             Apps.Add(app);
-            using (var pc = new ProjectContext())
-            {
-                var prj = pc.Projects.Find(Id);
-                prj.Apps = Apps;
-                pc.Entry(prj).State = EntityState.Modified;
-                pc.SaveChanges();
-            }
         }
         /// <summary>
         /// Удалить приложение
@@ -313,11 +320,6 @@ namespace FridayLib
         public void RemoveApp(ControlledApp app)
         {            
             Apps.Remove(app);
-            using (var pc = new ProjectContext())
-            {
-                pc.Applications.Remove(app);
-                pc.SaveChanges();
-            }
         }
 
         /// <summary>
