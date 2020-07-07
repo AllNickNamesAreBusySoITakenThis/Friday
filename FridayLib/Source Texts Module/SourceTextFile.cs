@@ -29,7 +29,7 @@ namespace FridayLib
         private string version;
         private string hash;
         private string creationDate;
-        //private CFileData fileData;
+        private string fullPath = "";
 
         /// <summary>
         /// Полное имя файла
@@ -115,6 +115,19 @@ namespace FridayLib
                 OnPropertyChanged("Version");
             }
         }
+        /// <summary>
+        /// Полный путь к файлу
+        /// </summary>
+        [Category("Общее"), Description("Полный путь к файлу"), DisplayName("Полный путь")]
+        public string FullPath
+        {
+            get { return fullPath; }
+            set
+            {
+                fullPath = value;
+                OnPropertyChanged("FullPath");
+            }
+        }
 
         /// <summary>
         /// Дата создания файла
@@ -142,7 +155,8 @@ namespace FridayLib
         {
             FullName = addName == "" ? fileInfo.Name : string.Format("{0}\\{1}", addName, fileInfo.Name);
             Name = fileInfo.Name;
-            Description = "";            
+            Description = "";
+            FullPath = fileInfo.FullName;
             Size = fileInfo.Length / 1024 < 1 ? string.Format("{0} B", fileInfo.Length) : string.Format("{0} kB", fileInfo.Length / 1024);
             Owner = "АО \"НПО \"Спецэлектромеханика\"";
             Hash = FileOperations.GetCheckSumm(fileInfo.FullName);
@@ -200,29 +214,29 @@ namespace FridayLib
             {
                 {"Name",Name},
                 {"Description",Description},
-                {"Owner",Owner},
-                {"Size",Size},
-                {"Hash",Hash},
-                {"CreationDate",CreationDate},
-                {"Version",Version},
-                {"FullName",FullName}
+                {"Owner",Owner},                
+                {"FullName",FullName},
+                {"FullPath",FullPath}
             };
         }
         public static SourceTextFile FromBsonDocument(BsonDocument source)
         {
             try
             {
-                return new SourceTextFile
+                var result = new SourceTextFile
                 {
                     Name = source["Name"].ToString(),
                     Description = source["Description"].ToString(),
-                    Owner = source["Owner"].ToString(),
-                    Size = source["Size"].ToString(),
-                    Version = source["Version"].ToString(),
-                    Hash = source["Hash"].ToString(),
-                    CreationDate = source["CreationDate"].ToString(),
-                    FullName = source["FullName"].ToString()
+                    Owner = source["Owner"].ToString(),                    
+                    FullName = source["FullName"].ToString(),
+                    FullPath = source["FullPath"].ToString(),
                 };
+                result.CreationDate = FileOperations.GetChangeDate(result.FullPath);
+                result.Hash = FileOperations.GetCheckSumm(result.FullPath);
+                result.Version = FileOperations.GetVersion(result.FullPath);
+                var fileInfo = new FileInfo(result.FullPath);
+                result.Size = fileInfo.Length / 1024 < 1 ? string.Format("{0} B", fileInfo.Length) : string.Format("{0} kB", fileInfo.Length / 1024);
+                return result;
             }
             catch (Exception ex)
             {

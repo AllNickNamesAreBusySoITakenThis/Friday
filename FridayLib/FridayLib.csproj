@@ -149,7 +149,6 @@
     <Compile Include="Enums.cs" />
     <Compile Include="FileOperations.cs" />
     <Compile Include="GScripts Module\GoogleScriptsClass.cs" />
-    <Compile Include="Models\MainModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Source Texts Module\SourceTextCreation.cs" />

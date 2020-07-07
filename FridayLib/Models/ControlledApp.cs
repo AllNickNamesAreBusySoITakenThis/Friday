@@ -54,7 +54,7 @@ namespace FridayLib
         [NonSerialized]
         private bool isInReestr = false;
         [NonSerialized]
-        private int id;
+        private int id=0;
         [NonSerialized]
         private bool blocked;
         [NonSerialized]
@@ -72,6 +72,8 @@ namespace FridayLib
         private string licenseType = "Нет";
         [NonSerialized]
         private bool selected = false;
+        private PPOTasks task = PPOTasks.SCADA_Addons;
+        private PPOCategories category = PPOCategories.Other;
 
         #region Properties
 
@@ -590,7 +592,31 @@ namespace FridayLib
                 status = value;
                 OnPropertyChanged("Status");
             }
-        } 
+        }
+        /// <summary>
+        /// Категория ППО
+        /// </summary>
+        public PPOCategories Category
+        {
+            get { return category; }
+            set
+            {
+                category = value;
+                OnPropertyChanged("Category");
+            }
+        }
+        /// <summary>
+        /// Задача ППО (по классификации реестра)
+        /// </summary>
+        public PPOTasks PPOTask
+        {
+            get { return task; }
+            set
+            {
+                task = value;
+                OnPropertyChanged("PPOTask");
+            }
+        }
         #endregion
 
 
@@ -645,9 +671,9 @@ namespace FridayLib
         /// <summary>
         /// Удалить приложение
         /// </summary>
-        public async void Remove()
+        public void Remove()
         {
-            await DatabaseClass.DeleteApp(this);
+            Parent.RemoveApp(this);
         }
         //-------------------------------------------------------10--------------------------------------------------------------
         /// <summary>
@@ -655,14 +681,17 @@ namespace FridayLib
         /// </summary>
         public async void Update()
         {
-            if(await CheckEquals())
-                await DatabaseClass.UpdateApp(this);
+            await Parent.SaveProjectAsync();
         }
-
+        /// <summary>
+        /// Перевести данные о приложении в формат документа Bson
+        /// </summary>
+        /// <returns></returns>
         public BsonDocument ToBsonElement()
         {
             return new BsonDocument
             {
+                {"Id",Id},
                 {"Name",Name},
                 {"Description",Description},
                 {"SourceDirectory",SourceDirectory},
@@ -689,8 +718,15 @@ namespace FridayLib
                 {"Propagation",Propagation},
                 {"Installer",Installer},
                 {"LicenseType",LicenseType},
+                {"PPOTask",(int)PPOTask},
+                {"PPOCategory",(int)Category},
             };
         }
+        /// <summary>
+        /// Получение массива Bson документов из коллекции приложений
+        /// </summary>
+        /// <param name="apps"></param>
+        /// <returns></returns>
         public static BsonArray GetAppArray(ICollection<ControlledApp> apps)
         {
             BsonArray result = new BsonArray();
@@ -700,12 +736,18 @@ namespace FridayLib
             }
             return result;
         }
+        /// <summary>
+        /// Получение приложения из Bson документа
+        /// </summary>
+        /// <param name="source">Bson-документ</param>
+        /// <returns></returns>
         public static ControlledApp FromBsonDocument(BsonDocument source)
         {
             try
             {
                 return new ControlledApp
                 {
+                    Id = source["Id"].ToInt32(),
                     Name = source["Name"].ToString(),
                     Description = source["Description"].ToString(),
                     SourceDirectory = source["SourceDirectory"].ToString(),
@@ -731,7 +773,9 @@ namespace FridayLib
                     Report = source["Report"].ToString(),
                     Propagation = source["Propagation"].ToString(),
                     Installer = source["Installer"].ToString(),
-                    LicenseType = source["LicenseType"].ToString()
+                    LicenseType = source["LicenseType"].ToString(),
+                    PPOTask = (PPOTasks)source["PPOTask"].ToInt32(),
+                    Category = (PPOCategories)source["PPOCategory"].ToInt32()
                 };
             }
             catch (Exception ex)
@@ -740,6 +784,11 @@ namespace FridayLib
                 return null;
             }
         }
+        /// <summary>
+        /// Получить коллекцию приложений из массива Bson документов
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public static ObservableCollection<ControlledApp> GetAppsFromBsonArray(BsonArray source)
         {
             ObservableCollection<ControlledApp> result = new ObservableCollection<ControlledApp>();
@@ -860,16 +909,16 @@ namespace FridayLib
             }
         }
         /// <summary>
-        /// Проверка уникальности данных по приложению
+        /// Проверка уникальности имени, назначаемого приложению
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> CheckEquals()
+        public bool CheckEquals(string name)
         {
             try
             {
-                foreach (var i in await DatabaseClass.CheckForEqual(this))
+                foreach(var app in Parent.Apps)
                 {
-                    if (!i.Equals(Id))
+                    if(app.Name==name)
                     {
                         return false;
                     }
@@ -882,6 +931,12 @@ namespace FridayLib
                 return false;
             }
         }
+        /// <summary>
+        /// Найти приложение по ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="prj"></param>
+        /// <returns></returns>
         public static ControlledApp GetById(int id, ControlledProject prj)
         {
             foreach (var app in prj.Apps)
@@ -890,6 +945,24 @@ namespace FridayLib
                     return app;
             }
             return new ControlledApp();
+        }
+        /// <summary>
+        /// Создать новое приложение для проекта
+        /// </summary>
+        /// <param name="parent">Проект-родитель</param>
+        /// <returns></returns>
+        public static ControlledApp CreateApp(ControlledProject parent)
+        {
+            int counter = 1;
+            string name = "Новое приложение";
+            ControlledApp nApp = new ControlledApp() { Parent = parent, ParentId = parent.Id, Id=parent.GetNewAppId() };
+            while(!nApp.CheckEquals(name))
+            {
+                name = name.Replace("_" + (counter-1).ToString(), "");
+                name = name + "_" + counter.ToString();
+            }
+            nApp.Name = name;
+            return nApp;
         }
         public object Clone()
         {

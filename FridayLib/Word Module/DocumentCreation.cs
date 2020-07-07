@@ -202,9 +202,9 @@ namespace FridayLib.Word_Module
                 document.Paragraphs[1].Range.Font.Bold = 2;
                 document.Paragraphs[1].Format.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
                 //1.1 Тип ППО
-                WriteLineInFormular(wordApp, document, 4, app.Parent.Task.ToString());
+                WriteLineInFormular(wordApp, document, 4, EnumHelper.Description(app.PPOTask));
                 //1.2 Категория ППО
-                WriteLineInFormular(wordApp, document, 5, app.Parent.Category.ToString());
+                WriteLineInFormular(wordApp, document, 5, EnumHelper.Description(app.Category));
                 //1.3.2 Назначение каждого из звеньев
                 WriteLineInFormular(wordApp, document, 8, app.Description);
                 //1.3.3 Исполняемые среды каждого из звеньев
@@ -229,16 +229,24 @@ namespace FridayLib.Word_Module
                 WriteLineInFormular(wordApp, document, 26, app.LocalData);
                 //4.2 Используемая СУБД
                 WriteLineInFormular(wordApp, document, 27, app.SUBD);
+                //4.3 Используемые средства расширения СУБД
+                WriteLineInFormular(wordApp, document, 28, app.SUBDExt);
                 //4.4 Используемые механизмы с средства хранения локальных данных
                 WriteLineInFormular(wordApp, document, 29, app.DataStoringMechanism);
+                //5.1 Средства и среды разработки с указанием версий
+                WriteLineInFormular(wordApp, document, 31, app.IDE);
                 //5.2 Компоненты и платформы, используемые для функционирования
                 WriteLineInFormular(wordApp, document, 32, app.FunctionalComponents);
                 //5.3 Компоненты и платформы, используемые для сборки
                 WriteLineInFormular(wordApp, document, 33, app.BuildingComponents);
                 //5.4 Средства предоставления отчетности
                 WriteLineInFormular(wordApp, document, 34, app.Report);
+                //6.1 Способ распространения приложения
+                WriteLineInFormular(wordApp, document, 36, app.Propagation);
                 //6.2 Тип установщика
-                WriteLineInFormular(wordApp, document, 36, app.Installer);
+                WriteLineInFormular(wordApp, document, 37, app.Installer);
+                //6.3 Способ лицензирования и тип лицензии
+                WriteLineInFormular(wordApp, document, 38, app.LicenseType);
                 #endregion
                 if (!Directory.Exists(app.DocumentDirectory))
                 {

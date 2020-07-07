@@ -12,6 +12,9 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
 using NLog.LayoutRenderers;
+using System.Security.Permissions;
+using ServiceLib.Configuration;
+using System.Net.Http.Headers;
 
 namespace FridayLib
 {
@@ -27,12 +30,10 @@ namespace FridayLib
         #endregion
 
         #region Private variables
-        private int id;
-        private string name = "";
-        private string workingDirectory="";
-        private PPOCategories category = PPOCategories.Other;
-        private string releaseDirectory = "";
-        private PPOTasks task = PPOTasks.SCADA_Addons;
+        private int id=0;
+        private string name = "Новый проект";
+        private string workingDirectory="";        
+        private string releaseDirectory = "";        
         private bool allAppsAreUpToDate;
         private string docDirectory = "";
         private bool allAppsAreInReestr;
@@ -109,30 +110,7 @@ namespace FridayLib
                 OnPropertyChanged("DocumentDirectory");
             }
         }
-        /// <summary>
-        /// Категория ППО
-        /// </summary>
-        public PPOCategories Category
-        {
-            get { return category; }
-            set
-            {
-                category = value;
-                OnPropertyChanged("Category");
-            }
-        }
-        /// <summary>
-        /// Задача ППО (по классификации реестра)
-        /// </summary>
-        public PPOTasks Task
-        {
-            get { return task; }
-            set
-            {
-                task = value;
-                OnPropertyChanged("Task");
-            }
-        }
+        
         /// <summary>
         /// Все приложения проекта обновлены
         /// </summary>
@@ -225,6 +203,21 @@ namespace FridayLib
         #region Public methods
 
         #region Static
+        public static void CreateProject(ICollection<ControlledProject> collection)
+        {
+            int newId = 0;
+            foreach(var prj in collection)
+            {
+                if (prj.Id > newId)
+                    newId = prj.Id;
+            }
+            newId++;
+            collection.Add(new ControlledProject
+            {
+                Id = newId,
+                Name = "Новый проект",
+            });
+        }
         /// <summary>
         /// Получить проект по его Id в коллекции
         /// </summary>
@@ -247,6 +240,7 @@ namespace FridayLib
         {
             var doc = new BsonDocument
             {
+                {"Id",Id },
                 {"Name",Name },
                 {"WorkingDirectory",WorkingDirectory },
                 {"DocumentDirectory",DocumentDirectory },
@@ -256,12 +250,18 @@ namespace FridayLib
             };
             return doc;
         }
+        /// <summary>
+        /// Получить проект из документа Bson (MongoDB)
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public static ControlledProject FromBsonDocument(BsonDocument source)
         {
             try
             {
                 var result = new ControlledProject
                 {
+                    Id = source["Id"].ToInt32(),
                     Name = source["Name"].ToString(),
                     WorkingDirectory = source["WorkingDirectory"].ToString(),
                     DocumentDirectory = source["DocumentDirectory"].ToString(),
@@ -269,12 +269,63 @@ namespace FridayLib
                     Apps = ControlledApp.GetAppsFromBsonArray(source["Applications"].AsBsonArray),
                     SourceTextFiles = SourceTextFile.GetFilesFromBsonArray(source["SourceFiles"].AsBsonArray)
                 };
+                foreach(var app in result.Apps)
+                {
+                    app.Parent = result;
+                    app.ParentId = result.Id;
+                }
+                foreach(var st in result.SourceTextFiles)
+                {
+                    st.Parent = result;
+                    st.ParentId = result.Id;
+                }
                 return result;
             }
             catch (Exception ex)
             {
                 Service.OnErrorInLibrary(string.Format("Ошибка получения данных для проекта : {0}", ex.Message));
                 return null;
+            }
+        }
+
+        public static ObservableCollection<ControlledProject> GetProjects()
+        {
+            try
+            {
+                ObservableCollection<ControlledProject> result = new ObservableCollection<ControlledProject>();
+                MongoClient client = new MongoClient(Configuration.Get("MongoServer").ToString());
+                IMongoDatabase database = client.GetDatabase(Configuration.Get("MongoDatabase").ToString());
+                var collection = database.GetCollection<BsonDocument>(Configuration.Get("MongoCollection").ToString());
+                var filter = new BsonDocument();
+                var data = collection.Find(filter).ToList();
+                foreach (var doc in data)
+                {
+                    result.Add(FromBsonDocument(doc));
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Service.OnErrorInLibrary(string.Format("Ошибка получения проектов: {0}", ex.Message));
+                return new ObservableCollection<ControlledProject>();
+            }
+        }
+        /// <summary>
+        /// Сохранить проект в БД
+        /// </summary>
+        public async Task SaveProjectAsync()
+        {
+            try
+            {
+                MongoClient client = new MongoClient(Configuration.Get("MongoServer").ToString());
+                IMongoDatabase database = client.GetDatabase(Configuration.Get("MongoDatabase").ToString());
+                var collection = database.GetCollection<BsonDocument>(Configuration.Get("MongoCollection").ToString());
+                var filter = Builders<BsonDocument>.Filter.Eq("Id", Id);
+                await collection.ReplaceOneAsync(filter, ToBsonDocument(), new ReplaceOptions { IsUpsert = true });
+            }
+            catch (Exception ex)
+            {
+                Service.OnErrorInLibrary(string.Format("Ошибка сохранения проекта {0}: {1}", Name, ex.Message));
             }
         }
         /// <summary>
@@ -284,7 +335,11 @@ namespace FridayLib
         {
             try
             {
-               
+                MongoClient client = new MongoClient(Configuration.Get("MongoServer").ToString());
+                IMongoDatabase database = client.GetDatabase(Configuration.Get("MongoDatabase").ToString());
+                var collection = database.GetCollection<BsonDocument>(Configuration.Get("MongoCollection").ToString());
+                var filter = Builders<BsonDocument>.Filter.Eq("Id", Id);
+                collection.ReplaceOne(filter, ToBsonDocument(), new ReplaceOptions { IsUpsert = true });
             }
             catch (Exception ex)
             {
@@ -292,17 +347,25 @@ namespace FridayLib
             }
         }
         /// <summary>
-        /// Загрузить из БД данные по проекту
+        /// Сохранить в проект в БД (для массового сохранения)
         /// </summary>
-        public void LoadProject()
+        /// <param name="mongoCollection"></param>
+        public async static Task SaveProjects(ObservableCollection<ControlledProject> projects)
         {
             try
             {
-
+                MongoClient client = new MongoClient(Configuration.Get("MongoServer").ToString());
+                IMongoDatabase database = client.GetDatabase(Configuration.Get("MongoDatabase").ToString());
+                var collection = database.GetCollection<BsonDocument>(Configuration.Get("MongoCollection").ToString());
+                foreach (var prj in projects)
+                {
+                    var filter = Builders<BsonDocument>.Filter.Eq("Id", prj.Id);
+                    await collection.ReplaceOneAsync(filter, prj.ToBsonDocument(), new ReplaceOptions { IsUpsert = true }); 
+                }
             }
             catch (Exception ex)
             {
-                Service.OnErrorInLibrary(string.Format("Ошибка сохранения проекта {0}: {1}", Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка сохранения проектов: {0}",ex.Message));
             }
         }
         /// <summary>
@@ -310,7 +373,7 @@ namespace FridayLib
         /// </summary>
         public void AddApp()
         {
-            ControlledApp app = new ControlledApp() { Name = "Новое приложение", Parent = this, ParentId=this.Id };
+            ControlledApp app = ControlledApp.CreateApp(this);
             Apps.Add(app);
         }
         /// <summary>
@@ -321,7 +384,6 @@ namespace FridayLib
         {            
             Apps.Remove(app);
         }
-
         /// <summary>
         /// Актуализировать релизы всех приложений данного проекта
         /// </summary>
@@ -381,7 +443,7 @@ namespace FridayLib
             try
             {
                 //Актуализируем документацию
-                //await PrepareDocumentation();
+                await PrepareDocumentation();
                 //Готовим структуру для формата разработки
                 Directory.CreateDirectory(Path.Combine(folderName, "Формат разработки"));
                 CopyDataForReestr(WorkingDirectory, Path.Combine(folderName, "Формат разработки"));
@@ -488,7 +550,6 @@ namespace FridayLib
             WorkStatus = "Подготовка ведомости исходных текстов";
             SourceTextCreation.SaveAsExcel(SourceTextFiles, System.IO.Path.Combine(DocumentDirectory, "Ведомость исходных текстов.xlsx"));
         }
-
         /// <summary>
         /// Обновить состояние проекта
         /// </summary>
@@ -504,55 +565,49 @@ namespace FridayLib
                 if (!Apps[i].IsInReestr)
                     AllAppsAreInReestr = false;
             }
-        }
+        }              
         /// <summary>
-        /// Получить приложения для проекта
-        /// </summary>
-        public async Task GetApps()
-        {
-            Apps = new ObservableCollection<ControlledApp>();
-            Apps = await DatabaseClass.GetAppsForProject(this);
-            UpdateState();
-        }
-        /// <summary>
-        /// Обновить информацию о проекте
-        /// </summary>
-        public async void UpdateInfo()
-        {
-            if (await CheckEquals())
-            {
-                await DatabaseClass.UpdateProject(this);
-                foreach (var app in Apps)
-                {
-                    app.Update();
-                } 
-            }
-        }
-        
-       
-        /// <summary>
-        /// Проверить новый/обноленный проект на совпадение с существующими
+        /// Проверить уникальность проекта в БД асинхронно
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> CheckEquals()
+        public static async Task<bool> CheckEqualsAsync(string name)
         {
             try
             {
-                foreach (var i in await DatabaseClass.CheckForEqual(this))
-                {
-                    if (!i.Equals(Id))
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                MongoClient client = new MongoClient("mongodb://localhost:27017");
+                IMongoDatabase database = client.GetDatabase("ProjectsDatabase");
+                var collection = database.GetCollection<BsonDocument>("ProjectsData");
+                var filter = Builders<BsonDocument>.Filter.Eq("Name", name);
+                var data = await collection.Find(filter).ToListAsync();
+                return data.Count == 0;
             }
             catch (Exception ex)
             {
-                Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", Name, ex.Message));
+                Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", name, ex.Message));
                 return false;
             }
-        }                
+        }
+        /// <summary>
+        /// Проверить уникальность проекта в БД
+        /// </summary>
+        /// <returns></returns>
+        public static bool CheckEquals(string name)
+        {
+            try
+            {
+                MongoClient client = new MongoClient("mongodb://localhost:27017");
+                IMongoDatabase database = client.GetDatabase("ProjectsDatabase");
+                var collection = database.GetCollection<BsonDocument>("ProjectsData");
+                var filter = Builders<BsonDocument>.Filter.Eq("Name", name);
+                var data = collection.Find(filter).ToList();
+                return data.Count == 0;
+            }
+            catch (Exception ex)
+            {
+                Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", name, ex.Message));
+                return false;
+            }
+        }
         /// <summary>
         /// Клонировать объет проекта
         /// </summary>
@@ -564,26 +619,20 @@ namespace FridayLib
                 AllAppsAreInReestr = this.AllAppsAreInReestr,
                 AllApрsAreUpToDate = this.AllApрsAreUpToDate,
                 Apps = this.Apps,
-                Category = this.Category,
                 DocumentDirectory = this.DocumentDirectory,
                 Id = this.Id,
                 Name = this.Name,
                 ReleaseDirectory = this.ReleaseDirectory,
                 SourceTextFiles = this.SourceTextFiles,
-                Task = this.Task,
                 WorkingDirectory = this.WorkingDirectory
             };
-        }
-        
-       
-       
-
+        }        
         #endregion
 
         #endregion
 
         #region Private methods
-        int GetNewAppId()
+        public int GetNewAppId()
         {
             int id = 0;
             foreach(var app in Apps)
