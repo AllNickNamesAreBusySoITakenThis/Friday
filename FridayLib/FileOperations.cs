@@ -50,13 +50,8 @@ namespace FridayLib
         {
             try
             {
-                if (Executable(filePath))
-                {
-                    FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(filePath);
-                    return fvi.FileVersion;
-                }
-                else
-                    return "";
+                FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(filePath);
+                return fvi.FileVersion??"";
             }
             catch (Exception ex)
             {

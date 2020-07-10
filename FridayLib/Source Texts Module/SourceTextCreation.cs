@@ -162,13 +162,16 @@ namespace FridayLib
                 excelworksheet.Name = "Ведомость";
                 for (int i = 0; i < collection.Count; i++)
                 {
-                    excelworksheet.Cells[i + 2, 1] = collection[i].Name;
-                    excelworksheet.Cells[i + 2, 2] = collection[i].Description;
-                    excelworksheet.Cells[i + 2, 3] = collection[i].FullName;
-                    excelworksheet.Cells[i + 2, 4] = collection[i].Size;
-                    excelworksheet.Cells[i + 2, 5] = collection[i].Version;
-                    excelworksheet.Cells[i + 2, 6] = collection[i].Hash;
-                    excelworksheet.Cells[i + 2, 7] = collection[i].Owner;
+                    if (collection[i].Include)
+                    {
+                        excelworksheet.Cells[i + 2, 1] = collection[i].Name;
+                        excelworksheet.Cells[i + 2, 2] = collection[i].Description;
+                        excelworksheet.Cells[i + 2, 3] = collection[i].FullName;
+                        excelworksheet.Cells[i + 2, 4] = collection[i].Size;
+                        excelworksheet.Cells[i + 2, 5] = collection[i].Version;
+                        excelworksheet.Cells[i + 2, 6] = collection[i].Hash;
+                        excelworksheet.Cells[i + 2, 7] = collection[i].Owner; 
+                    }
                 }
                 excelappworkbook.SaveAs(path);
                 excelapp.Quit();
@@ -232,7 +235,7 @@ namespace FridayLib
         {
             try
             {
-                project.SourceTextFiles = UpdateSourceTextList(project);
+                UpdateSourceTextList(project);
                 SaveAsExcel(project.SourceTextFiles, Path.Combine(project.DocumentDirectory, "Ведомость исходных текстов.xlsx"));
                 SaveAsTextFile(project.SourceTextFiles, Path.Combine(project.DocumentDirectory, "SourceTexts.csv"));
             }
@@ -242,15 +245,14 @@ namespace FridayLib
             }
         }
 
-        public static ObservableCollection<SourceTextFile> UpdateSourceTextList(ControlledProject project)
+        public static void UpdateSourceTextList(ControlledProject project)
         {
             try
             {
-                ObservableCollection<SourceTextFile> originalCollection = ScanFolder(project.WorkingDirectory);
-                ObservableCollection<SourceTextFile> savedCollection = GetFromTextFile(Path.Combine(project.DocumentDirectory, "SourceTexts.csv"));
+                ObservableCollection<SourceTextFile> originalCollection = ScanFolder(project.WorkingDirectory);                
                 foreach(var item in originalCollection)
                 {
-                    foreach(var sItem in savedCollection)
+                    foreach(var sItem in project.SourceTextFiles)
                     {
                         if(sItem.FullName.Equals(item.FullName))
                         {
@@ -260,12 +262,11 @@ namespace FridayLib
                         }
                     }
                 }
-                return originalCollection;
+                project.SourceTextFiles = originalCollection;
             }
             catch (Exception ex)
             {
                 Service.OnErrorInLibrary(string.Format("Ошибка при создании исходных текстов: {0}", ex.Message));
-                return new ObservableCollection<SourceTextFile>();
             }
         }
     }

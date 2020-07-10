@@ -128,7 +128,8 @@ namespace FridayLib
             set
             {
                 sourceDirectory = value;
-                CurrentFile = new ControlledFile(Path.Combine(SourceDirectory, MainFileName));
+                if (!string.IsNullOrEmpty(sourceDirectory) && !string.IsNullOrEmpty(MainFileName))
+                    CurrentFile = new ControlledFile(Path.Combine(SourceDirectory, MainFileName));
                 OnPropertyChanged("SourceDirectory");
             }
         }
@@ -142,7 +143,8 @@ namespace FridayLib
             set
             {
                 releaseDirectory = value;
-                ReleaseFile = new ControlledFile(Path.Combine(ReleaseDirectory, MainFileName));
+                if (!string.IsNullOrEmpty(releaseDirectory) && !string.IsNullOrEmpty(MainFileName))
+                    ReleaseFile = new ControlledFile(Path.Combine(ReleaseDirectory, MainFileName));
                 OnPropertyChanged("ReleaseDirectory");
             }
         }
@@ -169,7 +171,8 @@ namespace FridayLib
             set
             {
                 reestrDirectory = value;
-                ReestrFile = new ControlledFile(Path.Combine(ReestrDirectory, MainFileName));
+                if(!string.IsNullOrEmpty(reestrDirectory) && !string.IsNullOrEmpty(MainFileName))
+                    ReestrFile = new ControlledFile(Path.Combine(ReestrDirectory, MainFileName));
                 OnPropertyChanged("ReestrDirectory");
             }
         }
@@ -183,9 +186,12 @@ namespace FridayLib
             set
             {
                 mainFileName = value;
-                CurrentFile = new ControlledFile(Path.Combine(SourceDirectory, MainFileName));
-                ReestrFile = new ControlledFile(Path.Combine(ReestrDirectory, MainFileName));
-                ReleaseFile = new ControlledFile(Path.Combine(ReleaseDirectory, MainFileName));
+                if (!string.IsNullOrEmpty(sourceDirectory) && !string.IsNullOrEmpty(MainFileName))
+                    CurrentFile = new ControlledFile(Path.Combine(SourceDirectory, MainFileName));
+                if (!string.IsNullOrEmpty(reestrDirectory) && !string.IsNullOrEmpty(MainFileName))
+                    ReestrFile = new ControlledFile(Path.Combine(ReestrDirectory, MainFileName));
+                if (!string.IsNullOrEmpty(releaseDirectory) && !string.IsNullOrEmpty(MainFileName))
+                    ReleaseFile = new ControlledFile(Path.Combine(ReleaseDirectory, MainFileName));
                 OnPropertyChanged("MainFileName");
             }
         }
@@ -529,6 +535,7 @@ namespace FridayLib
         /// <summary>
         /// Приложение в релизе актуально
         /// </summary>
+        [Category("Statistics"), Description("Актуальная версия приложения находится в релизной директории"), DisplayName("Приложение в релизе")]
         [BsonIgnore]
         public bool UpToDate
         {
@@ -542,6 +549,7 @@ namespace FridayLib
         /// <summary>
         /// допущено в реестр
         /// </summary>
+        [Category("Statistics"), Description("Актуальная версия приложения находится в реестре ППО"), DisplayName("Приложение в реестре")]
         [BsonIgnore]
         public bool IsInReestr
         {
@@ -638,9 +646,10 @@ namespace FridayLib
         /// Актуализировать релиз
         /// </summary>
         public async void ActualizeRelease()
-        {
+        {           
             await CopyToFolderAsync(SourceDirectory, ReleaseDirectory);
             await UpdateFileInfoAsync();
+            await Task.Run(() => GoogleScriptsClass.UpdateSheetsData(this));
         }
         //-------------------------------------------------------2--------------------------------------------------------------
         /// <summary>

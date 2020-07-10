@@ -17,8 +17,6 @@ namespace FridayLib
             ErrorInLibrary?.Invoke(message);
         }
 
-        
-        public static string ConnectionString { get; set; }
         public static List<string> AllowedFileExtentions { get; set; } = new List<string>() { ".dll", ".exe", ".xml", ".txt",".png",".jpg", ".jpeg", ".bmp", ".ico", ".config", ".json" };
 
         public static string GetStringFromCollecction(IEnumerable<string> collection)
@@ -30,11 +28,13 @@ namespace FridayLib
             }
             return str;
         }
+
         public static List<String> GetListFromString(string source)
         {
             var data = source.Split(new char[] { ';' });
             return data.ToList();
         }
+
         public static bool FilterXMLFiles(string name)
         {
             try
@@ -67,12 +67,11 @@ namespace FridayLib
                 ServiceLib.Configuration.Configuration.Add("Password", ServiceLib.Configuration.SettingType.String, "Bzpa/123456789");
                 ServiceLib.Configuration.Configuration.Add("SpreadsheetAddress", ServiceLib.Configuration.SettingType.String, "10dymgee_7SNKLRwf9nS533pJpTMk1tLbndR9BmdO8As");
                 ServiceLib.Configuration.Configuration.Add("SpreadsheetId", ServiceLib.Configuration.SettingType.Integer, "1970994398");
+                ServiceLib.Configuration.Configuration.Add("SheetName", ServiceLib.Configuration.SettingType.Integer, "ReestrData");
                 ServiceLib.Configuration.Configuration.Add("MongoServer", ServiceLib.Configuration.SettingType.String, "mongodb://localhost:27017");
                 ServiceLib.Configuration.Configuration.Add("MongoDatabase", ServiceLib.Configuration.SettingType.String, "ProjectsDatabase");
                 ServiceLib.Configuration.Configuration.Add("MongoCollection", ServiceLib.Configuration.SettingType.String, "ProjectsData");
                 ServiceLib.Configuration.Configuration.Load(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "Friday"));
-                ConnectionString = string.Format("Data Source = {0}; Integrated Security = False; Initial catalog = {1}; User = {2}; Password={3}; Connection Timeout=3",
-                    Configuration.Get("Server").ToString(), Configuration.Get("Database").ToString(), Configuration.Get("User").ToString(), Configuration.Get("Password").ToString());
             }
             catch (Exception ex)
             {

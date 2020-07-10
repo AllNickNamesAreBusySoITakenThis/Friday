@@ -1,0 +1,49 @@
+﻿<dx:ThemedWindow x:Class="Frifull.Views.SettingsScreen" mc:Ignorable="d" 
+                 SizeToContent="WidthAndHeight" Title="Настройки" 
+                 ResizeMode="NoResize" Icon="pack://application:,,,/DevExpress.Images.v17.2;component/DevAV/Actions/ViewSetting_32x32.png" 
+                 common:DialogCloser.DialogResult="{Binding DialogResult}" 
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core" 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:vm="clr-namespace:Frifull.ViewModels" 
+    xmlns:local="clr-namespace:Frifull.Views" 
+    xmlns:common="clr-namespace:Frifull.Common" 
+    xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                 WindowStartupLocation="CenterOwner">
+    <dx:ThemedWindow.DataContext>
+        <vm:SettingsWindowViewModel />
+    </dx:ThemedWindow.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="500" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Margin="5" Text="Адрес сервера" Height="22" VerticalAlignment="Center" Grid.Row="0"/>
+        <TextBlock Margin="5" Text="Имя базы данных" VerticalAlignment="Center" Grid.Row="1"/>
+        <TextBlock Margin="5" Text="Имя коллекции" VerticalAlignment="Center" Grid.Row="2"/>
+        <TextBlock Margin="5" Text="Адрес таблицы" VerticalAlignment="Center" Grid.Row="3" />
+        <TextBlock Margin="5" Text="Идентификатор листа" VerticalAlignment="Center" Grid.Row="4"/>
+        <TextBlock Margin="5" Text="Доступные расширения файлов" VerticalAlignment="Center" Grid.Row="5"/>
+
+        <dxe:TextEdit Margin="5" EditValue="{Binding MongoServer,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"/>
+        <dxe:TextEdit Margin="5" EditValue="{Binding MongoDatabase,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"/>
+        <dxe:TextEdit Margin="5" EditValue="{Binding MongoCollection,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1"/>
+        <dxe:TextEdit Margin="5" EditValue="{Binding SpreadsheetAddress,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1"/>
+        <dxe:TextEdit Margin="5" EditValue="{Binding Sheet,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"/>
+        <dxe:TextEdit Margin="5" EditValue="{Binding AExt,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="5" Grid.Column="1"/>
+
+        <dx:SimpleButton Grid.Row="6" Grid.ColumnSpan="2" HorizontalAlignment="Right" Content="Ок" Command="{Binding ConfirmCommand}" Margin="5,5,135,5" Width="120"/>
+        <dx:SimpleButton Grid.Row="6" Grid.ColumnSpan="2" HorizontalAlignment="Right" Content="Отмена" Command="{Binding CancelCommand}" Margin="5,5,5,5" Width="120"/>
+    </Grid>
+</dx:ThemedWindow>

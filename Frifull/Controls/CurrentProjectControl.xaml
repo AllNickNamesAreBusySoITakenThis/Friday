@@ -27,16 +27,25 @@
         </Grid.RowDefinitions>
         <dxwui:AppBar  Margin="0" IsOpen="True" HideMode="AlwaysVisible" IsBackButtonEnabled="True" >
             <dxwui:AppBarButton  Label="Добавить приложение" Glyph="{dx:DXImageGrayscale Image=Add_32x32.png}" GlyphStretch="Uniform" IsEllipseEnabled="False" AllowGlyphTheming="True" Command="{DXCommand Execute=AddApp();}"/>
-            <dxwui:AppBarButton Content="" Label="Актуализировать все" Glyph="{dx:DXImageOffice2013 Image=HistoryItem_32x32.png}" IsEllipseEnabled="False" AllowGlyphTheming="True"/>
-            <dxwui:AppBarButton Label="Обновить данные" Glyph="{dx:DXImageGrayscale Image=Refresh_32x32.png}" IsEllipseEnabled="False" AllowGlyphTheming="True"/>
-            <dxe:TextEdit Margin="5" EditValue="{Binding Name, UpdateSourceTrigger=PropertyChanged}" FontSize="24" Foreground="Black" HorizontalAlignment="Center" Background="Transparent" ShowBorder="False"/>
-            <dxwui:AppBarButton  Label="Сохранить" Glyph="{dx:DXImageGrayscale Image=Save_32x32.png}" AllowGlyphTheming="True" IsEllipseEnabled="False"/>
-            <dxwui:AppBarButton  Label="Подготовить документацию" IsEllipseEnabled="False" AllowGlyphTheming="True" Glyph="{dx:DXImageGrayscale Image=New_32x32.png}"/>
-            <dxwui:AppBarButton  Label="Удалить проект" HorizontalAlignment="Right" IsEllipseEnabled="False" AllowGlyphTheming="True" Glyph="{dx:DXImageGrayscale Image=Cancel_32x32.png}"/>
+            <dxwui:AppBarButton Content="" Label="Актуализировать релиз" Glyph="{dx:DXImageOffice2013 Image=HistoryItem_32x32.png}" IsEllipseEnabled="False" AllowGlyphTheming="True"
+                                Command="{DXCommand Execute=ActualizeRelease();}"/>
+            <dxwui:AppBarButton Content="" Label="Актуализировать реестр" Glyph="{dx:DXImageOffice2013 Image=HistoryItem_32x32.png}" IsEllipseEnabled="False" AllowGlyphTheming="True"
+                                Command="{DXCommand Execute=ActualizeReestr();}"/>
+            <dxwui:AppBarButton Label="Обновить данные" Glyph="{dx:DXImageGrayscale Image=Refresh_32x32.png}" IsEllipseEnabled="False" AllowGlyphTheming="True" Alignment="Far"
+                                Command="{DXCommand Execute=UpdateState();}"/>
+            <dxe:TextEdit Margin="5" EditValue="{Binding Name, UpdateSourceTrigger=PropertyChanged}" FontSize="24" Foreground="Black" HorizontalAlignment="Center" 
+                          Background="Transparent" ShowBorder="False" IsReadOnly="True" />
+            <dxwui:AppBarButton  Label="Сохранить" Glyph="{dx:DXImageGrayscale Image=Save_32x32.png}" AllowGlyphTheming="True" IsEllipseEnabled="False" 
+                                 Command="{DXCommand Execute=SaveProject();}"/>
+            <dxwui:AppBarButton  Label="Подготовить документацию" IsEllipseEnabled="False" AllowGlyphTheming="True" Glyph="{dx:DXImageGrayscale Image=New_32x32.png}"
+                                 Command="{DXCommand Execute=PrepareDocumentation();}"/>
+            <dxwui:AppBarButton  Label="Подготовить пакет в реестр" IsEllipseEnabled="False" AllowGlyphTheming="True" Glyph="{dx:DXImageOffice2013 Image=EmailTemplate_32x32.png}"
+                                 Command="{Binding DataContext.CreateReestPackejeCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+           
         </dxwui:AppBar>
         <dxdo:DockLayoutManager Grid.Row="1">
             <dxdo:LayoutGroup Caption="LayoutRoot">
-                <dxdo:LayoutPanel Caption="Сведения о проекте" ItemWidth="250">
+                <dxdo:LayoutPanel Caption="Сведения о проекте" ItemWidth="250" AllowClose="False" AllowHide="False">
                     <dxprg:PropertyGridControl SelectedObject="{Binding}" ShowProperties="WithPropertyDefinitions"
                                     ExpandCategoriesWhenSelectedObjectChanged="True" ShowEditorButtons="False" ShowMenu="OnRightClick" 
                                                    ShowMenuButtonInRows="False">
@@ -49,35 +58,95 @@
                     </dxprg:PropertyGridControl>
                 </dxdo:LayoutPanel>
                 <dxdo:LayoutGroup Caption="LayoutRoot" Orientation="Vertical">
-                    <dxdo:LayoutPanel Caption="Перечень приложений">
-                        <dxg:GridControl ItemsSource="{Binding Apps}" SelectedItem="{Binding CurrentApp, UpdateSourceTrigger=PropertyChanged}">
-                            <dxg:GridControl.View>
-                                <dxg:TableView AllowPerPixelScrolling="True" ShowTotalSummary="True"/>
-                            </dxg:GridControl.View>
-                            <dxg:GridColumn FieldName="Name" IsSmart="True" Width="*"/>
-                            <dxg:GridColumn FieldName="UpToDate" IsSmart="True"/>
-                            <dxg:GridColumn FieldName="IsInReestr" IsSmart="True"/>
-                            
-                        </dxg:GridControl>
+                    <dxdo:LayoutPanel Caption="Перечень приложений" AllowClose="False" AllowHide="False">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" IsEnabled="{DXBinding 'CurrentApp ne null'}" 
+                                                 ToolTip="Проверить приложение" Glyph="{dx:DXImageOffice2013 Image=CheckBox_16x16.png}" Command="{Binding DataContext.CheckCurrentAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" IsEnabled="{DXBinding 'CurrentApp ne null'}" 
+                                                 ToolTip="Актуализировать релиз" Glyph="{dx:DXImageOffice2013 Image=HistoryItem_16x16.png}"  Command="{Binding DataContext.ActualizeCurrentAppReleaseCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" IsEnabled="{DXBinding 'CurrentApp ne null'}" 
+                                                 ToolTip="Подготовить документацию" Glyph="{dx:DXImage Image=TextBox_16x16.png}"  Command="{Binding DataContext.PrepareCurrentAppDocCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" IsEnabled="{DXBinding 'CurrentApp ne null'}" 
+                                                 ToolTip="Актуализировать реестр" Glyph="{dx:DXImage Image=Publish_16x16.png}"  Command="{Binding DataContext.ActualizeCurrentAppReestrCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" IsEnabled="{DXBinding 'CurrentApp ne null'}"
+                                                 Glyph="{dx:DXImageOffice2013 Image=Close_16x16.png}" ToolTip="Удалить приложение"  Command="{Binding DataContext.RemoveCurrentAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            </StackPanel>
+                            <dxg:GridControl ItemsSource="{Binding Apps}" SelectedItem="{Binding CurrentApp, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1">
+                                <dxg:GridControl.View>
+                                    <dxg:TableView AllowPerPixelScrolling="True" ShowTotalSummary="True" ShowGroupPanel="False"/>
+                                </dxg:GridControl.View>
+                                <dxg:GridColumn FieldName="Name" Header="Имя приложения" IsSmart="True" Width="*" AllowEditing="False"/>
+                                <dxg:GridColumn FieldName="WorkingStatus" Header="Статус" IsSmart="True" Width="200" AllowEditing="False"/>
+                                <dxg:GridColumn FieldName="UpToDate" Header="Релиз актуален" IsSmart="True" AllowEditing="False" Width="100">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Image Source="{dx:DXImage Image=IconSetTrafficLights4_16x16.png}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Visibility="{Binding RowData.Row.UpToDate, Converter={StaticResource boolToVisible}}" Width="16"/>
+                                                <Image  Source="{dx:DXImage Image=IconSetRedToBlack4_16x16.png}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Visibility="{Binding RowData.Row.UpToDate, Converter={StaticResource boolToInvisible}}" Width="16"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                </dxg:GridColumn>
+                                <dxg:GridColumn FieldName="IsInReestr" Header="Реестр актуален" IsSmart="True" AllowEditing="False" Width="100">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Image Source="{dx:DXImage Image=IconSetTrafficLights4_16x16.png}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Visibility="{Binding RowData.Row.IsInReestr, Converter={StaticResource boolToVisible}}" Width="16"/>
+                                                <Image  Source="{dx:DXImage Image=IconSetRedToBlack4_16x16.png}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Visibility="{Binding RowData.Row.IsInReestr, Converter={StaticResource boolToInvisible}}" Width="16"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                </dxg:GridColumn>
+
+                            </dxg:GridControl>
+                        </Grid>                        
                     </dxdo:LayoutPanel>
-                    <dxdo:LayoutPanel Caption="Ведомость исходных текстов">
-                        <dxg:GridControl ItemsSource="{Binding SourceTextFiles}">
-                            <dxg:GridControl.View>
-                                <dxg:TableView AllowPerPixelScrolling="True" ShowTotalSummary="False" ShowGroupPanel="False"/>
-                            </dxg:GridControl.View>
-                            <dxg:GridColumn FieldName="Name" IsSmart="True"/>
-                            <dxg:GridColumn FieldName="FullName" IsSmart="True" Width="*"/>
-                            <dxg:GridColumn FieldName="Description" IsSmart="True" Width="2*"/>
-                            <dxg:GridColumn FieldName="Hash" IsSmart="True"/>
-                            <dxg:GridColumn FieldName="Owner" IsSmart="True"/>
-                            <dxg:GridColumn FieldName="Size" IsSmart="True"/>
-                            <dxg:GridColumn FieldName="Version" IsSmart="True"/>
-                            <dxg:GridColumn FieldName="CreationDate" IsSmart="True"/>
-                        </dxg:GridControl>
+                    <dxdo:LayoutPanel Caption="Ведомость исходных текстов" AllowClose="False" AllowHide="False">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" ToolTip="Обновить данные" 
+                                                 Glyph="{dx:DXImageOffice2013 Image=HistoryItem_16x16.png}" Command="{Binding DataContext.RefreshSourceTextsCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" ToolTip="Сохранить" 
+                                                 Glyph="{dx:DXImageOffice2013 Image=Save_16x16.png}" Command="{Binding DataContext.SaveSourceTextCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" ToolTip="Сохранить как Excel" 
+                                                 Glyph="{dx:DXImage Image=ExportToXLSX_16x16.png}" Command="{Binding DataContext.SaveSourceTextsAsExcelCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <!--<dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" IsEnabled="{DXBinding 'CurrentApp ne null'}" 
+                                                 ToolTip="Актуализировать реестр" Glyph="{dx:DXImage Image=Publish_16x16.png}"/>
+                                <dx:SimpleButton Margin="5" CommandParameter="{Binding CurrentApp}" IsEnabled="{DXBinding 'CurrentApp ne null'}"
+                                                 Glyph="{dx:DXImageOffice2013 Image=Close_16x16.png}" ToolTip="Удалить приложение"/>-->
+                            </StackPanel>
+                            <dxg:GridControl ItemsSource="{Binding SourceTextFiles}" Grid.Row="1">
+                                <dxg:GridControl.View>
+                                    <dxg:TableView AllowPerPixelScrolling="True" ShowTotalSummary="False" ShowGroupPanel="False"/>
+                                </dxg:GridControl.View>
+                                <dxg:GridColumn FieldName="Include" IsSmart="True" Header=" " Width="30"/>
+                                <dxg:GridColumn FieldName="Name" IsSmart="True" Header="Название"/>
+                                <dxg:GridColumn FieldName="FullName" IsSmart="True" Header="Относительный путь" Width="*"/>
+                                <dxg:GridColumn FieldName="Description" IsSmart="True" Header="Описание" Width="2*"/>
+                                <dxg:GridColumn FieldName="Hash" IsSmart="True" Header="Хеш-сумма"/>
+                                <dxg:GridColumn FieldName="Owner" IsSmart="True" Header="Собственник"/>
+                                <dxg:GridColumn FieldName="Size" IsSmart="True" Header="Размер"/>
+                                <dxg:GridColumn FieldName="Version" IsSmart="True" Header="Версия"/>
+                                <dxg:GridColumn FieldName="CreationDate" IsSmart="True" Header="Дата изменения"/>
+                            </dxg:GridControl>
+                        </Grid>                        
                     </dxdo:LayoutPanel>
                 </dxdo:LayoutGroup>
-                <dxdo:TabbedGroup Orientation="Vertical" ItemWidth="300">
-                    <dxdo:LayoutPanel Caption="Свойства">
+                <dxdo:LayoutGroup Orientation="Vertical" ItemWidth="300">
+                    <dxdo:LayoutPanel Caption="Свойства" AllowClose="False" AllowHide="False">
                         <dxprg:PropertyGridControl SelectedObject="{Binding CurrentApp}" ShowProperties="WithPropertyDefinitions"
                                     ExpandCategoriesWhenSelectedObjectChanged="True" ShowEditorButtons="False" ShowMenu="OnRightClick" 
                                                    ShowMenuButtonInRows="False">
@@ -116,7 +185,7 @@
                             <dxprg:PropertyDefinition Path="LicenseType"/>
                         </dxprg:PropertyGridControl>
                     </dxdo:LayoutPanel>
-                    <dxdo:LayoutPanel Caption="Действия" ItemWidth="250">
+                    <!--<dxdo:LayoutPanel Caption="Действия" ItemWidth="250">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto"/>
@@ -134,9 +203,8 @@
                             <dx:SimpleButton Grid.Row="3" Content="Актуализировать реестр" Margin="5" dxwuin:Navigation.NavigationParameter="{Binding CurrentApp}" IsEnabled="{DXBinding 'CurrentApp ne null'}"/>
                             <dx:SimpleButton Grid.Row="7" Content="Удалить проект" Margin="5" dxwuin:Navigation.NavigationParameter="{Binding CurrentApp}" IsEnabled="{DXBinding 'CurrentApp ne null'}"/>
                         </Grid>
-                    </dxdo:LayoutPanel>
-                </dxdo:TabbedGroup>
-               
+                    </dxdo:LayoutPanel>-->
+                </dxdo:LayoutGroup>               
             </dxdo:LayoutGroup>
         </dxdo:DockLayoutManager>
     </Grid>

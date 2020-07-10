@@ -10,17 +10,20 @@
     xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
     xmlns:local="clr-namespace:Frifull"
     x:Class="Frifull.Views.MainScreen"
-    Title="Пятница" Height="350" Width="800"
-    >
+    WindowState="Maximized"
+    Title="Пятница" Height="600" Width="1000" Icon="{dx:DXImageOffice2013 Image=Suggestion_32x32.png}">
     <dx:ThemedWindow.Resources>
         <dxmvvm:BooleanToVisibilityConverter x:Key="boolToVisible"/>
         <dxmvvm:BooleanToVisibilityConverter x:Key="boolToInvisible" Inverse="True"/>
         <vm:MainWindowViewModel x:Key="viewmodel"/>
     </dx:ThemedWindow.Resources>
+    <dx:ThemedWindow.DataContext>
+        <vm:MainWindowViewModel/>
+    </dx:ThemedWindow.DataContext>
     <Grid>
         <dxwui:NavigationFrame  AnimationType="SlideHorizontal">
             <dxwui:NavigationFrame.Source>
-                <local:ProjectsControl DataContext="{StaticResource viewmodel}" x:Name="mainControl"/>
+                <local:ProjectsControl DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}" x:Name="mainControl"/>
             </dxwui:NavigationFrame.Source>
         </dxwui:NavigationFrame>
         

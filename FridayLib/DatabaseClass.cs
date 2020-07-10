@@ -22,7 +22,7 @@ namespace FridayLib
             try
             {
                 SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = Service.ConnectionString;
+                //sqlConnection.ConnectionString = Service.ConnectionString;
                 sqlConnection.Open();
                 return sqlConnection;
             }
@@ -42,7 +42,7 @@ namespace FridayLib
             try
             {
                 SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = Service.ConnectionString;
+                //sqlConnection.ConnectionString = Service.ConnectionString;
                 await sqlConnection.OpenAsync();
                 return sqlConnection;
             }

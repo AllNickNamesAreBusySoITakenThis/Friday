@@ -28,7 +28,7 @@ namespace FridayLib
                 var credential = GetCredintials();
                 var service = GetService(credential);
                 String spreadsheetId = ServiceLib.Configuration.Configuration.Get("SpreadsheetAddress").ToString();
-                String range = "A2:N100";
+                String range = string.Format("{0}!A2:N100", ServiceLib.Configuration.Configuration.Get("SheetName").ToString());
                 //int sheetId = 1970994398;
                 int sheetId = Convert.ToInt32(ServiceLib.Configuration.Configuration.Get("SpreadsheetId"));
                 SpreadsheetsResource.ValuesResource.GetRequest dataRequest =
@@ -37,11 +37,13 @@ namespace FridayLib
                 IList<IList<Object>> exValues = response.Values;
 
                 List<Request> requests = new List<Request>();
-                foreach (var val in exValues)
+                if (exValues!=null)
                 {
-                    if (application.Name == val[1].ToString())
+                    foreach (var val in exValues)
                     {
-                        List<CellData> values = new List<CellData>()
+                        if (application.Name == val[1].ToString())
+                        {
+                            List<CellData> values = new List<CellData>()
                             {
                                 new CellData(){UserEnteredValue = new ExtendedValue { NumberValue = Convert.ToInt32(val[0]) }},
                                 new CellData(){UserEnteredValue = new ExtendedValue { StringValue = application.Name }},
@@ -57,22 +59,23 @@ namespace FridayLib
                                 new CellData(){UserEnteredValue = new ExtendedValue { StringValue = application.CompatibleSZI }},
                             };
 
-                        requests.Add(new Request()
-                        {
-                            UpdateCells = new UpdateCellsRequest()
+                            requests.Add(new Request()
                             {
-                                Start = new GridCoordinate()
+                                UpdateCells = new UpdateCellsRequest()
                                 {
-                                    SheetId = sheetId,
-                                    ColumnIndex = 0,
-                                    RowIndex = Convert.ToInt32(val[0])
-                                },
-                                Rows = new List<RowData>() { new RowData() { Values = values } },
-                                Fields = "userEnteredValue"
-                            }
-                        });
-                        break;
-                    }
+                                    Start = new GridCoordinate()
+                                    {
+                                        SheetId = sheetId,
+                                        ColumnIndex = 0,
+                                        RowIndex = Convert.ToInt32(val[0])
+                                    },
+                                    Rows = new List<RowData>() { new RowData() { Values = values } },
+                                    Fields = "userEnteredValue"
+                                }
+                            });
+                            break;
+                        }
+                    } 
                 }
                 BatchUpdateSpreadsheetRequest request = new BatchUpdateSpreadsheetRequest()
                 {
@@ -130,7 +133,7 @@ namespace FridayLib
                 String spreadsheetId = ServiceLib.Configuration.Configuration.Get("SpreadsheetAddress").ToString();
                 //int sheetId = 1970994398;
                 int sheetId = Convert.ToInt32(ServiceLib.Configuration.Configuration.Get("SpreadsheetId"));
-                String range = "A2:N100";
+                String range = string.Format("{0}!A2:N100", ServiceLib.Configuration.Configuration.Get("SheetName").ToString());
                 SpreadsheetsResource.ValuesResource.GetRequest dataRequest =
                         service.Spreadsheets.Values.Get(spreadsheetId, range);
                 ValueRange response = dataRequest.Execute();

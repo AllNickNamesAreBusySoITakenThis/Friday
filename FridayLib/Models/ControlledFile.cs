@@ -90,9 +90,12 @@ namespace FridayLib
         {
             try
             {
-                GetChangeDate(Address);
-                GetCheckSumm(Address);
-                GetVersion(Address);
+                if (!string.IsNullOrEmpty(Address))
+                {
+                    GetChangeDate(Address);
+                    GetCheckSumm(Address);
+                    GetVersion(Address); 
+                }
             }
             catch(Exception ex)
             {

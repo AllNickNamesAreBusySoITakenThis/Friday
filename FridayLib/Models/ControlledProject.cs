@@ -15,10 +15,11 @@ using NLog.LayoutRenderers;
 using System.Security.Permissions;
 using ServiceLib.Configuration;
 using System.Net.Http.Headers;
+using System.Windows.Forms;
 
 namespace FridayLib
 {
-    public class ControlledProject : INotifyPropertyChanged, ICloneable
+    public class ControlledProject : INotifyPropertyChanged
     {
         
         #region Events
@@ -310,6 +311,35 @@ namespace FridayLib
                 return new ObservableCollection<ControlledProject>();
             }
         }
+        public async static Task<ObservableCollection<ControlledProject>> GetProjectsAsync(IProgress<double> progress)
+        {
+            try
+            {
+                ObservableCollection<ControlledProject> result = new ObservableCollection<ControlledProject>();
+                MongoClient client = new MongoClient(Configuration.Get("MongoServer").ToString());
+                IMongoDatabase database = client.GetDatabase(Configuration.Get("MongoDatabase").ToString());
+                var collection = database.GetCollection<BsonDocument>(Configuration.Get("MongoCollection").ToString());
+                var filter = new BsonDocument();
+                var data = await collection.Find(filter).ToListAsync();
+                double percentage = 0;
+                double step = (double)100 / data.Count;
+                foreach (var doc in data)
+                {
+                    progress.Report(percentage);
+                    var prj = await Task.Run(() => FromBsonDocument(doc));
+                    prj.UpdateState();
+                    result.Add(prj);
+                    percentage+=step;
+                }
+                progress.Report(100);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Service.OnErrorInLibrary(string.Format("Ошибка получения проектов: {0}", ex.Message));
+                return new ObservableCollection<ControlledProject>();
+            }
+        }
         /// <summary>
         /// Сохранить проект в БД
         /// </summary>
@@ -317,15 +347,21 @@ namespace FridayLib
         {
             try
             {
+                Blocked = true;
+                WorkStatus = "Сохранение проекта в БД";
                 MongoClient client = new MongoClient(Configuration.Get("MongoServer").ToString());
                 IMongoDatabase database = client.GetDatabase(Configuration.Get("MongoDatabase").ToString());
                 var collection = database.GetCollection<BsonDocument>(Configuration.Get("MongoCollection").ToString());
                 var filter = Builders<BsonDocument>.Filter.Eq("Id", Id);
                 await collection.ReplaceOneAsync(filter, ToBsonDocument(), new ReplaceOptions { IsUpsert = true });
+                WorkStatus = "";
+                Blocked = false;
             }
             catch (Exception ex)
             {
                 Service.OnErrorInLibrary(string.Format("Ошибка сохранения проекта {0}: {1}", Name, ex.Message));
+                Blocked = false;
+                WorkStatus = "";
             }
         }
         /// <summary>
@@ -335,15 +371,21 @@ namespace FridayLib
         {
             try
             {
+                Blocked = true;
+                WorkStatus = "Сохранение проекта в БД";
                 MongoClient client = new MongoClient(Configuration.Get("MongoServer").ToString());
                 IMongoDatabase database = client.GetDatabase(Configuration.Get("MongoDatabase").ToString());
                 var collection = database.GetCollection<BsonDocument>(Configuration.Get("MongoCollection").ToString());
                 var filter = Builders<BsonDocument>.Filter.Eq("Id", Id);
                 collection.ReplaceOne(filter, ToBsonDocument(), new ReplaceOptions { IsUpsert = true });
+                WorkStatus = "";
+                Blocked = false;
             }
             catch (Exception ex)
             {
                 Service.OnErrorInLibrary(string.Format("Ошибка сохранения проекта {0}: {1}", Name, ex.Message));
+                WorkStatus = "";
+                Blocked = false;
             }
         }
         /// <summary>
@@ -359,8 +401,21 @@ namespace FridayLib
                 var collection = database.GetCollection<BsonDocument>(Configuration.Get("MongoCollection").ToString());
                 foreach (var prj in projects)
                 {
-                    var filter = Builders<BsonDocument>.Filter.Eq("Id", prj.Id);
-                    await collection.ReplaceOneAsync(filter, prj.ToBsonDocument(), new ReplaceOptions { IsUpsert = true }); 
+                    try
+                    {
+                        prj.Blocked = true;
+                        prj.WorkStatus = "Сохранение проекта в БД";
+                        var filter = Builders<BsonDocument>.Filter.Eq("Id", prj.Id);
+                        await collection.ReplaceOneAsync(filter, prj.ToBsonDocument(), new ReplaceOptions { IsUpsert = true });
+                        prj.Blocked = false;
+                        prj.WorkStatus = "";
+                    }
+                    catch (Exception ex)
+                    {
+                        Service.OnErrorInLibrary(string.Format("Массовое сохранение. Ошибка сохранения проекта: {0}", ex.Message));
+                        prj.Blocked = false;
+                        prj.WorkStatus = "";
+                    }
                 }
             }
             catch (Exception ex)
@@ -384,55 +439,66 @@ namespace FridayLib
         {            
             Apps.Remove(app);
         }
+        
         /// <summary>
         /// Актуализировать релизы всех приложений данного проекта
         /// </summary>
         /// <returns></returns>
-        public void ActualizeRelease()
+        public async void ActualizeRelease()
         {
-            try
+            await Task.Run(() =>
             {
-                Blocked = true;
-                WorkStatus = "Актуализация релизов проекта";
-                AllAppsAreInReestr = true;
-                AllApрsAreUpToDate = true;
-                for (int i = 0; i < Apps.Count; i++)
+                try
                 {
-                    Apps[i].ActualizeRelease();                    
+                    Blocked = true;
+                    WorkStatus = "Актуализация релизов проекта";
+                    AllAppsAreInReestr = true;
+                    AllApрsAreUpToDate = true;
+                    for (int i = 0; i < Apps.Count; i++)
+                    {
+                        Apps[i].ActualizeRelease();
+                    }
+                    UpdateState();
+                    WorkStatus = "";
+                    Blocked = false;
                 }
-                UpdateState();
-                WorkStatus = "";
-                Blocked = false;
-            }
-            catch (Exception ex)
-            {
-                Service.OnErrorInLibrary(string.Format("Ошибка обновления проекта {0}: {1}", Name, ex.Message));
-            }
+                catch (Exception ex)
+                {
+                    Service.OnErrorInLibrary(string.Format("Ошибка обновления проекта {0}: {1}", Name, ex.Message));
+                    WorkStatus = "";
+                    Blocked = false;
+                }
+            });            
         }
         /// <summary>
         /// Актуализировать реестр всех приложений данного проекта
         /// </summary>
         /// <returns></returns>
-        public void ActualizeReestr()
+        public async void ActualizeReestr()
         {
-            try
+            await Task.Run(() =>
             {
-                Blocked = true;
-                WorkStatus = "Актуализация реестра проекта";
-                AllAppsAreInReestr = true;
-                AllApрsAreUpToDate = true;
-                for (int i = 0; i < Apps.Count; i++)
+                try
                 {
-                    Apps[i].ActualizeReestr();
+                    Blocked = true;
+                    WorkStatus = "Актуализация реестра проекта";
+                    AllAppsAreInReestr = true;
+                    AllApрsAreUpToDate = true;
+                    for (int i = 0; i < Apps.Count; i++)
+                    {
+                        Apps[i].ActualizeReestr();
+                    }
+                    UpdateState();
+                    WorkStatus = "";
+                    Blocked = false;
                 }
-                UpdateState();
-                WorkStatus = "";
-                Blocked = false;
-            }
-            catch (Exception ex)
-            {
-                Service.OnErrorInLibrary(string.Format("Ошибка обновления проекта {0}: {1}", Name, ex.Message));
-            }
+                catch (Exception ex)
+                {
+                    Service.OnErrorInLibrary(string.Format("Ошибка обновления проекта {0}: {1}", Name, ex.Message));
+                    WorkStatus = "";
+                    Blocked = false;
+                }
+            });            
         }
         /// <summary>
         /// Подготовить набор для реестра
@@ -440,60 +506,69 @@ namespace FridayLib
         /// <param name="folderName">Директория для сбора данных</param>
         public async void PrepareReestrPackeje(string folderName)
         {
-            try
+            await Task.Run(async () =>
             {
-                //Актуализируем документацию
-                await PrepareDocumentation();
-                //Готовим структуру для формата разработки
-                Directory.CreateDirectory(Path.Combine(folderName, "Формат разработки"));
-                CopyDataForReestr(WorkingDirectory, Path.Combine(folderName, "Формат разработки"));
-                //Копируем документацию
-                DirectoryInfo di = new DirectoryInfo(DocumentDirectory);
-                Directory.CreateDirectory(Path.Combine(folderName, "Документация"));
-                foreach (var file in di.GetFiles())
+                try
                 {
-                    if (file.Extension != ".csv")
-                    {
-                        File.Copy(file.FullName, Path.Combine(folderName, "Документация", file.Name));
-                    }
-                }
-                //Дальнейшие действия зависят от того, сколько приложений в проекте
-                if (Apps.Count == 1)
-                {
-                    Directory.CreateDirectory(Path.Combine(folderName, "Скомпилированная версия"));
-                    await Apps[0].CopyToFolderAsync(Apps[0].SourceDirectory, Path.Combine(folderName, "Скомпилированная версия"));
-                    DirectoryInfo adi = new DirectoryInfo(Apps[0].DocumentDirectory);
-                    foreach (var file in adi.GetFiles())
+                    
+                    //Актуализируем документацию
+                    await PrepareDocumentation();
+                    WorkStatus = "Перенос данных";
+                    Blocked = true;
+                    //Готовим структуру для формата разработки
+                    Directory.CreateDirectory(Path.Combine(folderName, "Формат разработки"));
+                    CopyDataForReestr(WorkingDirectory, Path.Combine(folderName, "Формат разработки"));
+                    //Копируем документацию
+                    DirectoryInfo di = new DirectoryInfo(DocumentDirectory);
+                    Directory.CreateDirectory(Path.Combine(folderName, "Документация"));
+                    foreach (var file in di.GetFiles())
                     {
                         if (file.Extension != ".csv")
                         {
                             File.Copy(file.FullName, Path.Combine(folderName, "Документация", file.Name));
                         }
                     }
-                }
-                else
-                {
-                    foreach (var app in Apps)
+                    //Дальнейшие действия зависят от того, сколько приложений в проекте
+                    if (Apps.Count == 1)
                     {
-                        Directory.CreateDirectory(Path.Combine(folderName, app.Name, "Скомпилированная версия"));
-                        await app.CopyToFolderAsync(app.SourceDirectory, Path.Combine(folderName, "Скомпилированная версия"));
-                        Directory.CreateDirectory(Path.Combine(folderName, app.Name, "Документация"));
-                        DirectoryInfo adi = new DirectoryInfo(app.DocumentDirectory);
+                        Directory.CreateDirectory(Path.Combine(folderName, "Скомпилированная версия"));
+                        await Apps[0].CopyToFolderAsync(Apps[0].SourceDirectory, Path.Combine(folderName, "Скомпилированная версия"));
+                        DirectoryInfo adi = new DirectoryInfo(Apps[0].DocumentDirectory);
                         foreach (var file in adi.GetFiles())
                         {
                             if (file.Extension != ".csv")
                             {
-                                File.Copy(file.FullName, Path.Combine(folderName, app.Name, "Документация", file.Name));
+                                File.Copy(file.FullName, Path.Combine(folderName, "Документация", file.Name));
                             }
                         }
                     }
+                    else
+                    {
+                        foreach (var app in Apps)
+                        {
+                            Directory.CreateDirectory(Path.Combine(folderName, app.Name, "Скомпилированная версия"));
+                            await app.CopyToFolderAsync(app.SourceDirectory, Path.Combine(folderName, "Скомпилированная версия"));
+                            Directory.CreateDirectory(Path.Combine(folderName, app.Name, "Документация"));
+                            DirectoryInfo adi = new DirectoryInfo(app.DocumentDirectory);
+                            foreach (var file in adi.GetFiles())
+                            {
+                                if (file.Extension != ".csv")
+                                {
+                                    File.Copy(file.FullName, Path.Combine(folderName, app.Name, "Документация", file.Name));
+                                }
+                            }
+                        }
+                    }
+                    WorkStatus = "";
+                    Blocked = false;
                 }
-
-            }
-            catch (Exception ex)
-            {
-                Service.OnErrorInLibrary(string.Format("Ошибка формирования пакета для реестра {0}: {1}", Name, ex.Message));
-            }
+                catch (Exception ex)
+                {
+                    Service.OnErrorInLibrary(string.Format("Ошибка формирования пакета для реестра {0}: {1}", Name, ex.Message));
+                    WorkStatus = "";
+                    Blocked = false;
+                }
+            });
         }
         /// <summary>
         /// Подготовить листинг проекта
@@ -534,27 +609,32 @@ namespace FridayLib
             WorkStatus = "Загрузка данных по исходным текстам";
             SourceTextFiles = SourceTextCreation.ScanFolder(WorkingDirectory, "", System.IO.Path.Combine(DocumentDirectory, "SourceTexts.txt"),
                 System.IO.Path.Combine(DocumentDirectory, "Ведомость исходных текстов.xlsx"));
+            WorkStatus = "";
         }
         /// <summary>
         /// Сохранить исходные тексты в текстовом файле
         /// </summary>
-        public void SaveSourceTextsAsText()
+        public async void SaveSourceTextsAsText()
         {
-            SourceTextCreation.SaveAsTextFile(SourceTextFiles, System.IO.Path.Combine(DocumentDirectory, "SourceTexts.txt"));
+            WorkStatus = "Сохраняем данные по исходным текстам в текстовом формате";
+            await Task.Run(() => SourceTextCreation.SaveAsTextFile(SourceTextFiles, System.IO.Path.Combine(DocumentDirectory, "SourceTexts.txt")));
+            WorkStatus = "";
         }
         /// <summary>
         /// Свормировать ведомость исходных текстов
         /// </summary>
-        public void SaveSourceTextsAsExcel()
+        public async void SaveSourceTextsAsExcel()
         {
             WorkStatus = "Подготовка ведомости исходных текстов";
-            SourceTextCreation.SaveAsExcel(SourceTextFiles, System.IO.Path.Combine(DocumentDirectory, "Ведомость исходных текстов.xlsx"));
+            await Task.Run(()=>SourceTextCreation.SaveAsExcel(SourceTextFiles, System.IO.Path.Combine(DocumentDirectory, "Ведомость исходных текстов.xlsx")));
+            WorkStatus = "";
         }
         /// <summary>
         /// Обновить состояние проекта
         /// </summary>
         public async void UpdateState()
         {
+            WorkStatus = "Актуализируем состояние проекта";
             AllAppsAreInReestr = true;
             AllApрsAreUpToDate = true;
             for (int i = 0; i < Apps.Count; i++)
@@ -565,68 +645,77 @@ namespace FridayLib
                 if (!Apps[i].IsInReestr)
                     AllAppsAreInReestr = false;
             }
+            WorkStatus = "";
         }              
         /// <summary>
         /// Проверить уникальность проекта в БД асинхронно
         /// </summary>
         /// <returns></returns>
-        public static async Task<bool> CheckEqualsAsync(string name)
+        //public static async Task<bool> CheckEqualsAsync(string name)
+        //{
+        //    try
+        //    {
+        //        MongoClient client = new MongoClient("mongodb://localhost:27017");
+        //        IMongoDatabase database = client.GetDatabase("ProjectsDatabase");
+        //        var collection = database.GetCollection<BsonDocument>("ProjectsData");
+        //        var filter = Builders<BsonDocument>.Filter.Eq("Name", name);
+        //        var data = await collection.Find(filter).ToListAsync();
+        //        return data.Count == 0;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", name, ex.Message));
+        //        return false;
+        //    }
+        //}
+        ///// <summary>
+        ///// Проверить уникальность проекта в БД
+        ///// </summary>
+        ///// <returns></returns>
+        //public static bool CheckEquals(string name)
+        //{
+        //    try
+        //    {
+        //        MongoClient client = new MongoClient("mongodb://localhost:27017");
+        //        IMongoDatabase database = client.GetDatabase("ProjectsDatabase");
+        //        var collection = database.GetCollection<BsonDocument>("ProjectsData");
+        //        var filter = Builders<BsonDocument>.Filter.Eq("Name", name);
+        //        var data = collection.Find(filter).ToList();
+        //        return data.Count == 0;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", name, ex.Message));
+        //        return false;
+        //    }
+        //}
+        public async static void RemoveProject(ControlledProject prj)
         {
-            try
-            {
-                MongoClient client = new MongoClient("mongodb://localhost:27017");
-                IMongoDatabase database = client.GetDatabase("ProjectsDatabase");
-                var collection = database.GetCollection<BsonDocument>("ProjectsData");
-                var filter = Builders<BsonDocument>.Filter.Eq("Name", name);
-                var data = await collection.Find(filter).ToListAsync();
-                return data.Count == 0;
-            }
-            catch (Exception ex)
-            {
-                Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", name, ex.Message));
-                return false;
-            }
-        }
-        /// <summary>
-        /// Проверить уникальность проекта в БД
-        /// </summary>
-        /// <returns></returns>
-        public static bool CheckEquals(string name)
-        {
-            try
-            {
-                MongoClient client = new MongoClient("mongodb://localhost:27017");
-                IMongoDatabase database = client.GetDatabase("ProjectsDatabase");
-                var collection = database.GetCollection<BsonDocument>("ProjectsData");
-                var filter = Builders<BsonDocument>.Filter.Eq("Name", name);
-                var data = collection.Find(filter).ToList();
-                return data.Count == 0;
-            }
-            catch (Exception ex)
-            {
-                Service.OnErrorInLibrary(string.Format("Ошибка проверки уникальности данных по проекту {0}: {1}", name, ex.Message));
-                return false;
-            }
+            MongoClient client = new MongoClient(Configuration.Get("MongoServer").ToString());
+            IMongoDatabase database = client.GetDatabase(Configuration.Get("MongoDatabase").ToString());
+            var collection = database.GetCollection<BsonDocument>(Configuration.Get("MongoCollection").ToString());
+            var filter = Builders<BsonDocument>.Filter.Eq("Id", prj.Id);
+            await collection.DeleteOneAsync(filter);
         }
         /// <summary>
         /// Клонировать объет проекта
         /// </summary>
         /// <returns></returns>
-        public object Clone()
-        {
-            return new ControlledProject
-            {
-                AllAppsAreInReestr = this.AllAppsAreInReestr,
-                AllApрsAreUpToDate = this.AllApрsAreUpToDate,
-                Apps = this.Apps,
-                DocumentDirectory = this.DocumentDirectory,
-                Id = this.Id,
-                Name = this.Name,
-                ReleaseDirectory = this.ReleaseDirectory,
-                SourceTextFiles = this.SourceTextFiles,
-                WorkingDirectory = this.WorkingDirectory
-            };
-        }        
+        //public object Clone()
+        //{
+        //    return new ControlledProject
+        //    {
+        //        AllAppsAreInReestr = this.AllAppsAreInReestr,
+        //        AllApрsAreUpToDate = this.AllApрsAreUpToDate,
+        //        Apps = this.Apps,
+        //        DocumentDirectory = this.DocumentDirectory,
+        //        Id = this.Id,
+        //        Name = this.Name,
+        //        ReleaseDirectory = this.ReleaseDirectory,
+        //        SourceTextFiles = this.SourceTextFiles,
+        //        WorkingDirectory = this.WorkingDirectory
+        //    };
+        //}        
         #endregion
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using DevExpress.Xpf.Dialogs;
 using FridayLib;
+using Frifull.Views;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using System;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,8 +48,7 @@ namespace Frifull.ViewModels
         }
         /// <summary>
         /// Текущий статус
-        /// </summary>
-        
+        /// </summary>        
         public string Status
         {
             get { return status; }
@@ -80,52 +81,61 @@ namespace Frifull.ViewModels
             }
         }
 
+        private double process=0;
+        public double BarProcess
+        {
+            get { return process; }
+            set
+            {
+                process = value;
+                //Console.WriteLine(value);
+                RaisePropertyChanged("BarProcess");
+            }
+        }
+
         public MainWindowViewModel()
         {
+            Service.ErrorInLibrary += Service_ErrorInLibrary;
             Service.Init();
             ProjectMode = false;
-            Collection = CollectionViewSource.GetDefaultView(Projects);
-            BindingOperations.EnableCollectionSynchronization(Projects, _syncLock);
+
+            //Collection = CollectionViewSource.GetDefaultView(Projects);
+            //BindingOperations.EnableCollectionSynchronization(Projects, _syncLock);
             StartApp();    
         }
+
+        private void Service_ErrorInLibrary(string message)
+        {
+            NLog.LogManager.GetCurrentClassLogger().Error(message);
+            App.Current.Dispatcher.Invoke(()=>DevExpress.Xpf.Core.DXMessageBox.Show(App.Current.MainWindow, message, "Ошибка", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error));
+        }
+
         public async void StartApp()
         {
             Processing = true;
-            ////Status = "Получение данных о проектах из БД";
-            //Projects = await DatabaseClass.GetProjects();
-            //for (int i = 0; i < Projects.Count; i++)
-            //{
-            //    Status = string.Format("Получение перечня приложений для проекта :{0}", Projects[i].Name);
-            //    await Projects[i].GetApps();
-            //    Status = "Подождите";
-            //}
-            await Task.Run(() =>
-            {
-                using (ProjectContext pc = new ProjectContext())
-                {
-                    //foreach (var prj in Projects)
-                    //{
-                    //    prj.LoadSourceTexts();
-                    //    pc.Projects.Add(prj);
-                    //    foreach (var stf in prj.SourceTextFiles)
-                    //    {
-                    //        pc.SourceTextFiles.Add(stf);
-                    //    }
-                    //}
-                    //pc.SaveChanges();
-                    foreach (ControlledProject prj in pc.Projects.Include(a => a.Apps).Include(s => s.SourceTextFiles))
-                    {
-                        lock (_syncLock)
-                        {
-                            Projects.Add(prj);
-                            Projects.Last().UpdateState();
-                        }
-                    }
-                }
-            });           
+            //Projects = await Task.Run(()=>ControlledProject.GetProjects());
+            Projects = await ControlledProject.GetProjectsAsync(new Progress<double>(state=>BarProcess=state));
+            Processing = false;
+        }
+        /// <summary>
+        /// Обновить данныео всех проектах
+        /// </summary>
+        public ICommand RefreshCommand
+        {
+            get { return new RelayCommand(ExecuteRefresh); }
+        }
+
+        private async void ExecuteRefresh()
+        {
+            Processing = true;
+            CurrentProject = null;
+            Projects = await ControlledProject.GetProjectsAsync(new Progress<double>(state => BarProcess = state));
             Processing = false;
         }
 
+        /// <summary>
+        /// Добавить проект
+        /// </summary>
         public ICommand AddProjectCommand
         {
             get { return new RelayCommand(ExecuteAddProject); }
@@ -133,14 +143,25 @@ namespace Frifull.ViewModels
 
         private void ExecuteAddProject()
         {
-            Projects.Add(new ControlledProject() { Name = "Новый проект" });
-            using (ProjectContext pc = new ProjectContext())
-            {
-                pc.Projects.Add(Projects.Last());
-                pc.SaveChanges();
-            }
+            ControlledProject.CreateProject(Projects);
         }
 
+        /// <summary>
+        /// Сохранить все проекты
+        /// </summary>
+        public ICommand SaveAllCommand
+        {
+            get { return new RelayCommand(ExecuteSaveAll); }
+        }
+
+        private async void ExecuteSaveAll()
+        {
+            await ControlledProject.SaveProjects(Projects);
+        }
+
+        /// <summary>
+        /// Отобразить данные по выбранному проекту
+        /// </summary>
         public ICommand ShowProjectCommand
         {
             get { return new RelayCommand(ExecuteShowProject); }
@@ -151,6 +172,9 @@ namespace Frifull.ViewModels
             ProjectMode = true;
         }
 
+        /// <summary>
+        /// Обновить данные по проекту (актуальность приложений)
+        /// </summary>
         public ICommand UpdateCurrentProjectCommand
         {
             get { return new RelayCommand(ExecuteUpdateCurrentProject); }
@@ -161,6 +185,9 @@ namespace Frifull.ViewModels
             CurrentProject.UpdateState();
         }
 
+        /// <summary>
+        /// Подготовить документацию на проект
+        /// </summary>
         public ICommand CreateDocCommand
         {
             get { return new RelayCommand(ExecuteCreateDoc); }
@@ -171,40 +198,52 @@ namespace Frifull.ViewModels
             await CurrentProject.PrepareDocumentation();
         }
 
+        /// <summary>
+        /// Подготовить пакет документации в реестр
+        /// </summary>
         public ICommand CreateReestPackejeCommand
         {
             get { return new RelayCommand(ExecuteCreateReestPackeje); }
         }
 
-        private void ExecuteCreateReestPackeje()
+        private async void ExecuteCreateReestPackeje()
         {
             DXFolderBrowserDialog dialog = new DXFolderBrowserDialog();
             if(dialog.ShowDialog()==true)
             {
-                CurrentProject.PrepareReestrPackeje(dialog.SelectedPath);
+                await Task.Run(() => CurrentProject.PrepareReestrPackeje(dialog.SelectedPath));
             }
         }
 
+        /// <summary>
+        /// Актуализировать релиз для выбранного проекта
+        /// </summary>
         public ICommand ActualizeReleaseCommand
         {
             get { return new RelayCommand(ExecuteActualizeRelease); }
         }
 
-        private void ExecuteActualizeRelease()
+        private async void ExecuteActualizeRelease()
         {
-            CurrentProject.ActualizeRelease();
+            await Task.Run(() => CurrentProject.ActualizeRelease());
         }
 
+        /// <summary>
+        /// Актуализировать реестр в выбранном проекте
+        /// </summary>
         public ICommand ActualizeReestrCommand
         {
             get { return new RelayCommand(ExecuteActualizeReestr); }
         }
 
-        private void ExecuteActualizeReestr()
+        private async void ExecuteActualizeReestr()
         {
-            CurrentProject.ActualizeReestr();
+            await Task.Run(() => CurrentProject.ActualizeReestr());
         }
 
+        /// <summary>
+        /// Удалить выбранный проект
+        /// </summary>
         public ICommand RemoveProjectCommand
         {
             get { return new RelayCommand(ExecuteRemoveProject); }
@@ -212,7 +251,116 @@ namespace Frifull.ViewModels
 
         private void ExecuteRemoveProject()
         {
-
+            if (DevExpress.Xpf.Core.DXMessageBox.Show(App.Current.MainWindow,string.Format("Действительно удалить {0}?",CurrentProject.Name),"Подтвердите удаление",System.Windows.MessageBoxButton.YesNo,System.Windows.MessageBoxImage.Question)==System.Windows.MessageBoxResult.Yes)
+            {
+                ControlledProject.RemoveProject(CurrentProject);
+                Projects.Remove(CurrentProject); 
+            }
         }
+
+
+        public ICommand CheckCurrentAppCommand
+        {
+            get { return new RelayCommand(ExecuteCheckCurrentApp); }
+        }
+
+        private async void ExecuteCheckCurrentApp()
+        {
+            await CurrentProject.CurrentApp.UpdateFileInfoAsync();
+        }
+
+        public ICommand ActualizeCurrentAppReleaseCommand
+        {
+            get { return new RelayCommand(ExecuteActualizeCurrentAppRelease); }
+        }
+
+        private async void ExecuteActualizeCurrentAppRelease()
+        {
+            await Task.Run(() => CurrentProject.CurrentApp.ActualizeRelease());
+        }
+
+
+        public ICommand ActualizeCurrentAppReestrCommand
+        {
+            get { return new RelayCommand(ExecuteActualizeCurrentAppReestr); }
+        }
+
+        private async void ExecuteActualizeCurrentAppReestr()
+        {
+            await Task.Run(() => CurrentProject.CurrentApp.ActualizeReestr());
+        }
+
+
+        public ICommand PrepareCurrentAppDocCommand
+        {
+            get { return new RelayCommand(ExecutePrepareCurrentAppDoc); }
+        }
+
+        private async void ExecutePrepareCurrentAppDoc()
+        {
+            await Task.Run(() =>
+            {
+                CurrentProject.CurrentApp.PrepareFormular();
+                CurrentProject.CurrentApp.PrepareRequest();
+            });           
+        }
+
+
+        public ICommand RemoveCurrentAppCommand
+        {
+            get { return new RelayCommand(ExecuteRemoveCurrentApp); }
+        }
+
+        private void ExecuteRemoveCurrentApp()
+        {
+            CurrentProject.RemoveApp(CurrentProject.CurrentApp);
+        }
+
+        public ICommand RefreshSourceTextsCommand
+        {
+            get { return new RelayCommand(ExecuteRefreshSourceTexts); }
+        }
+
+        private void ExecuteRefreshSourceTexts()
+        {
+            SourceTextCreation.UpdateSourceTextList(CurrentProject);
+        }
+
+
+        public ICommand SaveSourceTextCommand
+        {
+            get { return new RelayCommand(ExecuteSaveSourceText); }
+        }
+
+        private async void ExecuteSaveSourceText()
+        {
+            CurrentProject.SaveSourceTextsAsText();
+            await CurrentProject.SaveProjectAsync();
+        }
+
+
+        public ICommand SaveSourceTextsAsExcelCommand
+        {
+            get { return new RelayCommand(ExecuteSaveSourceTextsAsExcel); }
+        }
+
+        private void ExecuteSaveSourceTextsAsExcel()
+        {
+            CurrentProject.SaveSourceTextsAsExcel();
+        }
+
+        /// <summary>
+        /// Показать настройки
+        /// </summary>
+        public ICommand ShowSettingsCommand
+        {
+            get { return new RelayCommand(ExecuteShowSettings); }
+        }
+
+        private void ExecuteShowSettings()
+        {
+            new SettingsScreen() { Owner = App.Current.MainWindow }.ShowDialog();
+        }
+        
     }
 }

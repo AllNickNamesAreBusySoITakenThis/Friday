@@ -31,6 +31,18 @@ namespace FridayLib
         private string creationDate;
         private string fullPath = "";
 
+
+        private bool include=true;
+        [Category("Общее"), Description("Флаг включения файла в документацию"), DisplayName("Включать в документацию")]
+        public bool Include
+        {
+            get { return include; }
+            set
+            {
+                include = value;
+                OnPropertyChanged("Include");
+            }
+        }
         /// <summary>
         /// Полное имя файла
         /// </summary>
@@ -170,7 +182,7 @@ namespace FridayLib
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0}||{1}||{2}||{3}||{4}||{5}||{6}||{7}", FullName, Description, CreationDate, Version, Hash, Size, Name, Owner);
+            return string.Format("{0}||{1}||{2}||{3}||{4}||{5}||{6}||{7}||{8}", FullName, Description, CreationDate, Version, Hash, Size, Name, Owner,Include);
         }
         /// <summary>
         /// Прочитать данные из строки
@@ -186,12 +198,13 @@ namespace FridayLib
                 {
                     FullName = sSource[0],
                     Description = sSource[1],
-                    CreationDate = sSource[2], 
-                    Version = sSource[3], 
-                    Hash = sSource[4],  
+                    CreationDate = sSource[2],
+                    Version = sSource[3],
+                    Hash = sSource[4],
                     Size = sSource[5],
                     Name = sSource[6],
-                    Owner = sSource[7]
+                    Owner = sSource[7],
+                    Include = sSource.Length == 9 ? Convert.ToBoolean(sSource[8]) : true
                 };
             }
             catch
@@ -216,7 +229,8 @@ namespace FridayLib
                 {"Description",Description},
                 {"Owner",Owner},                
                 {"FullName",FullName},
-                {"FullPath",FullPath}
+                {"FullPath",FullPath},
+                {"Include",Include }
             };
         }
         public static SourceTextFile FromBsonDocument(BsonDocument source)
@@ -230,6 +244,7 @@ namespace FridayLib
                     Owner = source["Owner"].ToString(),                    
                     FullName = source["FullName"].ToString(),
                     FullPath = source["FullPath"].ToString(),
+                    Include = source.Contains("Include")?source["Include"].ToBoolean():true
                 };
                 result.CreationDate = FileOperations.GetChangeDate(result.FullPath);
                 result.Hash = FileOperations.GetCheckSumm(result.FullPath);
